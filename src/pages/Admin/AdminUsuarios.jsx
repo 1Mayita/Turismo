@@ -3,9 +3,11 @@ import Navbar from '../../components/Navbar.jsx'
 import AdminNav from '../../components/AdminNav.jsx'
 import { cambiarEstadoUsuario, getUsuarios } from '../../services/usuariosService.js'
 
+// Firestore devuelve un Timestamp; se convierte a Date antes de formatear.
 function formatearFecha(fechaRegistro) {
   if (!fechaRegistro) return '—'
-  return new Date(fechaRegistro).toLocaleDateString('es-BO')
+  const fecha = typeof fechaRegistro.toDate === 'function' ? fechaRegistro.toDate() : new Date(fechaRegistro)
+  return fecha.toLocaleDateString('es-BO')
 }
 
 function AdminUsuarios() {

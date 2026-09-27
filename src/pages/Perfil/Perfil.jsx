@@ -3,7 +3,9 @@ import Navbar from '../../components/Navbar.jsx'
 import { useAuth } from '../../context/useAuth.js'
 import { categoriasDeEjemplo, getCategorias } from '../../services/categoriasService.js'
 import { actualizarUsuario, crearUsuario, getUsuarioPorId } from '../../services/usuariosService.js'
+import { getPreferenciasDeUsuario, guardarPreferenciasDeUsuario } from '../../services/preferenciasService.js'
 
+// "preferencias" guarda los IDs de categoría leídos de "usuario_preferencias".
 const PERFIL_VACIO = { nombre: '', apellido: '', telefono: '', fotoUrl: '', preferencias: [] }
 
 function IconoLapiz() {
@@ -65,12 +67,14 @@ function Perfil() {
           datosUsuario = await getUsuarioPorId(usuario.uid)
         }
 
+        const preferencias = await getPreferenciasDeUsuario(usuario.uid)
+
         const datosCargados = {
           nombre: datosUsuario?.nombre || '',
           apellido: datosUsuario?.apellido || '',
           telefono: datosUsuario?.telefono || '',
           fotoUrl: datosUsuario?.fotoUrl || '',
-          preferencias: datosUsuario?.preferencias || [],
+          preferencias: preferencias.map((preferencia) => preferencia.id_categoria),
         }
         setDatosGuardados(datosCargados)
         setFormulario(datosCargados)
@@ -106,14 +110,14 @@ function Perfil() {
     if (name === 'fotoUrl') setFotoConError(false)
   }
 
-  function alternarPreferencia(nombreCategoria) {
+  function alternarPreferencia(idCategoria) {
     setFormulario((anterior) => {
-      const yaSeleccionada = anterior.preferencias.includes(nombreCategoria)
+      const yaSeleccionada = anterior.preferencias.includes(idCategoria)
       return {
         ...anterior,
         preferencias: yaSeleccionada
-          ? anterior.preferencias.filter((valor) => valor !== nombreCategoria)
-          : [...anterior.preferencias, nombreCategoria],
+          ? anterior.preferencias.filter((valor) => valor !== idCategoria)
+          : [...anterior.preferencias, idCategoria],
       }
     })
   }
@@ -130,7 +134,9 @@ function Perfil() {
 
     try {
       setGuardando(true)
-      await actualizarUsuario(usuario.uid, formulario)
+      const { preferencias, ...datosPerfil } = formulario
+      await actualizarUsuario(usuario.uid, datosPerfil)
+      await guardarPreferenciasDeUsuario(usuario.uid, preferencias)
       setDatosGuardados(formulario)
       setModoEdicion(false)
       setMensaje('Tu perfil se guardó correctamente.')
@@ -141,6 +147,9 @@ function Perfil() {
       setGuardando(false)
     }
   }
+
+  // Se ignoran IDs de categorías que ya fueron eliminadas.
+  const categoriasPreferidas = categorias.filter((categoria) => datosGuardados.preferencias.includes(categoria.id))
 
   return (
     <div className="min-h-screen bg-brand-50">
@@ -202,11 +211,11 @@ function Perfil() {
                 <p className="mb-3 text-sm font-semibold text-slate-700">Preferencias turísticas</p>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {categorias.map((categoria) => (
-                    <label key={categoria.id || categoria.nombre} className="flex items-center gap-2 text-sm text-slate-700">
+                    <label key={categoria.id} className="flex items-center gap-2 text-sm text-slate-700">
                       <input
                         type="checkbox"
-                        checked={formulario.preferencias.includes(categoria.nombre)}
-                        onChange={() => alternarPreferencia(categoria.nombre)}
+                        checked={formulario.preferencias.includes(categoria.id)}
+                        onChange={() => alternarPreferencia(categoria.id)}
                         className="h-4 w-4 rounded border-slate-300 text-brand-700 focus:ring-brand-700"
                       />
                       {categoria.nombre}
@@ -249,16 +258,16 @@ function Perfil() {
 
             <section className="rounded-3xl bg-white p-8 shadow-xl shadow-brand-950/10">
               <h3 className="mb-4 text-lg font-bold text-brand-900">Preferencias turísticas</h3>
-              {datosGuardados.preferencias.length === 0 ? (
+              {categoriasPreferidas.length === 0 ? (
                 <p className="text-sm text-slate-600">
                   Aún no elegiste categorías favoritas.{' '}
                   <button type="button" onClick={abrirEdicion} className="font-semibold text-brand-700 underline">Elegir ahora</button>
                 </p>
               ) : (
                 <div className="flex flex-wrap gap-2">
-                  {datosGuardados.preferencias.map((nombreCategoria) => (
-                    <span key={nombreCategoria} className="rounded-full bg-brand-100 px-4 py-1.5 text-sm font-semibold text-brand-800">
-                      {nombreCategoria}
+                  {categoriasPreferidas.map((categoria) => (
+                    <span key={categoria.id} className="rounded-full bg-brand-100 px-4 py-1.5 text-sm font-semibold text-brand-800">
+                      {categoria.nombre}
                     </span>
                   ))}
                 </div>

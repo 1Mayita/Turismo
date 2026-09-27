@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
-import { crearDepartamentosDeEjemplo, departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
+import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
+import { sembrarCatalogoDeEjemplo } from '../../services/sembradoService.js'
 
 function Departamentos() {
   const [departamentos, setDepartamentos] = useState([])
@@ -18,7 +19,7 @@ function Departamentos() {
         }
 
         try {
-          await crearDepartamentosDeEjemplo()
+          await sembrarCatalogoDeEjemplo()
           setDepartamentos(await getDepartamentos())
         } catch (errorSembrado) {
           console.error('Error al sembrar departamentos de ejemplo:', errorSembrado)

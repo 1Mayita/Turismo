@@ -5,13 +5,18 @@ import TarjetaDestino from '../../components/TarjetaDestino.jsx'
 import { GrillaEsqueleto } from '../../components/EsqueletoTarjeta.jsx'
 import { destinosDeEjemplo, getDestinos } from '../../services/destinosService.js'
 
-const DEPARTAMENTOS_RAPIDOS = ['Cochabamba', 'La Paz', 'Potosí', 'Santa Cruz']
+const DEPARTAMENTOS_RAPIDOS = [
+  { id: 'cochabamba', nombre: 'Cochabamba' },
+  { id: 'la-paz', nombre: 'La Paz' },
+  { id: 'potosi', nombre: 'Potosí' },
+  { id: 'santa-cruz', nombre: 'Santa Cruz' },
+]
 
 function Inicio() {
   const [destinos, setDestinos] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
-  const [departamentoActivo, setDepartamentoActivo] = useState('Cochabamba')
+  const [departamentoActivo, setDepartamentoActivo] = useState(DEPARTAMENTOS_RAPIDOS[0])
 
   useEffect(() => {
     async function cargarDestacados() {
@@ -32,7 +37,7 @@ function Inicio() {
 
   const destacados = destinos.filter((destino) => destino.destacado)
   const baseDestacados = destacados.length > 0 ? destacados : destinos
-  const destacadosDelDepartamento = baseDestacados.filter((destino) => destino.ubicacion === departamentoActivo)
+  const destacadosDelDepartamento = baseDestacados.filter((destino) => destino.id_departamento === departamentoActivo.id)
   const destacadosAMostrar = (destacadosDelDepartamento.length > 0 ? destacadosDelDepartamento : baseDestacados).slice(0, 6)
 
   return (
@@ -87,19 +92,19 @@ function Inicio() {
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="mb-2 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Destacados</p>
-            <h2 className="text-3xl font-bold text-brand-900">Lo mejor de {departamentoActivo}</h2>
+            <h2 className="text-3xl font-bold text-brand-900">Lo mejor de {departamentoActivo.nombre}</h2>
           </div>
           <div className="flex flex-wrap gap-2">
             {DEPARTAMENTOS_RAPIDOS.map((departamento) => (
               <button
-                key={departamento}
+                key={departamento.id}
                 type="button"
                 onClick={() => setDepartamentoActivo(departamento)}
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  departamentoActivo === departamento ? 'bg-brand-800 text-white' : 'bg-white text-brand-800 ring-1 ring-brand-900/10 hover:bg-brand-100'
+                  departamentoActivo.id === departamento.id ? 'bg-brand-800 text-white' : 'bg-white text-brand-800 ring-1 ring-brand-900/10 hover:bg-brand-100'
                 }`}
               >
-                {departamento}
+                {departamento.nombre}
               </button>
             ))}
           </div>
@@ -111,7 +116,7 @@ function Inicio() {
           <GrillaEsqueleto cantidad={3} />
         ) : destacadosAMostrar.length === 0 ? (
           <p className="text-slate-600">
-            Todavía no hay destinos destacados en {departamentoActivo}.{' '}
+            Todavía no hay destinos destacados en {departamentoActivo.nombre}.{' '}
             <Link to="/destinos" className="font-semibold text-brand-700 underline">Ver todos los destinos</Link>
           </p>
         ) : (

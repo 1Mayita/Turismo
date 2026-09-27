@@ -20,7 +20,7 @@ function TarjetaDestino({ destino }) {
           className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
         />
         <span className="absolute right-3 top-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-brand-800 shadow-sm">
-          {destino.precio_entrada > 0 ? `Bs ${destino.precio_entrada}` : 'Entrada libre'}
+          {destino.precio_ingreso > 0 ? `Bs ${destino.precio_ingreso}` : 'Entrada libre'}
         </span>
       </div>
       <div className="p-5">

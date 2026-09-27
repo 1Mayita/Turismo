@@ -1,11 +1,10 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getDatabase } from "firebase/database"; // <--- Cambiar esta importación
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD3fyONykL1J_6tWba-QYplrlOVRyRnNMQ",
   authDomain: "turismo-e0465.firebaseapp.com",
-  databaseURL: "https://turismo-e0465-default-rtdb.firebaseio.com", // <--- AGREGAR ESTA LÍNEA
   projectId: "turismo-e0465",
   storageBucket: "turismo-e0465.firebasestorage.app",
   messagingSenderId: "671138332563",
@@ -15,4 +14,4 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getDatabase(app); // <--- Exportar Realtime Database
+export const db = getFirestore(app);

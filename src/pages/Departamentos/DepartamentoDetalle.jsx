@@ -3,13 +3,16 @@ import { Link, useParams } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
 import TarjetaDestino from '../../components/TarjetaDestino.jsx'
 import { GrillaEsqueleto } from '../../components/EsqueletoTarjeta.jsx'
-import { getDepartamentoPorId, getDestinosPorDepartamento } from '../../services/departamentosService.js'
-import { getRegionesPorDepartamento } from '../../services/regionesService.js'
+import { getDepartamentoPorId } from '../../services/departamentosService.js'
+import { getDestinosPorDepartamento } from '../../services/destinosService.js'
+import { getMunicipiosPorDepartamento } from '../../services/municipiosService.js'
+import { getRegionesPorMunicipios } from '../../services/regionesService.js'
 
 function DepartamentoDetalle() {
   const { id } = useParams()
   const [departamento, setDepartamento] = useState(null)
   const [destinos, setDestinos] = useState([])
+  const [municipios, setMunicipios] = useState([])
   const [regiones, setRegiones] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
@@ -26,19 +29,24 @@ function DepartamentoDetalle() {
         }
         setDepartamento(departamentoEncontrado)
 
-        // Si falla traer destinos o regiones, no ocultamos la info del
+        // Si falla traer destinos o municipios, no ocultamos la info del
         // departamento que sí se cargó bien: cada bloque falla por su cuenta.
         try {
-          setDestinos(await getDestinosPorDepartamento(departamentoEncontrado.nombre))
+          setDestinos(await getDestinosPorDepartamento(departamentoEncontrado.id))
         } catch (errorDestinos) {
           console.error('Error al consultar destinos del departamento:', errorDestinos)
           setDestinos([])
         }
 
         try {
-          setRegiones(await getRegionesPorDepartamento(departamentoEncontrado.id))
-        } catch (errorRegiones) {
-          console.error('Error al consultar regiones del departamento:', errorRegiones)
+          const municipiosEncontrados = await getMunicipiosPorDepartamento(departamentoEncontrado.id)
+          setMunicipios(municipiosEncontrados)
+          setRegiones(municipiosEncontrados.length > 0
+            ? await getRegionesPorMunicipios(municipiosEncontrados.map((municipio) => municipio.id))
+            : [])
+        } catch (errorMunicipios) {
+          console.error('Error al consultar municipios y regiones del departamento:', errorMunicipios)
+          setMunicipios([])
           setRegiones([])
         }
       } catch (errorLectura) {
@@ -72,16 +80,28 @@ function DepartamentoDetalle() {
               <p className="mt-4 text-lg text-slate-600">{departamento.descripcion}</p>
             </div>
 
-            {regiones.length > 0 && (
+            {municipios.length > 0 && (
               <div className="mb-10">
-                <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Regiones</p>
-                <div className="flex flex-wrap gap-3">
-                  {regiones.map((region) => (
-                    <div key={region.id} className="rounded-xl bg-white px-4 py-3 shadow-md shadow-brand-950/5 ring-1 ring-brand-900/5">
-                      <p className="font-bold text-brand-900">{region.nombre}</p>
-                      {region.descripcion && <p className="max-w-xs text-sm text-slate-600">{region.descripcion}</p>}
-                    </div>
-                  ))}
+                <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Municipios</p>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {municipios.map((municipio) => {
+                    const regionesDelMunicipio = regiones.filter((region) => region.id_municipio === municipio.id)
+                    return (
+                      <div key={municipio.id} className="rounded-xl bg-white px-4 py-3 shadow-md shadow-brand-950/5 ring-1 ring-brand-900/5">
+                        <p className="font-bold text-brand-900">{municipio.nombre}</p>
+                        {municipio.descripcion && <p className="text-sm text-slate-600">{municipio.descripcion}</p>}
+                        {regionesDelMunicipio.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {regionesDelMunicipio.map((region) => (
+                              <span key={region.id} title={region.descripcion} className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-800">
+                                {region.nombre}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             )}

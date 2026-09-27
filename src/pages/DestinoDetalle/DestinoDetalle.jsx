@@ -68,7 +68,7 @@ function DestinoDetalle() {
                 </p>
               </div>
               <p className="whitespace-nowrap rounded-full bg-brand-100 px-4 py-2 text-sm font-bold text-brand-800">
-                {destino.precio_entrada > 0 ? `Bs ${destino.precio_entrada}` : 'Entrada libre'}
+                {destino.precio_ingreso > 0 ? `Bs ${destino.precio_ingreso}` : 'Entrada libre'}
               </p>
             </div>
 

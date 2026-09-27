@@ -1,54 +1,29 @@
-import { equalTo, get, orderByChild, push, query, ref, remove, update } from 'firebase/database'
+import { addDoc, collection, deleteDoc, doc, getDocs, query, updateDoc, where } from 'firebase/firestore'
 import { db } from './firebase.js'
 import { conLimiteDeTiempo } from './tiempoLimite.js'
 
-export const categoriasDeEjemplo = [
-  { nombre: 'Naturaleza', descripcion: 'Paisajes, parques y reservas naturales.' },
-  { nombre: 'Cultura', descripcion: 'Museos, tradiciones y patrimonio cultural.' },
-  { nombre: 'Aventura', descripcion: 'Trekking, expediciones y deportes extremos.' },
-  { nombre: 'Gastronomía', descripcion: 'Comida típica y experiencias culinarias.' },
-  { nombre: 'Historia', descripcion: 'Sitios y monumentos históricos.' },
-  { nombre: 'Entretenimiento', descripcion: 'Actividades recreativas y de esparcimiento.' },
-  { nombre: 'Religioso', descripcion: 'Templos, santuarios y turismo de fe.' },
-]
+export { categoriasDeEjemplo } from './datosDeEjemplo.js'
 
 export async function getCategorias() {
-  const instantanea = await conLimiteDeTiempo(get(ref(db, 'categorias')))
-  const valor = instantanea.val() || {}
-  return Object.entries(valor).map(([id, datos]) => ({ id, ...datos }))
+  const instantanea = await conLimiteDeTiempo(getDocs(collection(db, 'categorias')))
+  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
 }
 
 // Los destinos guardan el nombre de la categoría en el campo "categoria".
 export async function getDestinosPorCategoria(nombreCategoria) {
-  const consulta = query(ref(db, 'destinos'), orderByChild('categoria'), equalTo(nombreCategoria))
-  const instantanea = await conLimiteDeTiempo(get(consulta))
-  const valor = instantanea.val() || {}
-  return Object.entries(valor).map(([id, datos]) => ({ id, ...datos }))
-}
-
-let sembradoEnProgreso = null
-
-export function crearCategoriasDeEjemplo() {
-  if (!sembradoEnProgreso) {
-    sembradoEnProgreso = conLimiteDeTiempo(
-      Promise.all(categoriasDeEjemplo.map((categoria) => push(ref(db, 'categorias'), categoria))),
-      15000,
-    ).catch((error) => {
-      sembradoEnProgreso = null
-      throw error
-    })
-  }
-  return sembradoEnProgreso
+  const consulta = query(collection(db, 'destinos'), where('categoria', '==', nombreCategoria))
+  const instantanea = await conLimiteDeTiempo(getDocs(consulta))
+  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
 }
 
 export async function crearCategoria(datos) {
-  await conLimiteDeTiempo(push(ref(db, 'categorias'), datos))
+  await conLimiteDeTiempo(addDoc(collection(db, 'categorias'), datos))
 }
 
 export async function actualizarCategoria(id, datos) {
-  await conLimiteDeTiempo(update(ref(db, `categorias/${id}`), datos))
+  await conLimiteDeTiempo(updateDoc(doc(db, 'categorias', id), datos))
 }
 
 export async function eliminarCategoria(id) {
-  await conLimiteDeTiempo(remove(ref(db, `categorias/${id}`)))
+  await conLimiteDeTiempo(deleteDoc(doc(db, 'categorias', id)))
 }

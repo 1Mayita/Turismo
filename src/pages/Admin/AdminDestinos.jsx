@@ -4,17 +4,21 @@ import AdminNav from '../../components/AdminNav.jsx'
 import { actualizarDestino, crearDestino, eliminarDestino, getDestinos } from '../../services/destinosService.js'
 import { categoriasDeEjemplo, getCategorias } from '../../services/categoriasService.js'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
+import { getMunicipios, municipiosDeEjemplo } from '../../services/municipiosService.js'
+import { getRegiones, regionesDeEjemplo } from '../../services/regionesService.js'
 
 const FORMULARIO_VACIO = {
   nombre: '',
   descripcion: '',
   categoria: '',
-  ubicacion: '',
+  id_departamento: '',
+  id_municipio: '',
+  id_region: '',
   direccion: '',
   latitud: '',
   longitud: '',
   horario: '',
-  precio_entrada: '',
+  precio_ingreso: '',
   imagen_principal: '',
 }
 
@@ -22,6 +26,8 @@ function AdminDestinos() {
   const [destinos, setDestinos] = useState([])
   const [categorias, setCategorias] = useState([])
   const [departamentos, setDepartamentos] = useState([])
+  const [municipios, setMunicipios] = useState([])
+  const [regiones, setRegiones] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
   const [mensaje, setMensaje] = useState('')
@@ -36,14 +42,18 @@ function AdminDestinos() {
       setCargando(true)
       setError('')
       try {
-        const [destinosFirestore, categoriasFirestore, departamentosFirestore] = await Promise.all([
+        const [destinosFirestore, categoriasFirestore, departamentosFirestore, municipiosFirestore, regionesFirestore] = await Promise.all([
           getDestinos(),
           getCategorias(),
           getDepartamentos(),
+          getMunicipios(),
+          getRegiones(),
         ])
         setDestinos(destinosFirestore)
         setCategorias(categoriasFirestore.length > 0 ? categoriasFirestore : categoriasDeEjemplo)
         setDepartamentos(departamentosFirestore.length > 0 ? departamentosFirestore : departamentosDeEjemplo)
+        setMunicipios(municipiosFirestore.length > 0 ? municipiosFirestore : municipiosDeEjemplo)
+        setRegiones(regionesFirestore.length > 0 ? regionesFirestore : regionesDeEjemplo)
       } catch (errorLectura) {
         console.error('Error al cargar datos en AdminDestinos:', errorLectura)
         setError('No se pudieron cargar los destinos. Verifica tu conexión con Firestore.')
@@ -73,12 +83,14 @@ function AdminDestinos() {
       nombre: destino.nombre || '',
       descripcion: destino.descripcion || '',
       categoria: destino.categoria || '',
-      ubicacion: destino.ubicacion || '',
+      id_departamento: destino.id_departamento || '',
+      id_municipio: destino.id_municipio || '',
+      id_region: destino.id_region || '',
       direccion: destino.direccion || '',
       latitud: destino.latitud ?? '',
       longitud: destino.longitud ?? '',
       horario: destino.horario || '',
-      precio_entrada: destino.precio_entrada ?? '',
+      precio_ingreso: destino.precio_ingreso ?? '',
       imagen_principal: destino.imagen_principal || '',
     })
     setFormularioAbierto(true)
@@ -87,21 +99,37 @@ function AdminDestinos() {
   }
 
   function actualizarCampo(evento) {
-    setFormulario({ ...formulario, [evento.target.name]: evento.target.value })
+    const { name, value } = evento.target
+    // Al cambiar departamento o municipio se limpian los niveles de abajo.
+    if (name === 'id_departamento') {
+      setFormulario({ ...formulario, id_departamento: value, id_municipio: '', id_region: '' })
+    } else if (name === 'id_municipio') {
+      setFormulario({ ...formulario, id_municipio: value, id_region: '' })
+    } else {
+      setFormulario({ ...formulario, [name]: value })
+    }
   }
+
+  const municipiosDelDepartamento = municipios.filter((municipio) => municipio.id_departamento === formulario.id_departamento)
+  const regionesDelMunicipio = regiones.filter((region) => region.id_municipio === formulario.id_municipio)
 
   async function guardar(evento) {
     evento.preventDefault()
     setError('')
 
-    if (!formulario.nombre.trim() || !formulario.categoria || !formulario.ubicacion) {
-      setError('Nombre, categoría y departamento son obligatorios.')
+    if (!formulario.nombre.trim() || !formulario.categoria || !formulario.id_departamento || !formulario.id_municipio) {
+      setError('Nombre, categoría, departamento y municipio son obligatorios.')
       return
     }
 
+    const departamento = departamentos.find((item) => item.id === formulario.id_departamento)
+    const municipio = municipios.find((item) => item.id === formulario.id_municipio)
+
     const datos = {
       ...formulario,
-      precio_entrada: Number(formulario.precio_entrada) || 0,
+      // Texto legible para tarjetas y detalle; los filtros usan los id_*.
+      ubicacion: [municipio?.nombre, departamento?.nombre].filter(Boolean).join(', '),
+      precio_ingreso: Number(formulario.precio_ingreso) || 0,
       latitud: formulario.latitud === '' ? null : Number(formulario.latitud),
       longitud: formulario.longitud === '' ? null : Number(formulario.longitud),
     }
@@ -112,7 +140,7 @@ function AdminDestinos() {
         await actualizarDestino(destinoEditando.id, datos)
         setMensaje('Destino actualizado correctamente.')
       } else {
-        await crearDestino(datos)
+        await crearDestino({ ...datos, imagenes: datos.imagen_principal ? [datos.imagen_principal] : [] })
         setMensaje('Destino creado correctamente.')
       }
       setFormularioAbierto(false)
@@ -166,7 +194,7 @@ function AdminDestinos() {
               </label>
               <label className="block text-sm font-semibold text-slate-700">
                 Precio de entrada (Bs)
-                <input name="precio_entrada" type="number" min="0" value={formulario.precio_entrada} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20" />
+                <input name="precio_ingreso" type="number" min="0" value={formulario.precio_ingreso} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20" />
               </label>
               <label className="block text-sm font-semibold text-slate-700">
                 Categoría
@@ -179,10 +207,28 @@ function AdminDestinos() {
               </label>
               <label className="block text-sm font-semibold text-slate-700">
                 Departamento
-                <select name="ubicacion" value={formulario.ubicacion} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20">
+                <select name="id_departamento" value={formulario.id_departamento} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20">
                   <option value="">Selecciona un departamento</option>
                   {departamentos.map((departamento) => (
-                    <option key={departamento.id || departamento.nombre} value={departamento.nombre}>{departamento.nombre}</option>
+                    <option key={departamento.id} value={departamento.id}>{departamento.nombre}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="block text-sm font-semibold text-slate-700">
+                Municipio
+                <select name="id_municipio" value={formulario.id_municipio} onChange={actualizarCampo} disabled={!formulario.id_departamento} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 disabled:cursor-not-allowed disabled:bg-slate-100">
+                  <option value="">Selecciona un municipio</option>
+                  {municipiosDelDepartamento.map((municipio) => (
+                    <option key={municipio.id} value={municipio.id}>{municipio.nombre}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="block text-sm font-semibold text-slate-700">
+                Región (opcional)
+                <select name="id_region" value={formulario.id_region} onChange={actualizarCampo} disabled={!formulario.id_municipio} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 disabled:cursor-not-allowed disabled:bg-slate-100">
+                  <option value="">Sin región</option>
+                  {regionesDelMunicipio.map((region) => (
+                    <option key={region.id} value={region.id}>{region.nombre}</option>
                   ))}
                 </select>
               </label>
@@ -233,7 +279,7 @@ function AdminDestinos() {
                 <tr>
                   <th className="px-5 py-3">Nombre</th>
                   <th className="px-5 py-3">Categoría</th>
-                  <th className="px-5 py-3">Departamento</th>
+                  <th className="px-5 py-3">Ubicación</th>
                   <th className="px-5 py-3 text-right">Acciones</th>
                 </tr>
               </thead>
