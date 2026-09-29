@@ -1,7 +1,8 @@
 import { signOut } from 'firebase/auth'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/useAuth.js'
 import { auth } from '../services/firebase.js'
+import BarraBusqueda from './BarraBusqueda.jsx'
 
 function enlaceClase({ isActive }) {
   return `text-sm font-semibold transition hover:text-white ${isActive ? 'text-white' : 'text-white/70'}`
@@ -23,10 +24,16 @@ function IconoHoja() {
 function Navbar() {
   const { usuario, esAdmin } = useAuth()
   const navegar = useNavigate()
+  const [parametros] = useSearchParams()
+  const busquedaActual = parametros.get('buscar') || ''
 
   async function cerrarSesion() {
     await signOut(auth)
     navegar('/login')
+  }
+
+  function buscar(texto) {
+    navegar(texto ? `/destinos?buscar=${encodeURIComponent(texto)}` : '/destinos')
   }
 
   return (
@@ -41,9 +48,15 @@ function Navbar() {
           <NavLink to="/" end className={enlaceClase}>Inicio</NavLink>
           <NavLink to="/destinos" className={enlaceClase}>Destinos</NavLink>
           <NavLink to="/departamentos" className={enlaceClase}>Departamentos</NavLink>
+          <NavLink to="/mapa" className={enlaceClase}>Mapa</NavLink>
+          <NavLink to="/eventos" className={enlaceClase}>Eventos</NavLink>
+          {usuario && <NavLink to="/favoritos" className={enlaceClase}>Mis favoritos</NavLink>}
           {usuario && <NavLink to="/perfil" className={enlaceClase}>Perfil</NavLink>}
           {esAdmin && <NavLink to="/admin/destinos" className={enlaceClase}>Panel Admin</NavLink>}
         </div>
+
+        {/* key: si la búsqueda cambia en la URL, el input se reinicia con ese texto. */}
+        <BarraBusqueda key={busquedaActual} valorInicial={busquedaActual} onBuscar={buscar} className="w-full sm:w-56" />
 
         <div className="flex items-center gap-3">
           {usuario ? (

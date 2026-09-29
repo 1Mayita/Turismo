@@ -30,6 +30,40 @@ export function getDestinosPorDepartamento(idDepartamento) {
   return getDestinosPorZona({ idDepartamento })
 }
 
+// Solo filtros de igualdad: Firestore los combina sin pedir índices compuestos.
+// Los rangos (precio, valoración) se aplican luego en el cliente.
+export async function getDestinosFiltrados({ categoria, idDepartamento, idMunicipio, idRegion } = {}) {
+  const filtros = []
+  if (categoria) filtros.push(where('categoria', '==', categoria))
+  if (idDepartamento) filtros.push(where('id_departamento', '==', idDepartamento))
+  if (idMunicipio) filtros.push(where('id_municipio', '==', idMunicipio))
+  if (idRegion) filtros.push(where('id_region', '==', idRegion))
+
+  const instantanea = await conLimiteDeTiempo(getDocs(query(collection(db, 'destinos'), ...filtros)))
+  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
+}
+
+// Búsqueda por prefijo: "Sal" encuentra "Salar de Uyuni". Firestore distingue
+// mayúsculas, así que también se prueba con la primera letra en mayúscula
+// para que "salar" encuentre "Salar".
+export async function buscarDestinosPorNombre(texto) {
+  const limpio = texto.trim()
+  if (!limpio) return []
+
+  const variantes = [...new Set([limpio, limpio.charAt(0).toUpperCase() + limpio.slice(1)])]
+  const instantaneas = await conLimiteDeTiempo(Promise.all(variantes.map((variante) => getDocs(query(
+    collection(db, 'destinos'),
+    where('nombre', '>=', variante),
+    where('nombre', '<=', variante + ''),
+  )))))
+
+  const porId = new Map()
+  instantaneas.forEach((instantanea) => {
+    instantanea.docs.forEach((documento) => porId.set(documento.id, { id: documento.id, ...documento.data() }))
+  })
+  return [...porId.values()]
+}
+
 export async function crearDestino(datos) {
   await conLimiteDeTiempo(addDoc(collection(db, 'destinos'), datos))
 }

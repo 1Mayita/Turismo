@@ -2,9 +2,11 @@ import { collection, doc, getDocs, limit, query, writeBatch } from 'firebase/fir
 import { db } from './firebase.js'
 import { conLimiteDeTiempo } from './tiempoLimite.js'
 import {
+  actividadesDeEjemplo,
   categoriasDeEjemplo,
   departamentosDeEjemplo,
   destinosDeEjemplo,
+  eventosDeEjemplo,
   municipiosDeEjemplo,
   regionesDeEjemplo,
 } from './datosDeEjemplo.js'
@@ -15,6 +17,8 @@ const CATALOGO_DE_EJEMPLO = {
   municipios: municipiosDeEjemplo,
   regiones: regionesDeEjemplo,
   destinos: destinosDeEjemplo,
+  actividades: actividadesDeEjemplo,
+  eventos: eventosDeEjemplo,
 }
 
 async function coleccionVacia(nombreColeccion) {

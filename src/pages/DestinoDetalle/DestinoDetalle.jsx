@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
+import BotonFavorito from '../../components/BotonFavorito.jsx'
+import { ResumenCalificacion } from '../../components/Estrellas.jsx'
 import { getDestinoPorId } from '../../services/destinosService.js'
+import { getPromedioCalificacion } from '../../services/resenasService.js'
+import ActividadesDestino from './ActividadesDestino.jsx'
+import ResenasDestino from './ResenasDestino.jsx'
 
 function DestinoDetalle() {
   const { id } = useParams()
@@ -9,6 +14,23 @@ function DestinoDetalle() {
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
   const [imagenSeleccionada, setImagenSeleccionada] = useState(null)
+  const [calificacion, setCalificacion] = useState(null)
+  const [errorCalificacion, setErrorCalificacion] = useState('')
+  const [versionCalificacion, setVersionCalificacion] = useState(0)
+
+  useEffect(() => {
+    async function cargarCalificacion() {
+      try {
+        setCalificacion(await getPromedioCalificacion(id))
+        setErrorCalificacion('')
+      } catch (errorLectura) {
+        console.error('Error al calcular el promedio de calificación:', errorLectura)
+        setErrorCalificacion('No se pudo cargar la calificación.')
+      }
+    }
+
+    cargarCalificacion()
+  }, [id, versionCalificacion])
 
   useEffect(() => {
     async function cargarDestino() {
@@ -62,7 +84,15 @@ function DestinoDetalle() {
 
             <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
               <div>
-                <h1 className="text-4xl font-bold text-brand-900">{destino.nombre}</h1>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-4xl font-bold text-brand-900">{destino.nombre}</h1>
+                  <BotonFavorito idDestino={destino.id} />
+                </div>
+                {errorCalificacion ? (
+                  <p className="mt-1 text-sm font-semibold text-red-700" role="alert">{errorCalificacion}</p>
+                ) : calificacion && (
+                  <ResumenCalificacion promedio={calificacion.promedio} total={calificacion.total} className="mt-1" />
+                )}
                 <p className="mt-2 flex items-center gap-1 text-slate-600">
                   <span aria-hidden="true">📍</span> {destino.ubicacion}
                 </p>
@@ -105,8 +135,10 @@ function DestinoDetalle() {
               )}
             </div>
 
+            <ActividadesDestino idDestino={destino.id} />
+
             {galeria.length > 0 && (
-              <div>
+              <div className="mb-10">
                 <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Galería</p>
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                   {galeria.map((url, indice) => (
@@ -128,6 +160,8 @@ function DestinoDetalle() {
                 </div>
               </div>
             )}
+
+            <ResenasDestino idDestino={destino.id} onResenaCreada={() => setVersionCalificacion((valorAnterior) => valorAnterior + 1)} />
           </article>
         )}
       </main>

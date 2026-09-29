@@ -14,6 +14,11 @@ import AdminDestinos from './pages/Admin/AdminDestinos.jsx'
 import AdminDepartamentos from './pages/Admin/AdminDepartamentos.jsx'
 import AdminCategorias from './pages/Admin/AdminCategorias.jsx'
 import AdminUsuarios from './pages/Admin/AdminUsuarios.jsx'
+import AdminActividades from './pages/Admin/AdminActividades.jsx'
+import AdminEventos from './pages/Admin/AdminEventos.jsx'
+import Mapa from './pages/Mapa/Mapa.jsx'
+import Eventos from './pages/Eventos/Eventos.jsx'
+import Favoritos from './pages/Favoritos/Favoritos.jsx'
 
 function App() {
   const { cargando } = useAuth()
@@ -31,8 +36,11 @@ function App() {
       {/* Los catálogos son públicos: cualquiera puede explorar destinos y departamentos. */}
       <Route path="/destinos" element={<Destinos />} />
       <Route path="/departamentos" element={<Departamentos />} />
+      <Route path="/mapa" element={<Mapa />} />
+      <Route path="/eventos" element={<Eventos />} />
 
-      {/* Ver el detalle completo o el perfil sí requiere haber iniciado sesión. */}
+      {/* Ver el detalle completo, favoritos o el perfil sí requiere haber iniciado sesión. */}
+      <Route path="/favoritos" element={<RutaPrivada><Favoritos /></RutaPrivada>} />
       <Route path="/destinos/:id" element={<RutaPrivada><DestinoDetalle /></RutaPrivada>} />
       <Route path="/departamentos/:id" element={<RutaPrivada><DepartamentoDetalle /></RutaPrivada>} />
       <Route path="/perfil" element={<RutaPrivada><Perfil /></RutaPrivada>} />
@@ -41,6 +49,8 @@ function App() {
       <Route path="/admin/departamentos" element={<RutaAdmin><AdminDepartamentos /></RutaAdmin>} />
       <Route path="/admin/categorias" element={<RutaAdmin><AdminCategorias /></RutaAdmin>} />
       <Route path="/admin/usuarios" element={<RutaAdmin><AdminUsuarios /></RutaAdmin>} />
+      <Route path="/admin/actividades" element={<RutaAdmin><AdminActividades /></RutaAdmin>} />
+      <Route path="/admin/eventos" element={<RutaAdmin><AdminEventos /></RutaAdmin>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

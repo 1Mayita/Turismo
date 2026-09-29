@@ -2,6 +2,16 @@
 // como ID del documento en Firestore, así las relaciones (id_departamento,
 // id_municipio, id_region) quedan enlazadas desde el primer sembrado.
 
+// Fecha "AAAA-MM-DD" a tantos días de hoy (negativo = en el pasado). Los
+// eventos de ejemplo se calculan al sembrar para que siempre haya próximos.
+function fechaRelativa(dias) {
+  const fecha = new Date()
+  fecha.setDate(fecha.getDate() + dias)
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0')
+  const dia = String(fecha.getDate()).padStart(2, '0')
+  return `${fecha.getFullYear()}-${mes}-${dia}`
+}
+
 export const categoriasDeEjemplo = [
   { id: 'naturaleza', nombre: 'Naturaleza', descripcion: 'Paisajes, parques y reservas naturales.' },
   { id: 'cultura', nombre: 'Cultura', descripcion: 'Museos, tradiciones y patrimonio cultural.' },
@@ -182,5 +192,56 @@ export const destinosDeEjemplo = [
     precio_ingreso: 100,
     recomendaciones: 'Contrata un guía local autorizado. Lleva ropa de manga larga y repelente para mosquitos.',
     destacado: false,
+  },
+]
+
+export const actividadesDeEjemplo = [
+  { id: 'uyuni-tour-4x4', id_destino: 'salar-de-uyuni', nombre: 'Tour en 4x4 por el salar', descripcion: 'Recorrido de día completo por el salar, el cementerio de trenes y Colchani.' },
+  { id: 'uyuni-fotografia', id_destino: 'salar-de-uyuni', nombre: 'Fotografía de perspectiva', descripcion: 'Sesión guiada de fotos con efectos de perspectiva sobre la sal.' },
+  { id: 'uyuni-incahuasi', id_destino: 'salar-de-uyuni', nombre: 'Trekking en la Isla Incahuasi', descripcion: 'Caminata corta entre cactus gigantes con vista 360° del salar.' },
+  { id: 'colorada-flamencos', id_destino: 'laguna-colorada', nombre: 'Avistamiento de flamencos', descripcion: 'Observación de las tres especies de flamencos andinos en la laguna.' },
+  { id: 'colorada-geiseres', id_destino: 'laguna-colorada', nombre: 'Visita a los géiseres Sol de Mañana', descripcion: 'Salida al amanecer para ver las fumarolas en plena actividad.' },
+  { id: 'luna-sendero', id_destino: 'valle-de-la-luna', nombre: 'Recorrido por el sendero corto', descripcion: 'Circuito de 15 minutos apto para toda la familia.' },
+  { id: 'luna-mirador', id_destino: 'valle-de-la-luna', nombre: 'Circuito largo y mirador del Diablo', descripcion: 'Caminata de 45 minutos hasta el mirador más alto del valle.' },
+]
+
+// Las fechas se guardan como texto "AAAA-MM-DD": se ordenan bien como texto
+// y encajan directo con <input type="date">.
+export const eventosDeEjemplo = [
+  {
+    id: 'feria-gastronomica-cochabamba',
+    nombre: 'Feria Gastronómica de Cochabamba',
+    descripcion: 'Platos típicos del valle: silpancho, pique macho, chicha y repostería tradicional.',
+    fecha_inicio: fechaRelativa(-1),
+    fecha_fin: fechaRelativa(2),
+    ubicacion: 'Plaza 14 de Septiembre, Cochabamba',
+    id_departamento: 'cochabamba',
+  },
+  {
+    id: 'festival-vino-tarija',
+    nombre: 'Festival del Vino y el Singani',
+    descripcion: 'Catas, música chapaca y visitas guiadas a bodegas del Valle de la Concepción.',
+    fecha_inicio: fechaRelativa(6),
+    fecha_fin: fechaRelativa(8),
+    ubicacion: 'Valle de la Concepción, Uriondo',
+    id_departamento: 'tarija',
+  },
+  {
+    id: 'encuentro-danzas-oruro',
+    nombre: 'Encuentro de Danzas Folklóricas',
+    descripcion: 'Fraternidades de diablada, morenada y caporales presentan sus coreografías.',
+    fecha_inicio: fechaRelativa(15),
+    fecha_fin: fechaRelativa(15),
+    ubicacion: 'Avenida Cívica, Oruro',
+    id_departamento: 'oruro',
+  },
+  {
+    id: 'festival-musica-chiquitos',
+    nombre: 'Festival de Música en las Misiones',
+    descripcion: 'Conciertos de música barroca en los templos jesuíticos de la Chiquitania.',
+    fecha_inicio: fechaRelativa(28),
+    fecha_fin: fechaRelativa(32),
+    ubicacion: 'Templo de San José de Chiquitos',
+    id_departamento: 'santa-cruz',
   },
 ]

@@ -4,6 +4,8 @@ const ENLACES = [
   { to: '/admin/destinos', etiqueta: 'Destinos' },
   { to: '/admin/departamentos', etiqueta: 'Departamentos y regiones' },
   { to: '/admin/categorias', etiqueta: 'Categorías' },
+  { to: '/admin/actividades', etiqueta: 'Actividades' },
+  { to: '/admin/eventos', etiqueta: 'Eventos' },
   { to: '/admin/usuarios', etiqueta: 'Usuarios' },
 ]
 
