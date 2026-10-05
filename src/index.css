@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+/* Paleta de marca "Rutas de Bolivia": verdes de selva/altiplano + acento
+   terracota andino. Cambiar el look del sitio entero pasa por aquí. */
+@theme {
+  --color-brand-50: #eef8f1;
+  --color-brand-100: #d6eedd;
+  --color-brand-200: #aedbbc;
+  --color-brand-300: #7ac496;
+  --color-brand-400: #46a86f;
+  --color-brand-500: #268a54;
+  --color-brand-600: #1b7245;
+  --color-brand-700: #185c39;
+  --color-brand-800: #164a2f;
+  --color-brand-900: #103a25;
+  --color-brand-950: #0a2718;
+
+  --color-accent-50: #fdf3ec;
+  --color-accent-400: #e0904f;
+  --color-accent-500: #d67f3c;
+  --color-accent-600: #c46b32;
+  --color-accent-700: #a95324;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--color-brand-50);
+  color: var(--color-brand-950);
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+#root {
+  min-height: 100vh;
+}
