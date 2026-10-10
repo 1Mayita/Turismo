@@ -1,14 +1,17 @@
-import { collection, doc, getDocs, limit, query, writeBatch } from 'firebase/firestore'
+import { collection, doc, getDocs, limit, query, setDoc, writeBatch } from 'firebase/firestore'
 import { db } from './firebase.js'
 import { conLimiteDeTiempo } from './tiempoLimite.js'
 import {
   actividadesDeEjemplo,
+  alojamientosDeEjemplo,
   categoriasDeEjemplo,
   departamentosDeEjemplo,
   destinosDeEjemplo,
   eventosDeEjemplo,
   municipiosDeEjemplo,
+  platosDeEjemplo,
   regionesDeEjemplo,
+  restaurantesDeEjemplo,
 } from './datosDeEjemplo.js'
 
 const CATALOGO_DE_EJEMPLO = {
@@ -19,6 +22,9 @@ const CATALOGO_DE_EJEMPLO = {
   destinos: destinosDeEjemplo,
   actividades: actividadesDeEjemplo,
   eventos: eventosDeEjemplo,
+  platos: platosDeEjemplo,
+  restaurantes: restaurantesDeEjemplo,
+  alojamientos: alojamientosDeEjemplo,
 }
 
 async function coleccionVacia(nombreColeccion) {
@@ -44,6 +50,56 @@ export async function sembrarColeccionesVacias(extras = {}) {
 
   if (sembradas.length > 0) await lote.commit()
   return sembradas
+}
+
+// Las reglas de seguridad reconocen a un administrador buscando un documento
+// de "administradores" cuyo ID sea su correo. Los que se crearon antes tenían
+// un ID cualquiera: aquí se copian a un documento con el correo como ID.
+// No borra nada y la app sigue encontrándolos por el campo "email".
+export async function indexarAdministradoresPorCorreo() {
+  const instantanea = await getDocs(collection(db, 'administradores'))
+  const existentes = new Set(instantanea.docs.map((documento) => documento.id))
+  const copiados = []
+  for (const documento of instantanea.docs) {
+    const { email } = documento.data()
+    if (!email || existentes.has(email)) continue
+    await setDoc(doc(db, 'administradores', email), documento.data())
+    existentes.add(email)
+    copiados.push(email)
+  }
+  return copiados
+}
+
+// Vuelve a escribir los datos de ejemplo aunque las colecciones ya tengan
+// datos. Usa "merge": actualiza los documentos de ejemplo (por su id fijo) y
+// no toca los que creó el administrador. Cada colección se guarda por
+// separado para que, si una falla (ej. falta su regla de seguridad), las
+// demás se carguen igual. Devuelve { cargadas: { coleccion: cantidad }, fallidas: [] }.
+// Lo usan el botón del panel de administración y el script de consola.
+export async function actualizarDatosDeEjemplo() {
+  const colecciones = {
+    departamentos: departamentosDeEjemplo,
+    destinos: destinosDeEjemplo,
+    actividades: actividadesDeEjemplo,
+    eventos: eventosDeEjemplo,
+    platos: platosDeEjemplo,
+    restaurantes: restaurantesDeEjemplo,
+    alojamientos: alojamientosDeEjemplo,
+  }
+  const cargadas = {}
+  const fallidas = []
+  for (const [nombreColeccion, registros] of Object.entries(colecciones)) {
+    const lote = writeBatch(db)
+    registros.forEach(({ id, ...datos }) => lote.set(doc(db, nombreColeccion, id), datos, { merge: true }))
+    try {
+      await lote.commit()
+      cargadas[nombreColeccion] = registros.length
+    } catch (error) {
+      console.error(`No se pudo cargar la colección "${nombreColeccion}":`, error)
+      fallidas.push(nombreColeccion)
+    }
+  }
+  return { cargadas, fallidas }
 }
 
 // Cachea la promesa de sembrado para que llamadas concurrentes (ej. doble

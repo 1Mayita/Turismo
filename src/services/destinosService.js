@@ -1,46 +1,34 @@
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from 'firebase/firestore'
+import { collection, getDocs, query, where } from 'firebase/firestore'
+import { crearServicio, SOLO_EJEMPLOS } from './coleccion.js'
+import { destinosDeEjemplo } from './datosDeEjemplo.js'
 import { db } from './firebase.js'
 import { conLimiteDeTiempo } from './tiempoLimite.js'
 
-export { destinosDeEjemplo } from './datosDeEjemplo.js'
+export { destinosDeEjemplo }
 
-export async function getDestinos() {
-  const instantanea = await conLimiteDeTiempo(getDocs(collection(db, 'destinos')))
-  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
-}
+const destinos = crearServicio('destinos', destinosDeEjemplo)
 
-export async function getDestinoPorId(id) {
-  const documento = await conLimiteDeTiempo(getDoc(doc(db, 'destinos', id)))
-  return documento.exists() ? { id: documento.id, ...documento.data() } : null
+export const getDestinos = destinos.todos
+export const getDestinoPorId = destinos.uno
+export const crearDestino = destinos.crear
+export const actualizarDestino = destinos.actualizar
+export const eliminarDestino = destinos.eliminar
+
+// Solo filtros de igualdad: Firestore los combina sin pedir índices compuestos.
+// Los rangos (precio, valoración) se aplican luego en el cliente.
+export function getDestinosFiltrados({ categoria, idDepartamento, idMunicipio, idRegion } = {}) {
+  return destinos.donde({ categoria, id_departamento: idDepartamento, id_municipio: idMunicipio, id_region: idRegion })
 }
 
 // Filtra por la zona más específica que se indique: región > municipio > departamento.
-export async function getDestinosPorZona({ idDepartamento, idMunicipio, idRegion } = {}) {
-  let filtro = null
-  if (idRegion) filtro = where('id_region', '==', idRegion)
-  else if (idMunicipio) filtro = where('id_municipio', '==', idMunicipio)
-  else if (idDepartamento) filtro = where('id_departamento', '==', idDepartamento)
-
-  const referencia = filtro ? query(collection(db, 'destinos'), filtro) : collection(db, 'destinos')
-  const instantanea = await conLimiteDeTiempo(getDocs(referencia))
-  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
+export function getDestinosPorZona({ idDepartamento, idMunicipio, idRegion } = {}) {
+  if (idRegion) return destinos.donde({ id_region: idRegion })
+  if (idMunicipio) return destinos.donde({ id_municipio: idMunicipio })
+  return destinos.donde({ id_departamento: idDepartamento })
 }
 
 export function getDestinosPorDepartamento(idDepartamento) {
   return getDestinosPorZona({ idDepartamento })
-}
-
-// Solo filtros de igualdad: Firestore los combina sin pedir índices compuestos.
-// Los rangos (precio, valoración) se aplican luego en el cliente.
-export async function getDestinosFiltrados({ categoria, idDepartamento, idMunicipio, idRegion } = {}) {
-  const filtros = []
-  if (categoria) filtros.push(where('categoria', '==', categoria))
-  if (idDepartamento) filtros.push(where('id_departamento', '==', idDepartamento))
-  if (idMunicipio) filtros.push(where('id_municipio', '==', idMunicipio))
-  if (idRegion) filtros.push(where('id_region', '==', idRegion))
-
-  const instantanea = await conLimiteDeTiempo(getDocs(query(collection(db, 'destinos'), ...filtros)))
-  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
 }
 
 // Búsqueda por prefijo: "Sal" encuentra "Salar de Uyuni". Firestore distingue
@@ -51,10 +39,17 @@ export async function buscarDestinosPorNombre(texto) {
   if (!limpio) return []
 
   const variantes = [...new Set([limpio, limpio.charAt(0).toUpperCase() + limpio.slice(1)])]
+  if (SOLO_EJEMPLOS) {
+    return destinosDeEjemplo.filter((destino) => variantes.some((variante) => destino.nombre.startsWith(variante)))
+  }
+
+  // FIN_DE_PREFIJO es el último carácter Unicode de uso privado: cualquier
+  // nombre que empiece con el texto queda entre "texto" y "texto + FIN_DE_PREFIJO".
+  const FIN_DE_PREFIJO = String.fromCharCode(0xf8ff)
   const instantaneas = await conLimiteDeTiempo(Promise.all(variantes.map((variante) => getDocs(query(
     collection(db, 'destinos'),
     where('nombre', '>=', variante),
-    where('nombre', '<=', variante + ''),
+    where('nombre', '<=', variante + FIN_DE_PREFIJO),
   )))))
 
   const porId = new Map()
@@ -62,16 +57,4 @@ export async function buscarDestinosPorNombre(texto) {
     instantanea.docs.forEach((documento) => porId.set(documento.id, { id: documento.id, ...documento.data() }))
   })
   return [...porId.values()]
-}
-
-export async function crearDestino(datos) {
-  await conLimiteDeTiempo(addDoc(collection(db, 'destinos'), datos))
-}
-
-export async function actualizarDestino(id, datos) {
-  await conLimiteDeTiempo(updateDoc(doc(db, 'destinos', id), datos))
-}
-
-export async function eliminarDestino(id) {
-  await conLimiteDeTiempo(deleteDoc(doc(db, 'destinos', id)))
 }

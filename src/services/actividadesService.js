@@ -1,31 +1,14 @@
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from 'firebase/firestore'
-import { db } from './firebase.js'
-import { conLimiteDeTiempo } from './tiempoLimite.js'
+import { crearServicio } from './coleccion.js'
+import { actividadesDeEjemplo } from './datosDeEjemplo.js'
 
-export async function getActividades() {
-  const instantanea = await conLimiteDeTiempo(getDocs(collection(db, 'actividades')))
-  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
-}
+const actividades = crearServicio('actividades', actividadesDeEjemplo)
 
-export async function getActividadPorId(id) {
-  const documento = await conLimiteDeTiempo(getDoc(doc(db, 'actividades', id)))
-  return documento.exists() ? { id: documento.id, ...documento.data() } : null
-}
+export const getActividades = actividades.todos
+export const getActividadPorId = actividades.uno
+export const crearActividad = actividades.crear
+export const actualizarActividad = actividades.actualizar
+export const eliminarActividad = actividades.eliminar
 
-export async function getActividadesPorDestino(idDestino) {
-  const consulta = query(collection(db, 'actividades'), where('id_destino', '==', idDestino))
-  const instantanea = await conLimiteDeTiempo(getDocs(consulta))
-  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
-}
-
-export async function crearActividad(datos) {
-  await conLimiteDeTiempo(addDoc(collection(db, 'actividades'), datos))
-}
-
-export async function actualizarActividad(id, datos) {
-  await conLimiteDeTiempo(updateDoc(doc(db, 'actividades', id), datos))
-}
-
-export async function eliminarActividad(id) {
-  await conLimiteDeTiempo(deleteDoc(doc(db, 'actividades', id)))
+export function getActividadesPorDestino(idDestino) {
+  return actividades.donde({ id_destino: idDestino })
 }

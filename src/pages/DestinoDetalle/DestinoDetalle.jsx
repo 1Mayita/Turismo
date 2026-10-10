@@ -1,19 +1,31 @@
-import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { lazy, Suspense, useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
 import BotonFavorito from '../../components/BotonFavorito.jsx'
+import EstablecimientosCercanos from '../../components/EstablecimientosCercanos.jsx'
+import ImagenSegura from '../../components/ImagenSegura.jsx'
+import InsigniaCategoria from '../../components/InsigniaCategoria.jsx'
+import Migas from '../../components/Migas.jsx'
+import VisorImagenes from '../../components/VisorImagenes.jsx'
 import { ResumenCalificacion } from '../../components/Estrellas.jsx'
+import { getDepartamentoPorId } from '../../services/departamentosService.js'
 import { getDestinoPorId } from '../../services/destinosService.js'
+import { useTituloPagina } from '../../hooks/useTituloPagina.js'
+import { coordenadasValidas } from '../../utils/geo.js'
 import { getPromedioCalificacion } from '../../services/resenasService.js'
 import ActividadesDestino from './ActividadesDestino.jsx'
 import ResenasDestino from './ResenasDestino.jsx'
+
+// El mapa (Leaflet) se descarga aparte, solo cuando el destino tiene coordenadas.
+const MapaUbicacion = lazy(() => import('../../components/mapa/MapaUbicacion.jsx'))
 
 function DestinoDetalle() {
   const { id } = useParams()
   const [destino, setDestino] = useState(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
-  const [imagenSeleccionada, setImagenSeleccionada] = useState(null)
+  const [departamento, setDepartamento] = useState(null)
+  const [indiceVisor, setIndiceVisor] = useState(null)
   const [calificacion, setCalificacion] = useState(null)
   const [errorCalificacion, setErrorCalificacion] = useState('')
   const [versionCalificacion, setVersionCalificacion] = useState(0)
@@ -43,6 +55,14 @@ function DestinoDetalle() {
           return
         }
         setDestino(destinoEncontrado)
+
+        // El departamento solo se usa para las migas y los lugares cercanos:
+        // si falla, el destino se muestra igual.
+        if (destinoEncontrado.id_departamento) {
+          getDepartamentoPorId(destinoEncontrado.id_departamento)
+            .then(setDepartamento)
+            .catch((errorDepartamento) => console.error('Error al consultar el departamento del destino:', errorDepartamento))
+        }
       } catch (errorLectura) {
         console.error('Error al consultar el destino en Firestore:', errorLectura)
         setError('No se pudo cargar la información del destino.')
@@ -54,15 +74,22 @@ function DestinoDetalle() {
     cargarDestino()
   }, [id])
 
-  const galeria = destino ? (destino.imagenes?.length > 0 ? destino.imagenes : [destino.imagen_principal]) : []
+  const galeria = destino ? (destino.imagenes?.length > 0 ? destino.imagenes : [destino.imagen_principal]).filter(Boolean) : []
+
+  useTituloPagina(destino?.nombre || 'Destinos')
+
+  const migas = [
+    { etiqueta: 'Inicio', to: '/' },
+    { etiqueta: 'Destinos', to: '/destinos' },
+    ...(departamento ? [{ etiqueta: departamento.nombre, to: `/departamentos/${departamento.id}` }] : []),
+    { etiqueta: destino?.nombre || 'Destino' },
+  ]
 
   return (
-    <div className="min-h-screen bg-brand-50">
+    <div className="min-h-screen">
       <Navbar />
       <main className="mx-auto max-w-5xl px-5 py-12 lg:px-8">
-        <Link to="/destinos" className="mb-6 inline-block text-sm font-semibold text-brand-700 underline">
-          ← Volver a destinos
-        </Link>
+        <Migas pasos={migas} />
 
         {cargando ? (
           <div className="animate-pulse space-y-6">
@@ -74,18 +101,16 @@ function DestinoDetalle() {
           <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
         ) : (
           <article>
-            <div className="relative mb-8 h-80 w-full overflow-hidden rounded-3xl">
-              <img src={destino.imagen_principal} alt={destino.nombre} className="h-full w-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-950/60 via-transparent to-transparent" />
-              <span className="absolute bottom-4 left-4 rounded-full bg-white/95 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-accent-700">
-                {destino.categoria}
-              </span>
+            <div className="relative mb-8 h-72 w-full overflow-hidden rounded-3xl sm:h-[26rem]">
+              <ImagenSegura key={destino.imagen_principal} src={destino.imagen_principal} alt={destino.nombre} className="h-full w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent" />
+              <InsigniaCategoria categoria={destino.categoria} className="absolute bottom-4 left-4 px-4 py-1.5 text-sm shadow-sm" />
             </div>
 
             <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
               <div>
                 <div className="flex items-center gap-3">
-                  <h1 className="text-4xl font-bold text-brand-900">{destino.nombre}</h1>
+                  <h1 className="text-4xl font-bold text-slate-900">{destino.nombre}</h1>
                   <BotonFavorito idDestino={destino.id} />
                 </div>
                 {errorCalificacion ? (
@@ -106,36 +131,41 @@ function DestinoDetalle() {
 
             <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {destino.horario && (
-                <div className="rounded-2xl bg-white p-5 shadow-md shadow-brand-950/5 ring-1 ring-brand-900/5">
+                <div className="rounded-2xl p-5 cristal">
                   <p className="mb-1 text-xs font-bold uppercase tracking-wider text-accent-600">Horario</p>
                   <p className="text-slate-700">{destino.horario}</p>
                 </div>
               )}
               {destino.direccion && (
-                <div className="rounded-2xl bg-white p-5 shadow-md shadow-brand-950/5 ring-1 ring-brand-900/5">
+                <div className="rounded-2xl p-5 cristal">
                   <p className="mb-1 text-xs font-bold uppercase tracking-wider text-accent-600">Dirección</p>
                   <p className="text-slate-700">{destino.direccion}</p>
-                  {destino.latitud && destino.longitud && (
-                    <a
-                      href={`https://www.google.com/maps?q=${destino.latitud},${destino.longitud}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-2 inline-block text-sm font-semibold text-brand-700 underline"
-                    >
-                      Ver en el mapa
-                    </a>
-                  )}
                 </div>
               )}
               {destino.recomendaciones && (
-                <div className="rounded-2xl bg-white p-5 shadow-md shadow-brand-950/5 ring-1 ring-brand-900/5">
+                <div className="rounded-2xl p-5 cristal">
                   <p className="mb-1 text-xs font-bold uppercase tracking-wider text-accent-600">Recomendaciones</p>
                   <p className="text-slate-700">{destino.recomendaciones}</p>
                 </div>
               )}
             </div>
 
+            {coordenadasValidas(destino.latitud, destino.longitud) && (
+              <section className="mb-10">
+                <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Cómo llegar</p>
+                <Suspense fallback={<div className="h-72 animate-pulse rounded-2xl bg-white/50" />}>
+                  <MapaUbicacion latitud={destino.latitud} longitud={destino.longitud} titulo={destino.nombre} clave={destino.categoria} />
+                </Suspense>
+              </section>
+            )}
+
             <ActividadesDestino idDestino={destino.id} />
+
+            <EstablecimientosCercanos
+              idDepartamento={destino.id_departamento}
+              idMunicipio={destino.id_municipio}
+              nombreDepartamento={departamento?.nombre}
+            />
 
             {galeria.length > 0 && (
               <div className="mb-10">
@@ -145,12 +175,13 @@ function DestinoDetalle() {
                     <button
                       key={url + indice}
                       type="button"
-                      onClick={() => setImagenSeleccionada(url)}
+                      onClick={() => setIndiceVisor(indice)}
+                      aria-label={`Ampliar foto ${indice + 1} de ${galeria.length}`}
                       className="overflow-hidden rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600"
                     >
-                      <img
+                      <ImagenSegura
                         src={url}
-                        alt={`${destino.nombre} ${indice + 1}`}
+                        alt={`${destino.nombre}, foto ${indice + 1}`}
                         loading="lazy"
                         decoding="async"
                         className="h-32 w-full object-cover transition hover:scale-105"
@@ -158,6 +189,7 @@ function DestinoDetalle() {
                     </button>
                   ))}
                 </div>
+                {destino.credito_imagenes && <p className="mt-3 text-xs text-slate-500">{destino.credito_imagenes}</p>}
               </div>
             )}
 
@@ -166,21 +198,14 @@ function DestinoDetalle() {
         )}
       </main>
 
-      {imagenSeleccionada && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6"
-          onClick={() => setImagenSeleccionada(null)}
-        >
-          <button
-            type="button"
-            onClick={() => setImagenSeleccionada(null)}
-            className="absolute right-6 top-6 text-3xl font-bold text-white"
-            aria-label="Cerrar"
-          >
-            ×
-          </button>
-          <img src={imagenSeleccionada} alt="Vista ampliada" className="max-h-[85vh] max-w-4xl rounded-2xl object-contain" />
-        </div>
+      {indiceVisor !== null && (
+        <VisorImagenes
+          imagenes={galeria}
+          indice={indiceVisor}
+          titulo={destino.nombre}
+          onCambiar={setIndiceVisor}
+          onCerrar={() => setIndiceVisor(null)}
+        />
       )}
     </div>
   )

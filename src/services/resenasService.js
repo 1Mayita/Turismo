@@ -4,6 +4,11 @@ import { conLimiteDeTiempo } from './tiempoLimite.js'
 
 const COLECCION_RESENAS = 'reseñas'
 
+// Se pueden reseñar destinos, restaurantes y alojamientos.
+//   - Destino:               { id_destino }                    (formato original)
+//   - Restaurante/alojamiento: { tipo_elemento, id_elemento }
+const TIPOS_VALIDOS = ['destino', 'restaurante', 'alojamiento']
+
 // Caché de getResumenCalificaciones(); las escrituras de reseñas la invalidan.
 let resumenEnCache = null
 
@@ -11,7 +16,32 @@ function milisegundos(fecha) {
   return typeof fecha?.toMillis === 'function' ? fecha.toMillis() : 0
 }
 
-// datos: { id_usuario, nombre_usuario, id_destino, calificacion, comentario }
+function tipoDeResena(resena) {
+  return resena.tipo_elemento || 'destino'
+}
+
+function idElementoDeResena(resena) {
+  return resena.id_elemento || resena.id_destino
+}
+
+// Clave con la que el resumen de calificaciones identifica cada lugar. Los
+// destinos usan su id a secas para no romper lo que ya funcionaba.
+export function claveDeCalificacion(tipo, idElemento) {
+  return tipo === 'destino' ? idElemento : `${tipo}:${idElemento}`
+}
+
+async function leerResenasDe(tipo, idElemento) {
+  if (!TIPOS_VALIDOS.includes(tipo)) throw new Error(`Tipo de reseña no válido: ${tipo}`)
+  const campo = tipo === 'destino' ? 'id_destino' : 'id_elemento'
+  const consulta = query(collection(db, COLECCION_RESENAS), where(campo, '==', idElemento))
+  const instantanea = await conLimiteDeTiempo(getDocs(consulta))
+  return instantanea.docs
+    .map((documento) => ({ id: documento.id, ...documento.data() }))
+    .filter((resena) => tipoDeResena(resena) === tipo && resena.estado !== 'oculta')
+}
+
+// datos: { id_usuario, nombre_usuario, calificacion, comentario } más
+// { id_destino } o { tipo_elemento, id_elemento }.
 export async function crearResena(datos) {
   await conLimiteDeTiempo(addDoc(collection(db, COLECCION_RESENAS), {
     ...datos,
@@ -24,7 +54,10 @@ export async function crearResena(datos) {
 
 export async function getTodasLasResenas() {
   const instantanea = await conLimiteDeTiempo(getDocs(collection(db, COLECCION_RESENAS)))
-  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
+  return instantanea.docs.map((documento) => {
+    const datos = documento.data()
+    return { id: documento.id, ...datos, tipo_elemento: tipoDeResena(datos), id_elemento: idElementoDeResena(datos) }
+  })
 }
 
 export async function actualizarEstadoResena(id, estado) {
@@ -40,47 +73,47 @@ export async function eliminarResena(id) {
   resumenEnCache = null
 }
 
-// Se ordena en el cliente (más reciente primero) para no necesitar un índice
-// compuesto de id_destino + fecha en Firestore.
-export async function getResenasPorDestino(idDestino) {
-  const consulta = query(collection(db, COLECCION_RESENAS), where('id_destino', '==', idDestino))
-  const instantanea = await conLimiteDeTiempo(getDocs(consulta))
-  return instantanea.docs
-    .map((documento) => ({ id: documento.id, ...documento.data() }))
-    .filter((resena) => resena.estado !== 'oculta')
-    .sort((a, b) => milisegundos(b.fecha) - milisegundos(a.fecha))
+// Reseñas publicadas de un lugar, de la más reciente a la más antigua. Se
+// ordena en el cliente para no necesitar un índice compuesto en Firestore.
+export async function getResenasDe(tipo, idElemento) {
+  const resenas = await leerResenasDe(tipo, idElemento)
+  return resenas.sort((a, b) => milisegundos(b.fecha) - milisegundos(a.fecha))
 }
 
-// Se filtran reseñas ocultas en el cliente para incluir también documentos
-// antiguos que todavía no tienen el campo "estado".
-export async function getPromedioCalificacion(idDestino) {
-  const consulta = query(collection(db, COLECCION_RESENAS), where('id_destino', '==', idDestino))
-  const instantanea = await conLimiteDeTiempo(getDocs(consulta))
-  const publicadas = instantanea.docs
-    .map((documento) => documento.data())
-    .filter((resena) => resena.estado !== 'oculta')
-  const total = publicadas.length
-  const suma = publicadas.reduce((acumulado, resena) => acumulado + (Number(resena.calificacion) || 0), 0)
+export async function getPromedioDe(tipo, idElemento) {
+  const resenas = await leerResenasDe(tipo, idElemento)
+  const total = resenas.length
+  const suma = resenas.reduce((acumulado, resena) => acumulado + (Number(resena.calificacion) || 0), 0)
   return { promedio: total ? suma / total : 0, total }
 }
 
-// Resumen { [idDestino]: { promedio, total } } de todos los destinos en una sola
-// lectura, para las tarjetas del catálogo y el filtro de valoración mínima.
-// Se cachea para que todas las tarjetas compartan la misma consulta.
+export function getResenasPorDestino(idDestino) {
+  return getResenasDe('destino', idDestino)
+}
+
+export function getPromedioCalificacion(idDestino) {
+  return getPromedioDe('destino', idDestino)
+}
+
+// Resumen { [clave]: { promedio, total } } de todos los lugares en una sola
+// lectura, para las tarjetas y los filtros de valoración. La clave sale de
+// claveDeCalificacion(). Se cachea para que todas las tarjetas compartan la
+// misma consulta.
 export function getResumenCalificaciones() {
   if (!resumenEnCache) {
     resumenEnCache = conLimiteDeTiempo(getDocs(collection(db, COLECCION_RESENAS)))
       .then((instantanea) => {
         const sumas = {}
         instantanea.docs.forEach((documento) => {
-          const { id_destino: idDestino, calificacion, estado } = documento.data()
-          if (estado === 'oculta') return
-          sumas[idDestino] ??= { suma: 0, total: 0 }
-          sumas[idDestino].suma += Number(calificacion) || 0
-          sumas[idDestino].total += 1
+          const resena = documento.data()
+          if (resena.estado === 'oculta') return
+          const clave = claveDeCalificacion(tipoDeResena(resena), idElementoDeResena(resena))
+          sumas[clave] ??= { suma: 0, total: 0 }
+          sumas[clave].suma += Number(resena.calificacion) || 0
+          sumas[clave].total += 1
         })
-        return Object.fromEntries(Object.entries(sumas).map(([idDestino, { suma, total }]) => [
-          idDestino,
+        return Object.fromEntries(Object.entries(sumas).map(([clave, { suma, total }]) => [
+          clave,
           { promedio: suma / total, total },
         ]))
       })

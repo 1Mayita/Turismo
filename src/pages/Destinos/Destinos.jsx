@@ -10,18 +10,21 @@ import { getMunicipios, municipiosDeEjemplo } from '../../services/municipiosSer
 import { getRegiones, regionesDeEjemplo } from '../../services/regionesService.js'
 import { sembrarCatalogoDeEjemplo } from '../../services/sembradoService.js'
 import { useResumenCalificaciones } from '../../hooks/useResumenCalificaciones.js'
+import { distanciaEnKm } from '../../utils/geo.js'
 
-const FILTROS_VACIOS = {
-  categoria: '',
-  idDepartamento: '',
-  idMunicipio: '',
-  idRegion: '',
-  precioMaximo: '',
-  valoracionMinima: '',
-  distanciaMaxima: '',
+// Cada filtro se guarda en la URL con este nombre (ej. ?categoria=Naturaleza):
+// así sobreviven al entrar a un destino y volver, y el enlace se puede compartir.
+const PARAMETRO_DE_FILTRO = {
+  categoria: 'categoria',
+  idDepartamento: 'departamento',
+  idMunicipio: 'municipio',
+  idRegion: 'region',
+  precioMaximo: 'precio',
+  valoracionMinima: 'valoracion',
+  distanciaMaxima: 'distancia',
 }
 
-const CLASE_CAMPO = 'mt-1 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-normal normal-case tracking-normal text-slate-800 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 disabled:cursor-not-allowed disabled:bg-slate-100'
+const CLASE_CAMPO = 'mt-1 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 text-sm font-normal normal-case tracking-normal text-slate-800 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 disabled:cursor-not-allowed disabled:bg-slate-100'
 const CLASE_ETIQUETA = 'block text-xs font-bold uppercase tracking-wider text-slate-500'
 
 async function leerCatalogo() {
@@ -40,27 +43,6 @@ const REFERENCIAS_DE_EJEMPLO = {
   departamentos: departamentosDeEjemplo,
   municipios: municipiosDeEjemplo,
   regiones: regionesDeEjemplo,
-}
-
-function coordenadasValidas(latitud, longitud) {
-  const lat = Number(latitud)
-  const lon = Number(longitud)
-  return latitud !== null && latitud !== undefined && latitud !== ''
-    && longitud !== null && longitud !== undefined && longitud !== ''
-    && Number.isFinite(lat) && Number.isFinite(lon)
-    && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180
-}
-
-function distanciaEnKm(origen, destino) {
-  if (!coordenadasValidas(destino.latitud, destino.longitud)) return null
-  const radianes = (grados) => grados * (Math.PI / 180)
-  const deltaLatitud = radianes(Number(destino.latitud) - origen.latitud)
-  const deltaLongitud = radianes(Number(destino.longitud) - origen.longitud)
-  const a = Math.sin(deltaLatitud / 2) ** 2
-    + Math.cos(radianes(origen.latitud)) * Math.cos(radianes(Number(destino.latitud)))
-    * Math.sin(deltaLongitud / 2) ** 2
-  const segura = Math.min(1, Math.max(0, a))
-  return 6371 * 2 * Math.atan2(Math.sqrt(segura), Math.sqrt(1 - segura))
 }
 
 // Los filtros de igualdad se resuelven en Firestore; los rangos y la
@@ -89,7 +71,18 @@ function Destinos() {
   const [modoEjemplo, setModoEjemplo] = useState(false)
   const [referenciasListas, setReferenciasListas] = useState(false)
   const [destinosBase, setDestinosBase] = useState([])
-  const [filtros, setFiltros] = useState(FILTROS_VACIOS)
+  const filtros = Object.fromEntries(
+    Object.entries(PARAMETRO_DE_FILTRO).map(([campo, parametro]) => [campo, parametros.get(parametro) || '']),
+  )
+
+  function setFiltros(siguientes) {
+    const nuevos = new URLSearchParams()
+    if (textoBuscado) nuevos.set('buscar', textoBuscado)
+    Object.entries(PARAMETRO_DE_FILTRO).forEach(([campo, parametro]) => {
+      if (siguientes[campo]) nuevos.set(parametro, siguientes[campo])
+    })
+    setParametros(nuevos, { replace: true })
+  }
   const [panelAbierto, setPanelAbierto] = useState(false)
   const [cargando, setCargando] = useState(true)
   const [aviso, setAviso] = useState('')
@@ -176,13 +169,14 @@ function Destinos() {
   }
 
   function limpiarFiltros() {
-    setFiltros(FILTROS_VACIOS)
     setErrorUbicacion('')
-    if (textoBuscado) setParametros({})
+    setParametros({}, { replace: true })
   }
 
   function quitarBusqueda() {
-    setParametros({})
+    const sinBusqueda = new URLSearchParams(parametros)
+    sinBusqueda.delete('buscar')
+    setParametros(sinBusqueda, { replace: true })
   }
 
   function obtenerUbicacion() {
@@ -215,12 +209,12 @@ function Destinos() {
   if (textoBuscado && destinosBase.length === 0) mensajeVacio = `No se encontraron destinos con ese nombre ("${textoBuscado}").`
 
   return (
-    <div className="min-h-screen bg-brand-50">
+    <div className="min-h-screen">
       <Navbar />
       <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
         <div className="mb-10 max-w-2xl">
           <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Catálogo de experiencias</p>
-          <h1 className="text-5xl font-bold tracking-tight text-brand-900">Encuentra tu próximo paisaje</h1>
+          <h1 className="text-5xl font-bold tracking-tight text-slate-900">Encuentra tu próximo paisaje</h1>
           <p className="mt-4 text-lg text-slate-600">Desde el altiplano hasta la Amazonía, Bolivia te espera.</p>
         </div>
 
@@ -230,7 +224,7 @@ function Destinos() {
         {textoBuscado && (
           <div className="mb-6 flex flex-wrap items-center gap-3">
             <p className="text-lg text-slate-700">
-              Resultados para <span className="font-bold text-brand-900">"{textoBuscado}"</span>
+              Resultados para <span className="font-bold text-slate-900">"{textoBuscado}"</span>
             </p>
             <button type="button" onClick={quitarBusqueda} className="text-sm font-semibold text-brand-700 underline">
               Quitar búsqueda
@@ -242,7 +236,7 @@ function Destinos() {
           type="button"
           onClick={() => setPanelAbierto(!panelAbierto)}
           aria-expanded={panelAbierto}
-          className="mb-5 rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-800 ring-1 ring-brand-900/10 transition hover:bg-brand-100 lg:hidden"
+          className="mb-5 rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-800 ring-1 ring-white/80 transition hover:bg-brand-100 lg:hidden"
         >
           {panelAbierto ? 'Ocultar filtros' : 'Mostrar filtros'}
           {cantidadFiltrosActivos > 0 && ` (${cantidadFiltrosActivos})`}
@@ -250,8 +244,8 @@ function Destinos() {
 
         <div className="lg:grid lg:grid-cols-[16rem_1fr] lg:gap-8">
           <aside className={`${panelAbierto ? 'block' : 'hidden'} mb-8 lg:mb-0 lg:block`}>
-            <div className="space-y-4 rounded-2xl bg-white p-5 shadow-lg shadow-brand-950/5 lg:sticky lg:top-24">
-              <h2 className="text-lg font-bold text-brand-900">Filtros</h2>
+            <div className="space-y-4 rounded-2xl p-5 cristal lg:sticky lg:top-24">
+              <h2 className="text-lg font-bold text-slate-900">Filtros</h2>
 
               <label className={CLASE_ETIQUETA}>
                 Categoría
@@ -342,7 +336,7 @@ function Destinos() {
                 type="button"
                 onClick={limpiarFiltros}
                 disabled={cantidadFiltrosActivos === 0}
-                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Limpiar filtros
               </button>
@@ -353,13 +347,22 @@ function Destinos() {
             {cargando ? (
               <GrillaEsqueleto />
             ) : destinosFiltrados.length === 0 ? (
-              !error && <p className="rounded-2xl bg-white px-5 py-6 text-slate-600 shadow-lg shadow-brand-950/5">{mensajeVacio}</p>
+              !error && (
+                <div className="rounded-2xl px-5 py-6 text-slate-600 cristal">
+                  <p>{mensajeVacio}</p>
+                  {cantidadFiltrosActivos > 0 && (
+                    <button type="button" onClick={limpiarFiltros} className="mt-3 font-semibold text-brand-700 underline">
+                      Quitar los filtros y ver todos los destinos
+                    </button>
+                  )}
+                </div>
+              )
             ) : (
               <>
                 <p className="mb-4 text-sm text-slate-500">
                   {destinosFiltrados.length} {destinosFiltrados.length === 1 ? 'destino encontrado' : 'destinos encontrados'}
                 </p>
-                <div className="grid grid-cols-1 gap-7 md:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
                   {destinosFiltrados.map((destino) => (
                     <TarjetaDestino
                       key={destino.id || destino.nombre}

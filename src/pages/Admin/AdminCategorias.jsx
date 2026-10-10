@@ -93,35 +93,35 @@ function AdminCategorias() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-50">
+    <div className="min-h-screen">
       <Navbar />
       <main className="mx-auto max-w-4xl px-5 py-12 lg:px-8">
-        <h1 className="mb-6 text-3xl font-bold text-brand-900">Administración de categorías</h1>
+        <h1 className="mb-6 text-3xl font-bold text-slate-900">Administración de categorías</h1>
         <AdminNav />
 
         {error && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
         {mensaje && <p className="mb-5 rounded-lg bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-800" role="status">{mensaje}</p>}
 
-        <button type="button" onClick={abrirNueva} className="mb-6 rounded-xl bg-accent-600 px-5 py-3 font-bold text-white transition hover:bg-accent-700">
+        <button type="button" onClick={abrirNueva} className="mb-6 rounded-xl boton-principal px-5 py-3 font-bold text-white transition">
           Nueva categoría
         </button>
 
         {formularioAbierto && (
-          <form onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl bg-white p-6 shadow-lg shadow-brand-950/5">
-            <h2 className="text-xl font-bold text-brand-900">{categoriaEditando ? 'Editar categoría' : 'Nueva categoría'}</h2>
+          <form onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
+            <h2 className="text-xl font-bold text-slate-900">{categoriaEditando ? 'Editar categoría' : 'Nueva categoría'}</h2>
             <label className="block text-sm font-semibold text-slate-700">
               Nombre
-              <input value={formulario.nombre} onChange={(e) => setFormulario({ ...formulario, nombre: e.target.value })} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20" />
+              <input value={formulario.nombre} onChange={(e) => setFormulario({ ...formulario, nombre: e.target.value })} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
             </label>
             <label className="block text-sm font-semibold text-slate-700">
               Descripción
-              <textarea value={formulario.descripcion} onChange={(e) => setFormulario({ ...formulario, descripcion: e.target.value })} rows={2} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20" />
+              <textarea value={formulario.descripcion} onChange={(e) => setFormulario({ ...formulario, descripcion: e.target.value })} rows={2} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
             </label>
             <div className="flex gap-3">
-              <button disabled={guardando} className="rounded-xl bg-brand-800 px-5 py-2.5 font-bold text-white transition hover:bg-brand-900 disabled:cursor-not-allowed disabled:opacity-60">
+              <button disabled={guardando} className="rounded-xl bg-brand-700 px-5 py-2.5 font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60">
                 {guardando ? 'Guardando...' : 'Guardar'}
               </button>
-              <button type="button" onClick={() => setFormularioAbierto(false)} className="rounded-xl border border-slate-300 px-5 py-2.5 font-bold text-slate-700 transition hover:bg-slate-100">
+              <button type="button" onClick={() => setFormularioAbierto(false)} className="rounded-xl border border-neutral-300 px-5 py-2.5 font-bold text-slate-700 transition hover:bg-slate-100">
                 Cancelar
               </button>
             </div>
@@ -129,11 +129,11 @@ function AdminCategorias() {
         )}
 
         {cargando ? (
-          <div className="h-48 animate-pulse rounded-2xl bg-white shadow-lg shadow-brand-950/5" />
+          <div className="h-48 animate-pulse rounded-2xl bg-white/50 cristal" />
         ) : (
-          <div className="overflow-x-auto rounded-2xl bg-white shadow-lg shadow-brand-950/5">
+          <div className="overflow-x-auto rounded-2xl cristal">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500">
+              <thead className="bg-white/40 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <tr>
                   <th className="px-5 py-3">Nombre</th>
                   <th className="px-5 py-3">Descripción</th>
@@ -142,8 +142,8 @@ function AdminCategorias() {
               </thead>
               <tbody>
                 {categorias.map((categoria) => (
-                  <tr key={categoria.id} className="border-t border-slate-100">
-                    <td className="px-5 py-3 font-semibold text-brand-900">{categoria.nombre}</td>
+                  <tr key={categoria.id} className="border-t border-neutral-100">
+                    <td className="px-5 py-3 font-semibold text-slate-900">{categoria.nombre}</td>
                     <td className="px-5 py-3 text-slate-600">{categoria.descripcion}</td>
                     <td className="px-5 py-3 text-right">
                       <button type="button" onClick={() => abrirEditar(categoria)} className="mr-3 font-semibold text-brand-700 hover:underline">Editar</button>

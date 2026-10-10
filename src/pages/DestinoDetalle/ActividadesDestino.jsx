@@ -27,8 +27,8 @@ function ActividadesDestino({ idDestino }) {
       <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Actividades disponibles</p>
       {cargando ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="h-20 animate-pulse rounded-2xl bg-white" />
-          <div className="h-20 animate-pulse rounded-2xl bg-white" />
+          <div className="h-20 animate-pulse rounded-2xl bg-white/50" />
+          <div className="h-20 animate-pulse rounded-2xl bg-white/50" />
         </div>
       ) : error ? (
         <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
@@ -37,8 +37,8 @@ function ActividadesDestino({ idDestino }) {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {actividades.map((actividad) => (
-            <div key={actividad.id} className="relative rounded-2xl bg-white p-5 pr-16 shadow-md shadow-brand-950/5 ring-1 ring-brand-900/5">
-              <p className="font-bold text-brand-900">{actividad.nombre}</p>
+            <div key={actividad.id} className="relative rounded-2xl p-5 pr-16 cristal">
+              <p className="font-bold text-slate-900">{actividad.nombre}</p>
               {actividad.descripcion && <p className="mt-1 text-sm text-slate-600">{actividad.descripcion}</p>}
               <BotonFavorito idElemento={actividad.id} tipo="actividad" className="absolute right-3 top-3" />
             </div>

@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
+import InsigniaCategoria from '../../components/InsigniaCategoria.jsx'
+import ListaFavoritos from '../../components/ListaFavoritos.jsx'
 import { useAuth } from '../../context/useAuth.js'
+import { useFavoritos } from '../../context/useFavoritos.js'
 import { categoriasDeEjemplo, getCategorias } from '../../services/categoriasService.js'
 import { actualizarUsuario, crearUsuario, getUsuarioPorId } from '../../services/usuariosService.js'
 import { getPreferenciasDeUsuario, guardarPreferenciasDeUsuario } from '../../services/preferenciasService.js'
@@ -29,24 +33,37 @@ function Avatar({ fotoUrl, nombre, apellido, onError }) {
           setFallo(true)
           onError?.()
         }}
-        className="h-24 w-24 rounded-full object-cover ring-4 ring-brand-50"
+        className="h-28 w-28 rounded-full object-cover shadow-lg ring-4 ring-white"
       />
     )
   }
-  const iniciales = `${nombre?.[0] || ''}${apellido?.[0] || ''}`.toUpperCase() || '🙂'
+  const iniciales = `${nombre?.[0] || ''}${apellido?.[0] || ''}`.toUpperCase()
   return (
-    <div className="flex h-24 w-24 items-center justify-center rounded-full bg-brand-100 text-3xl font-bold text-brand-700 ring-4 ring-brand-50">
-      {iniciales}
+    <div className="flex h-28 w-28 items-center justify-center rounded-full bg-linear-to-br from-sky-500 to-brand-700 text-4xl font-extrabold text-white shadow-lg ring-4 ring-white">
+      {iniciales || (
+        // Sin nombre todavía: silueta en vez de iniciales.
+        <svg viewBox="0 0 24 24" fill="currentColor" className="h-14 w-14" aria-hidden="true">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 20c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5v1H4v-1Z" />
+        </svg>
+      )}
     </div>
   )
 }
 
 function Perfil() {
   const { usuario } = useAuth()
+  const { idsFavoritos } = useFavoritos()
+  const navegar = useNavigate()
+  const ubicacion = useLocation()
+  const [parametros] = useSearchParams()
+  // Recién registrado: se abre directo la edición para elegir preferencias.
+  const esBienvenida = parametros.get('bienvenida') === '1'
+  const rutaSiguiente = ubicacion.state?.desde || '/destinos'
   const [categorias, setCategorias] = useState([])
   const [datosGuardados, setDatosGuardados] = useState(PERFIL_VACIO)
   const [formulario, setFormulario] = useState(PERFIL_VACIO)
-  const [modoEdicion, setModoEdicion] = useState(false)
+  const [modoEdicion, setModoEdicion] = useState(esBienvenida)
   const [cargando, setCargando] = useState(true)
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
@@ -88,6 +105,14 @@ function Perfil() {
 
     cargarPerfil()
   }, [usuario.uid, usuario.displayName, usuario.email])
+
+  // Al llegar con /perfil#favoritos (desde el menú) se baja hasta esa sección
+  // cuando el perfil ya terminó de cargar.
+  useEffect(() => {
+    if (!cargando && ubicacion.hash === '#favoritos') {
+      document.getElementById('favoritos')?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [cargando, ubicacion.hash, ubicacion.key])
 
   function abrirEdicion() {
     setFormulario(datosGuardados)
@@ -131,6 +156,10 @@ function Perfil() {
       setError('Nombre y apellido no pueden estar vacíos.')
       return
     }
+    if (formulario.telefono.trim() && !/^[0-9+\s-]{7,15}$/.test(formulario.telefono.trim())) {
+      setError('El teléfono solo puede tener números, espacios, guiones o "+", entre 7 y 15 caracteres.')
+      return
+    }
 
     try {
       setGuardando(true)
@@ -140,6 +169,7 @@ function Perfil() {
       setDatosGuardados(formulario)
       setModoEdicion(false)
       setMensaje('Tu perfil se guardó correctamente.')
+      if (esBienvenida) navegar(rutaSiguiente, { replace: true })
     } catch (error) {
       console.error('Error al guardar el perfil:', error)
       setError('No pudimos guardar los cambios. Inténtalo de nuevo.')
@@ -151,28 +181,40 @@ function Perfil() {
   // Se ignoran IDs de categorías que ya fueron eliminadas.
   const categoriasPreferidas = categorias.filter((categoria) => datosGuardados.preferencias.includes(categoria.id))
 
-  return (
-    <div className="min-h-screen bg-brand-50">
-      <Navbar />
-      <main className="mx-auto max-w-3xl px-5 py-12 lg:px-8">
-        <div className="mb-8">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Mi cuenta</p>
-          <h1 className="text-4xl font-bold text-brand-900">Mi perfil</h1>
-        </div>
+  const nombreCompleto = `${datosGuardados.nombre} ${datosGuardados.apellido}`.trim() || 'Viajero'
 
-        {error && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
-        {mensaje && <p className="mb-5 rounded-lg bg-brand-100 px-4 py-3 text-sm font-semibold text-brand-800" role="status">{mensaje}</p>}
+  return (
+    <div className="min-h-screen">
+      <Navbar />
+      <main className="mx-auto max-w-6xl px-5 py-10 lg:px-8">
+        {esBienvenida && (
+          <div className="mb-6 rounded-2xl p-5 cristal">
+            <p className="text-lg font-bold text-slate-900">¡Tu cuenta está lista!</p>
+            <p className="mt-1 text-sm text-slate-600">
+              Marca abajo las categorías que más te interesan y guarda los cambios. Puedes cambiarlas cuando quieras desde tu perfil.
+            </p>
+            <Link to={rutaSiguiente} replace className="mt-3 inline-block text-sm font-semibold text-brand-700 underline">
+              Omitir por ahora y empezar a explorar
+            </Link>
+          </div>
+        )}
+
+        {error && <p className="mb-5 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
+        {mensaje && <p className="mb-5 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800" role="status">✓ {mensaje}</p>}
 
         {cargando ? (
-          <div className="animate-pulse rounded-3xl bg-white p-8 shadow-xl shadow-brand-950/10">
-            <div className="mb-4 h-24 w-24 rounded-full bg-brand-100" />
-            <div className="h-4 w-1/3 rounded bg-brand-100" />
+          <div className="animate-pulse overflow-hidden rounded-[2rem] cristal">
+            <div className="h-40 bg-white/60" />
+            <div className="space-y-3 p-8">
+              <div className="h-6 w-1/3 rounded bg-white/70" />
+              <div className="h-4 w-1/4 rounded bg-white/70" />
+            </div>
           </div>
         ) : modoEdicion ? (
-          <section className="rounded-3xl bg-white p-8 shadow-xl shadow-brand-950/10">
-            <h2 className="mb-6 text-xl font-bold text-brand-900">Editar perfil</h2>
-            <form onSubmit={guardarPerfil} className="space-y-5">
-              <div className="flex items-center gap-5">
+          <section className="mx-auto max-w-3xl rounded-[2rem] p-6 cristal sm:p-8">
+            <h1 className="mb-6 text-2xl font-bold text-slate-900">Editar perfil</h1>
+            <form onSubmit={guardarPerfil} className="space-y-6">
+              <div className="flex flex-wrap items-center gap-5">
                 <Avatar
                   key={formulario.fotoUrl}
                   fotoUrl={formulario.fotoUrl}
@@ -180,9 +222,9 @@ function Perfil() {
                   apellido={formulario.apellido}
                   onError={() => setFotoConError(true)}
                 />
-                <label className="block flex-1 text-sm font-semibold text-slate-700">
+                <label className="block min-w-60 flex-1 text-sm font-semibold text-slate-700">
                   URL de foto de perfil
-                  <input name="fotoUrl" value={formulario.fotoUrl} onChange={actualizarCampo} placeholder="https://..." className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20" />
+                  <input name="fotoUrl" value={formulario.fotoUrl} onChange={actualizarCampo} placeholder="https://..." className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-3 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
                   {fotoConError && (
                     <span className="mt-2 block text-xs font-semibold text-red-600">
                       No pudimos cargar esa imagen. Verifica que el enlace apunte directo a un archivo (termina en .jpg, .png, .webp...) y no a una página web.
@@ -194,86 +236,135 @@ function Perfil() {
               <div className="grid gap-5 sm:grid-cols-2">
                 <label className="block text-sm font-semibold text-slate-700">
                   Nombre
-                  <input name="nombre" value={formulario.nombre} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20" />
+                  <input name="nombre" autoComplete="given-name" value={formulario.nombre} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-3 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
                 </label>
                 <label className="block text-sm font-semibold text-slate-700">
                   Apellido
-                  <input name="apellido" value={formulario.apellido} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20" />
+                  <input name="apellido" autoComplete="family-name" value={formulario.apellido} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-3 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
                 </label>
               </div>
 
               <label className="block text-sm font-semibold text-slate-700">
                 Teléfono
-                <input name="telefono" value={formulario.telefono} onChange={actualizarCampo} placeholder="Ej: 71234567" className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20" />
+                <input name="telefono" type="tel" autoComplete="tel" value={formulario.telefono} onChange={actualizarCampo} placeholder="Ej: 71234567" className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-3 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
               </label>
 
-              <div>
-                <p className="mb-3 text-sm font-semibold text-slate-700">Preferencias turísticas</p>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <fieldset>
+                <legend className="text-sm font-semibold text-slate-700">¿Qué te gusta hacer cuando viajas?</legend>
+                <p className="mb-3 mt-1 text-xs text-slate-500">Toca las categorías que te interesan. Puedes elegir varias.</p>
+                <div className="flex flex-wrap gap-2">
                   {categorias.map((categoria) => (
-                    <label key={categoria.id} className="flex items-center gap-2 text-sm text-slate-700">
+                    <label
+                      key={categoria.id}
+                      className="cursor-pointer select-none rounded-full bg-white/70 px-4 py-2 text-sm font-semibold text-slate-700 ring-1 ring-sky-200 transition hover:bg-white has-[:checked]:bg-brand-700 has-[:checked]:text-white has-[:checked]:ring-brand-700 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-500"
+                    >
                       <input
                         type="checkbox"
                         checked={formulario.preferencias.includes(categoria.id)}
                         onChange={() => alternarPreferencia(categoria.id)}
-                        className="h-4 w-4 rounded border-slate-300 text-brand-700 focus:ring-brand-700"
+                        className="sr-only"
                       />
+                      {formulario.preferencias.includes(categoria.id) && <span aria-hidden="true">✓ </span>}
                       {categoria.nombre}
                     </label>
                   ))}
                 </div>
-              </div>
+              </fieldset>
 
-              <div className="flex gap-3">
-                <button disabled={guardando} className="flex-1 rounded-xl bg-accent-600 px-4 py-3 font-bold text-white transition hover:bg-accent-700 disabled:cursor-not-allowed disabled:opacity-60">
+              <div className="flex flex-wrap gap-3">
+                <button disabled={guardando} className="flex-1 rounded-xl boton-principal px-4 py-3 font-bold disabled:cursor-not-allowed disabled:opacity-60">
                   {guardando ? 'Guardando...' : 'Guardar cambios'}
                 </button>
-                <button type="button" onClick={cancelarEdicion} className="rounded-xl border border-slate-300 px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-100">
-                  Cancelar
-                </button>
+                {!esBienvenida && (
+                  <button type="button" onClick={cancelarEdicion} className="rounded-xl border border-sky-200 bg-white/70 px-5 py-3 font-bold text-slate-700 transition hover:bg-white">
+                    Cancelar
+                  </button>
+                )}
               </div>
             </form>
           </section>
         ) : (
-          <div className="space-y-6">
-            <section className="relative rounded-3xl bg-white p-8 shadow-xl shadow-brand-950/10">
-              <button
-                type="button"
-                onClick={abrirEdicion}
-                className="absolute right-6 top-6 flex h-9 w-9 items-center justify-center rounded-full bg-brand-50 text-brand-800 transition hover:bg-brand-100"
-                aria-label="Editar perfil"
-              >
-                <IconoLapiz />
-              </button>
+          <>
+            {/* Tarjeta de presentación: portada con degradado y avatar superpuesto. */}
+            <section className="overflow-hidden rounded-[2rem] cristal">
+              <div className="relative h-36 overflow-hidden bg-linear-to-r from-blue-600 via-sky-500 to-brand-400 sm:h-44">
+                <div className="absolute -right-10 -top-16 h-56 w-56 rounded-full bg-white/15" aria-hidden="true" />
+                <div className="absolute right-40 top-16 h-32 w-32 rounded-full bg-white/10" aria-hidden="true" />
+                <div className="absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-accent-200/25" aria-hidden="true" />
+              </div>
 
-              <div className="flex flex-wrap items-center gap-6">
-                <Avatar fotoUrl={datosGuardados.fotoUrl} nombre={datosGuardados.nombre} apellido={datosGuardados.apellido} />
-                <div>
-                  <h2 className="text-2xl font-bold text-brand-900">{datosGuardados.nombre} {datosGuardados.apellido}</h2>
-                  <p className="mt-2 text-sm text-slate-600">Correo: {usuario.email}</p>
-                  <p className="mt-1 text-sm text-slate-600">Teléfono: {datosGuardados.telefono || 'No registrado'}</p>
+              <div className="px-6 pb-7 sm:px-10">
+                <div className="-mt-14 flex flex-wrap items-end justify-between gap-4">
+                  <div className="relative">
+                    <Avatar fotoUrl={datosGuardados.fotoUrl} nombre={datosGuardados.nombre} apellido={datosGuardados.apellido} />
+                  </div>
+                  <button type="button" onClick={abrirEdicion} className="flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-brand-800 shadow-md ring-1 ring-sky-100 transition hover:bg-brand-50">
+                    <IconoLapiz /> Editar perfil
+                  </button>
+                </div>
+
+                <p className="mt-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Mi perfil</p>
+                <h1 className="mt-1 text-3xl font-extrabold capitalize text-slate-900 sm:text-4xl">{nombreCompleto}</h1>
+
+                <dl className="mt-4 flex flex-wrap gap-x-8 gap-y-2 text-sm text-slate-600">
+                  <div className="flex items-center gap-2">
+                    <dt className="font-semibold text-slate-500">Correo</dt>
+                    <dd className="font-semibold text-slate-800">{usuario.email}</dd>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <dt className="font-semibold text-slate-500">Teléfono</dt>
+                    <dd className="font-semibold text-slate-800">
+                      {datosGuardados.telefono || (
+                        <button type="button" onClick={abrirEdicion} className="text-brand-700 underline">Agregar</button>
+                      )}
+                    </dd>
+                  </div>
+                </dl>
+
+                <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-[auto_auto_1fr]">
+                  <a href="#favoritos" className="rounded-2xl bg-white/70 px-6 py-4 text-center ring-1 ring-white/80 transition hover:bg-white">
+                    <span className="block text-3xl font-extrabold text-brand-700">{idsFavoritos.size}</span>
+                    <span className="text-sm font-semibold text-slate-600">{idsFavoritos.size === 1 ? 'Favorito' : 'Favoritos'}</span>
+                  </a>
+                  <div className="rounded-2xl bg-white/70 px-6 py-4 text-center ring-1 ring-white/80">
+                    <span className="block text-3xl font-extrabold text-brand-700">{categoriasPreferidas.length}</span>
+                    <span className="text-sm font-semibold text-slate-600">{categoriasPreferidas.length === 1 ? 'Interés' : 'Intereses'}</span>
+                  </div>
+                  <div className="col-span-2 rounded-2xl bg-white/70 px-6 py-4 ring-1 ring-white/80 sm:col-span-1">
+                    <h2 className="text-sm font-bold text-slate-900">Mis intereses de viaje</h2>
+                    {categoriasPreferidas.length === 0 ? (
+                      <p className="mt-2 text-sm text-slate-600">
+                        Aún no elegiste categorías.{' '}
+                        <button type="button" onClick={abrirEdicion} className="font-semibold text-brand-700 underline">Elegir ahora</button>
+                      </p>
+                    ) : (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {categoriasPreferidas.map((categoria) => (
+                          <InsigniaCategoria key={categoria.id} categoria={categoria.nombre} className="px-4 py-1.5 text-sm" />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </section>
+          </>
+        )}
 
-            <section className="rounded-3xl bg-white p-8 shadow-xl shadow-brand-950/10">
-              <h3 className="mb-4 text-lg font-bold text-brand-900">Preferencias turísticas</h3>
-              {categoriasPreferidas.length === 0 ? (
-                <p className="text-sm text-slate-600">
-                  Aún no elegiste categorías favoritas.{' '}
-                  <button type="button" onClick={abrirEdicion} className="font-semibold text-brand-700 underline">Elegir ahora</button>
-                </p>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {categoriasPreferidas.map((categoria) => (
-                    <span key={categoria.id} className="rounded-full bg-brand-100 px-4 py-1.5 text-sm font-semibold text-brand-800">
-                      {categoria.nombre}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </section>
-          </div>
+        {/* En la bienvenida (recién registrado) todavía no hay favoritos que mostrar. */}
+        {!esBienvenida && !modoEdicion && (
+          <section id="favoritos" className="mt-12 scroll-mt-24">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="mb-2 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Guardados</p>
+                <h2 className="text-3xl font-bold text-slate-900">Mis favoritos</h2>
+              </div>
+              <Link to="/destinos" className="rounded-xl bg-white/70 px-4 py-2 text-sm font-bold text-brand-800 ring-1 ring-white/80 transition hover:bg-white">
+                Explorar más destinos →
+              </Link>
+            </div>
+            <ListaFavoritos />
+          </section>
         )}
       </main>
     </div>

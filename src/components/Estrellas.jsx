@@ -40,7 +40,19 @@ export function SelectorEstrellas({ valor, onCambiar }) {
 }
 
 // Texto corto tipo "★ 4.3 (12 reseñas)".
-export function ResumenCalificacion({ promedio = 0, total = 0, className = '' }) {
+// "compacto" muestra solo "★ 4.3" (o "Nuevo" si aún no tiene reseñas).
+export function ResumenCalificacion({ promedio = 0, total = 0, compacto = false, className = '' }) {
+  if (compacto) {
+    return total ? (
+      <span className={`inline-flex items-center gap-1 text-sm font-semibold text-slate-800 ${className}`} aria-label={`${promedio.toFixed(1)} de 5, ${total} ${total === 1 ? 'reseña' : 'reseñas'}`}>
+        <span className="text-amber-400" aria-hidden="true">★</span>
+        {promedio.toFixed(1)}
+      </span>
+    ) : (
+      <span className={`rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium text-gray-500 ${className}`}>Nuevo</span>
+    )
+  }
+
   if (!total) return <span className={`text-sm text-slate-500 ${className}`}>Sin reseñas todavía</span>
   return (
     <span className={`inline-flex items-center gap-1 text-sm font-semibold text-slate-700 ${className}`}>

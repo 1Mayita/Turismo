@@ -1,4 +1,4 @@
-const CLASE_CAMPO = 'mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 disabled:cursor-not-allowed disabled:bg-slate-100'
+const CLASE_CAMPO = 'mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 disabled:cursor-not-allowed disabled:bg-slate-100'
 
 function AdminZonaCampos({ departamentos, municipios, regiones, formulario, onChange }) {
   const municipiosVisibles = municipios.filter((municipio) => municipio.id_departamento === formulario.id_departamento)
@@ -21,9 +21,9 @@ function AdminZonaCampos({ departamentos, municipios, regiones, formulario, onCh
         </select>
       </label>
       <label className="block text-sm font-semibold text-slate-700">
-        Región
-        <select required disabled={!formulario.id_municipio} name="id_region" value={formulario.id_region} onChange={onChange} className={CLASE_CAMPO}>
-          <option value="">Selecciona una región</option>
+        Región (opcional)
+        <select disabled={!formulario.id_municipio} name="id_region" value={formulario.id_region} onChange={onChange} className={CLASE_CAMPO}>
+          <option value="">{regionesVisibles.length > 0 ? 'Sin región' : 'Este municipio no tiene regiones'}</option>
           {regionesVisibles.map((region) => <option key={region.id} value={region.id}>{region.nombre}</option>)}
         </select>
       </label>

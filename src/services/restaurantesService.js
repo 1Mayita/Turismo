@@ -1,27 +1,18 @@
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore'
-import { db } from './firebase.js'
-import { conLimiteDeTiempo } from './tiempoLimite.js'
+import { crearServicio } from './coleccion.js'
+import { restaurantesDeEjemplo } from './datosDeEjemplo.js'
 
-const COLECCION = 'restaurantes'
+// Campos de un restaurante: nombre, descripcion, especialidad, horario,
+// platos_tipicos [], menu [{ nombre, precio }], telefono, facebook, instagram,
+// sitio_web, imagen_principal, imagenes [], latitud, longitud, direccion,
+// ubicacion, id_departamento, id_municipio, id_region.
+const restaurantes = crearServicio('restaurantes', restaurantesDeEjemplo)
 
-export async function getRestaurantes() {
-  const instantanea = await conLimiteDeTiempo(getDocs(collection(db, COLECCION)))
-  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
-}
+export const getRestaurantes = restaurantes.todos
+export const getRestaurantePorId = restaurantes.uno
+export const crearRestaurante = restaurantes.crear
+export const actualizarRestaurante = restaurantes.actualizar
+export const eliminarRestaurante = restaurantes.eliminar
 
-export async function getRestaurantePorId(id) {
-  const documento = await conLimiteDeTiempo(getDoc(doc(db, COLECCION, id)))
-  return documento.exists() ? { id: documento.id, ...documento.data() } : null
-}
-
-export async function crearRestaurante(datos) {
-  await conLimiteDeTiempo(addDoc(collection(db, COLECCION), datos))
-}
-
-export async function actualizarRestaurante(id, datos) {
-  await conLimiteDeTiempo(updateDoc(doc(db, COLECCION, id), datos))
-}
-
-export async function eliminarRestaurante(id) {
-  await conLimiteDeTiempo(deleteDoc(doc(db, COLECCION, id)))
+export function getRestaurantesPorDepartamento(idDepartamento) {
+  return restaurantes.donde({ id_departamento: idDepartamento })
 }

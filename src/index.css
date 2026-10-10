@@ -1,35 +1,127 @@
 @import "tailwindcss";
 
-/* Paleta de marca "Rutas de Bolivia": verdes de selva/altiplano + acento
-   terracota andino. Cambiar el look del sitio entero pasa por aquí. */
-@theme {
-  --color-brand-50: #eef8f1;
-  --color-brand-100: #d6eedd;
-  --color-brand-200: #aedbbc;
-  --color-brand-300: #7ac496;
-  --color-brand-400: #46a86f;
-  --color-brand-500: #268a54;
-  --color-brand-600: #1b7245;
-  --color-brand-700: #185c39;
-  --color-brand-800: #164a2f;
-  --color-brand-900: #103a25;
-  --color-brand-950: #0a2718;
+/* Sistema de diseño de "Rutas de Bolivia", estilo "cristal": fondo con
+   degradados suaves y paneles translúcidos con desenfoque.
+   Cambiar el look del sitio entero pasa por aquí: las páginas usan estos
+   nombres (brand, accent, cristal), no colores sueltos.
 
-  --color-accent-50: #fdf3ec;
-  --color-accent-400: #e0904f;
-  --color-accent-500: #d67f3c;
-  --color-accent-600: #c46b32;
-  --color-accent-700: #a95324;
+   - brand  = turquesa / azul celeste del lago Titicaca y el cielo del salar.
+              Marca, navegación, enlaces y botones.
+   - accent = café de la tierra y la madera. Se usa poco: rótulos y detalles.
+   - El verde esmeralda (naturaleza) y el ámbar (cultura) quedan solo en las
+     insignias de categoría. */
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --color-brand-50: #ecfeff;
+  --color-brand-100: #cffafe;
+  --color-brand-200: #a5f3fc;
+  --color-brand-300: #67e8f9;
+  --color-brand-400: #22d3ee;
+  --color-brand-500: #06b6d4;
+  --color-brand-600: #0891b2;
+  --color-brand-700: #0e7490;
+  --color-brand-800: #155e75;
+  --color-brand-900: #164e63;
+  --color-brand-950: #083344;
+
+  --color-accent-50: #fbf6f1;
+  --color-accent-100: #f3e6d8;
+  --color-accent-200: #e6ccb0;
+  --color-accent-300: #d6ab82;
+  --color-accent-400: #c48a58;
+  --color-accent-500: #a9703e;
+  --color-accent-600: #8b5a2b;
+  --color-accent-700: #6f4722;
+}
+
+/* Panel de cristal: blanco translúcido, desenfoque del fondo, borde luminoso
+   y sombra azulada suave. Es la base de tarjetas, formularios y tablas. */
+@utility cristal {
+  background-image: linear-gradient(135deg, rgb(255 255 255 / 0.78), rgb(255 255 255 / 0.5));
+  border: 1px solid rgb(255 255 255 / 0.8);
+  box-shadow:
+    0 12px 32px -14px rgb(14 116 144 / 0.28),
+    inset 0 1px 0 rgb(255 255 255 / 0.7);
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+}
+
+/* Botón de acción principal: degradado de azul a turquesa con un brillo suave. */
+@utility boton-principal {
+  background-image: linear-gradient(120deg, #2563eb, #0e7490);
+  color: #fff;
+  box-shadow: 0 8px 20px -8px rgb(37 99 235 / 0.55);
+  transition: filter 0.2s, transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 10px 24px -8px rgb(37 99 235 / 0.65);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  background: var(--color-brand-50);
+  color: var(--color-slate-800);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* Fondo: manchas de color difuminadas (turquesa, celeste, azul y un toque
+     café arena) sobre un degradado celeste. Queda fijo al hacer scroll. */
+  background-color: #e6f4fb;
+  background-image:
+    radial-gradient(60rem 40rem at 8% -5%, rgb(103 232 249 / 0.55), transparent 60%),
+    radial-gradient(50rem 38rem at 95% 8%, rgb(147 197 253 / 0.6), transparent 60%),
+    radial-gradient(46rem 34rem at 88% 92%, rgb(230 204 176 / 0.55), transparent 62%),
+    radial-gradient(52rem 40rem at 5% 95%, rgb(125 211 252 / 0.5), transparent 60%),
+    linear-gradient(160deg, #e0f7fb 0%, #e6f0fd 55%, #f3ede6 100%);
+  background-attachment: fixed;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: var(--color-brand-200);
   color: var(--color-brand-950);
-  font-family: Georgia, 'Times New Roman', serif;
 }
 
 #root {
   min-height: 100vh;
+}
+
+/* Foco de teclado visible en enlaces y botones de toda la app. Los campos de
+   formulario ya dibujan su propio anillo con las clases focus:ring. */
+:where(a, button, [role='button'], summary):focus-visible {
+  outline: 3px solid var(--color-brand-500);
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+/* Quien pidió "reducir movimiento" en su sistema no ve animaciones ni
+   desplazamientos suaves. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

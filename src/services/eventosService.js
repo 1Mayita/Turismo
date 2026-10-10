@@ -1,6 +1,17 @@
-import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, updateDoc } from 'firebase/firestore'
+import { collection, getDocs, orderBy, query } from 'firebase/firestore'
+import { crearServicio, SOLO_EJEMPLOS } from './coleccion.js'
+import { eventosDeEjemplo } from './datosDeEjemplo.js'
 import { db } from './firebase.js'
 import { conLimiteDeTiempo } from './tiempoLimite.js'
+
+// Campos de un evento: nombre, descripcion, fecha_inicio, fecha_fin, ubicacion,
+// id_departamento, imagen, cronograma [], recomendaciones.
+const eventos = crearServicio('eventos', eventosDeEjemplo)
+
+export const getEventoPorId = eventos.uno
+export const crearEvento = eventos.crear
+export const actualizarEvento = eventos.actualizar
+export const eliminarEvento = eventos.eliminar
 
 // fecha_inicio y fecha_fin se guardan como texto "AAAA-MM-DD", que se ordena
 // igual que las fechas y se compara directo con la fecha de hoy.
@@ -19,7 +30,9 @@ export function formatearFechaEvento(fechaISO, opciones = { day: 'numeric', mont
   return new Date(anio, mes - 1, dia).toLocaleDateString('es-BO', opciones)
 }
 
+// Ordenados por fecha de inicio, del más próximo al más lejano.
 export async function getEventos() {
+  if (SOLO_EJEMPLOS) return [...eventosDeEjemplo].sort((a, b) => a.fecha_inicio.localeCompare(b.fecha_inicio))
   const consulta = query(collection(db, 'eventos'), orderBy('fecha_inicio', 'asc'))
   const instantanea = await conLimiteDeTiempo(getDocs(consulta))
   return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
@@ -30,18 +43,6 @@ export async function getEventos() {
 // compuesto de fecha_fin + fecha_inicio.
 export async function getEventosProximos() {
   const hoy = fechaHoyISO()
-  const eventos = await getEventos()
-  return eventos.filter((evento) => (evento.fecha_fin || evento.fecha_inicio) >= hoy)
-}
-
-export async function crearEvento(datos) {
-  await conLimiteDeTiempo(addDoc(collection(db, 'eventos'), datos))
-}
-
-export async function actualizarEvento(id, datos) {
-  await conLimiteDeTiempo(updateDoc(doc(db, 'eventos', id), datos))
-}
-
-export async function eliminarEvento(id) {
-  await conLimiteDeTiempo(deleteDoc(doc(db, 'eventos', id)))
+  const lista = await getEventos()
+  return lista.filter((evento) => (evento.fecha_fin || evento.fecha_inicio) >= hoy)
 }

@@ -1,27 +1,18 @@
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore'
-import { db } from './firebase.js'
-import { conLimiteDeTiempo } from './tiempoLimite.js'
+import { crearServicio } from './coleccion.js'
+import { alojamientosDeEjemplo } from './datosDeEjemplo.js'
 
-const COLECCION = 'alojamientos'
+// Campos de un alojamiento: nombre, tipo, descripcion, precio_noche,
+// servicios [], check_in, check_out, telefono, facebook, instagram, sitio_web,
+// imagen_principal, imagenes [], latitud, longitud, direccion, ubicacion,
+// id_departamento, id_municipio, id_region.
+const alojamientos = crearServicio('alojamientos', alojamientosDeEjemplo)
 
-export async function getAlojamientos() {
-  const instantanea = await conLimiteDeTiempo(getDocs(collection(db, COLECCION)))
-  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
-}
+export const getAlojamientos = alojamientos.todos
+export const getAlojamientoPorId = alojamientos.uno
+export const crearAlojamiento = alojamientos.crear
+export const actualizarAlojamiento = alojamientos.actualizar
+export const eliminarAlojamiento = alojamientos.eliminar
 
-export async function getAlojamientoPorId(id) {
-  const documento = await conLimiteDeTiempo(getDoc(doc(db, COLECCION, id)))
-  return documento.exists() ? { id: documento.id, ...documento.data() } : null
-}
-
-export async function crearAlojamiento(datos) {
-  await conLimiteDeTiempo(addDoc(collection(db, COLECCION), datos))
-}
-
-export async function actualizarAlojamiento(id, datos) {
-  await conLimiteDeTiempo(updateDoc(doc(db, COLECCION, id), datos))
-}
-
-export async function eliminarAlojamiento(id) {
-  await conLimiteDeTiempo(deleteDoc(doc(db, COLECCION, id)))
+export function getAlojamientosPorDepartamento(idDepartamento) {
+  return alojamientos.donde({ id_departamento: idDepartamento })
 }

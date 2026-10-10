@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
+import ImagenSegura from '../../components/ImagenSegura.jsx'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
 import { sembrarCatalogoDeEjemplo } from '../../services/sembradoService.js'
 
@@ -24,12 +25,12 @@ function Departamentos() {
         } catch (errorSembrado) {
           console.error('Error al sembrar departamentos de ejemplo:', errorSembrado)
           setDepartamentos(departamentosDeEjemplo)
-          setError('Mostrando departamentos de ejemplo. Configura las reglas de escritura de Firestore para guardarlos.')
+          setError('Estás viendo departamentos de ejemplo: todavía no se cargaron en la base de datos.')
         }
       } catch (errorLectura) {
         console.error('Error al consultar departamentos en Firestore:', errorLectura)
         setDepartamentos(departamentosDeEjemplo)
-        setError('No se pudo consultar Firestore. Mostramos departamentos de ejemplo para la demo.')
+        setError('No pudimos conectar con el servidor. Estás viendo departamentos de ejemplo.')
       } finally {
         setCargando(false)
       }
@@ -38,40 +39,57 @@ function Departamentos() {
     cargarDepartamentos()
   }, [])
 
+  const ordenados = [...departamentos].sort((a, b) => (a.nombre || '').localeCompare(b.nombre || '', 'es'))
+
   return (
-    <div className="min-h-screen bg-brand-50">
+    <div className="min-h-screen">
       <Navbar />
       <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
         <div className="mb-10 max-w-2xl">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Regiones de Bolivia</p>
-          <h1 className="text-5xl font-bold tracking-tight text-brand-900">Explora por departamento</h1>
-          <p className="mt-4 text-lg text-slate-600">Cada región de Bolivia tiene experiencias únicas para descubrir.</p>
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Los nueve departamentos</p>
+          <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">Explora por departamento</h1>
+          <p className="mt-4 text-lg text-slate-600">Del altiplano a la Amazonía: elige un departamento y descubre sus municipios, destinos y sabores.</p>
         </div>
 
         {error && <p className="mb-8 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{error}</p>}
 
         {cargando ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 6 }).map((_, indice) => (
-              <div key={indice} className="h-32 animate-pulse rounded-2xl bg-white shadow-lg shadow-brand-950/5" />
+              <div key={indice} className="h-80 animate-pulse rounded-3xl bg-white/50" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {departamentos.map((departamento) => (
-              <Link
-                key={departamento.id || departamento.nombre}
-                to={departamento.id ? `/departamentos/${departamento.id}` : '#'}
-                className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-lg shadow-brand-950/10 ring-1 ring-brand-900/5 transition hover:-translate-y-1 hover:shadow-2xl"
-              >
-                <span className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-brand-500 to-accent-500" />
-                <h2 className="text-2xl font-bold text-brand-900">{departamento.nombre}</h2>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{departamento.descripcion}</p>
-                <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 transition group-hover:gap-2">
-                  Ver destinos →
-                </span>
-              </Link>
-            ))}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {ordenados.map((departamento) => {
+              const Contenedor = departamento.id ? Link : 'div'
+              const props = departamento.id ? { to: `/departamentos/${departamento.id}` } : {}
+              return (
+                <Contenedor
+                  key={departamento.id || departamento.nombre}
+                  {...props}
+                  className="group relative flex h-80 flex-col justify-end overflow-hidden rounded-3xl shadow-[0_20px_40px_-20px_rgba(8,51,68,0.6)] transition duration-300 hover:-translate-y-1"
+                >
+                  <ImagenSegura
+                    src={departamento.imagen_portada}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                  />
+                  {/* Velo oscuro abajo para que el texto se lea sobre cualquier foto. */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-brand-950/90 via-brand-950/35 to-transparent" />
+                  <div className="relative p-6 text-white">
+                    <h2 className="text-3xl font-extrabold">{departamento.nombre}</h2>
+                    {departamento.eslogan && <p className="mt-1 text-base font-semibold text-brand-200">“{departamento.eslogan}”</p>}
+                    {departamento.descripcion && <p className="mt-2 line-clamp-2 text-sm text-white/85">{departamento.descripcion}</p>}
+                    <span className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-brand-800 transition group-hover:gap-3">
+                      Ver más <span aria-hidden="true">→</span>
+                    </span>
+                  </div>
+                </Contenedor>
+              )
+            })}
           </div>
         )}
       </main>

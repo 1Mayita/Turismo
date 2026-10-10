@@ -55,21 +55,21 @@ function AdminUsuarios() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-50">
+    <div className="min-h-screen">
       <Navbar />
       <main className="mx-auto max-w-5xl px-5 py-12 lg:px-8">
-        <h1 className="mb-6 text-3xl font-bold text-brand-900">Administración de usuarios</h1>
+        <h1 className="mb-6 text-3xl font-bold text-slate-900">Administración de usuarios</h1>
         <AdminNav />
 
         {error && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
         {mensaje && <p className="mb-5 rounded-lg bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-800" role="status">{mensaje}</p>}
 
         {cargando ? (
-          <div className="h-48 animate-pulse rounded-2xl bg-white shadow-lg shadow-brand-950/5" />
+          <div className="h-48 animate-pulse rounded-2xl bg-white/50 cristal" />
         ) : (
-          <div className="overflow-x-auto rounded-2xl bg-white shadow-lg shadow-brand-950/5">
+          <div className="overflow-x-auto rounded-2xl cristal">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500">
+              <thead className="bg-white/40 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <tr>
                   <th className="px-5 py-3">Nombre</th>
                   <th className="px-5 py-3">Correo</th>
@@ -80,8 +80,8 @@ function AdminUsuarios() {
               </thead>
               <tbody>
                 {usuarios.map((usuario) => (
-                  <tr key={usuario.id} className="border-t border-slate-100">
-                    <td className="px-5 py-3 font-semibold text-brand-900">{usuario.nombre} {usuario.apellido}</td>
+                  <tr key={usuario.id} className="border-t border-neutral-100">
+                    <td className="px-5 py-3 font-semibold text-slate-900">{usuario.nombre} {usuario.apellido}</td>
                     <td className="px-5 py-3 text-slate-600">{usuario.email}</td>
                     <td className="px-5 py-3 text-slate-600">{formatearFecha(usuario.fechaRegistro)}</td>
                     <td className="px-5 py-3">

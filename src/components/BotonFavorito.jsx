@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/useAuth.js'
 import { useFavoritos } from '../context/useFavoritos.js'
 
@@ -16,17 +17,23 @@ function IconoCorazon({ relleno }) {
   )
 }
 
-// Corazón para marcar/desmarcar un elemento como favorito. Solo se muestra con sesión iniciada.
+// Corazón para marcar/desmarcar un elemento como favorito. A quien no inició
+// sesión lo lleva al login y, al entrar, lo devuelve a la página donde estaba.
 function BotonFavorito({ idDestino, idElemento = idDestino, tipo = 'destino', className = '' }) {
   const { usuario } = useAuth()
   const { esFavorito, alternarFavorito } = useFavoritos()
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
+  const navegar = useNavigate()
+  const ubicacion = useLocation()
 
-  if (!usuario) return null
-  const activo = esFavorito(idElemento, tipo)
+  const activo = Boolean(usuario) && esFavorito(idElemento, tipo)
 
   async function alternar() {
+    if (!usuario) {
+      navegar('/login', { state: { desde: ubicacion.pathname + ubicacion.search, aviso: 'Inicia sesión para guardar tus favoritos.' } })
+      return
+    }
     setError('')
     setGuardando(true)
     try {
@@ -48,8 +55,8 @@ function BotonFavorito({ idDestino, idElemento = idDestino, tipo = 'destino', cl
         aria-pressed={activo}
         aria-label={`${activo ? 'Quitar de' : 'Agregar a'} favoritos`}
         title={`${activo ? 'Quitar de' : 'Agregar a'} favoritos`}
-        className={`flex h-10 w-10 items-center justify-center rounded-full bg-white/95 shadow-md transition hover:scale-110 disabled:opacity-60 ${
-          activo ? 'text-red-600' : 'text-slate-500 hover:text-red-600'
+        className={`flex h-10 w-10 items-center justify-center rounded-full bg-white/95 shadow-md backdrop-blur transition hover:scale-110 active:scale-95 disabled:opacity-60 ${
+          activo ? 'text-rose-500' : 'text-slate-500 hover:text-rose-500'
         }`}
       >
         <IconoCorazon relleno={activo} />

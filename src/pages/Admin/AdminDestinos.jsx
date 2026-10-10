@@ -1,11 +1,22 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
+import ImagenSegura from '../../components/ImagenSegura.jsx'
 import AdminNav from '../../components/AdminNav.jsx'
 import { actualizarDestino, crearDestino, eliminarDestino, getDestinos } from '../../services/destinosService.js'
 import { categoriasDeEjemplo, getCategorias } from '../../services/categoriasService.js'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
 import { getMunicipios, municipiosDeEjemplo } from '../../services/municipiosService.js'
 import { getRegiones, regionesDeEjemplo } from '../../services/regionesService.js'
+import { actualizarDatosDeEjemplo, indexarAdministradoresPorCorreo } from '../../services/sembradoService.js'
+
+// El mapa para marcar la ubicación (Leaflet) se descarga solo al abrir el formulario.
+const SelectorUbicacion = lazy(() => import('../../components/mapa/SelectorUbicacion.jsx'))
+
+// Convierte el texto del formulario (una URL por línea) en una lista limpia.
+function listaDeUrls(texto) {
+  return [...new Set(texto.split(/\r?\n/).map((url) => url.trim()).filter(Boolean))]
+}
 
 const FORMULARIO_VACIO = {
   nombre: '',
@@ -20,6 +31,9 @@ const FORMULARIO_VACIO = {
   horario: '',
   precio_ingreso: '',
   imagen_principal: '',
+  imagenes: '',
+  recomendaciones: '',
+  destacado: false,
 }
 
 function AdminDestinos() {
@@ -35,6 +49,7 @@ function AdminDestinos() {
   const [destinoEditando, setDestinoEditando] = useState(null)
   const [formulario, setFormulario] = useState(FORMULARIO_VACIO)
   const [guardando, setGuardando] = useState(false)
+  const [actualizandoEjemplos, setActualizandoEjemplos] = useState(false)
   const [version, setVersion] = useState(0)
 
   useEffect(() => {
@@ -92,6 +107,9 @@ function AdminDestinos() {
       horario: destino.horario || '',
       precio_ingreso: destino.precio_ingreso ?? '',
       imagen_principal: destino.imagen_principal || '',
+      imagenes: (destino.imagenes || []).join('\n'),
+      recomendaciones: destino.recomendaciones || '',
+      destacado: Boolean(destino.destacado),
     })
     setFormularioAbierto(true)
     setMensaje('')
@@ -99,7 +117,8 @@ function AdminDestinos() {
   }
 
   function actualizarCampo(evento) {
-    const { name, value } = evento.target
+    const { name, type, checked } = evento.target
+    const value = type === 'checkbox' ? checked : evento.target.value
     // Al cambiar departamento o municipio se limpian los niveles de abajo.
     if (name === 'id_departamento') {
       setFormulario({ ...formulario, id_departamento: value, id_municipio: '', id_region: '' })
@@ -125,8 +144,19 @@ function AdminDestinos() {
     const departamento = departamentos.find((item) => item.id === formulario.id_departamento)
     const municipio = municipios.find((item) => item.id === formulario.id_municipio)
 
+    // La imagen principal siempre va primera en la galería; si no se indicó
+    // una, se usa la primera foto de la galería.
+    const imagenPrincipal = formulario.imagen_principal.trim() || listaDeUrls(formulario.imagenes)[0] || ''
+    const imagenes = listaDeUrls([imagenPrincipal, formulario.imagenes].join('\n'))
+    const cambiaronLasFotos = destinoEditando && imagenes.join('|') !== (destinoEditando.imagenes || []).join('|')
+
     const datos = {
       ...formulario,
+      nombre: formulario.nombre.trim(),
+      imagen_principal: imagenPrincipal,
+      imagenes,
+      // El crédito pertenecía a las fotos anteriores.
+      ...(cambiaronLasFotos ? { credito_imagenes: '' } : {}),
       // Texto legible para tarjetas y detalle; los filtros usan los id_*.
       ubicacion: [municipio?.nombre, departamento?.nombre].filter(Boolean).join(', '),
       precio_ingreso: Number(formulario.precio_ingreso) || 0,
@@ -140,7 +170,7 @@ function AdminDestinos() {
         await actualizarDestino(destinoEditando.id, datos)
         setMensaje('Destino actualizado correctamente.')
       } else {
-        await crearDestino({ ...datos, imagenes: datos.imagen_principal ? [datos.imagen_principal] : [] })
+        await crearDestino(datos)
         setMensaje('Destino creado correctamente.')
       }
       setFormularioAbierto(false)
@@ -154,7 +184,7 @@ function AdminDestinos() {
   }
 
   async function eliminar(destino) {
-    if (!window.confirm(`¿Eliminar el destino "${destino.nombre}"? Esta acción no se puede deshacer.`)) return
+    if (!window.confirm(`¿Eliminar el destino "${destino.nombre}"? Sus actividades, reseñas y favoritos quedarán sin destino. Esta acción no se puede deshacer.`)) return
     setError('')
     try {
       await eliminarDestino(destino.id)
@@ -166,39 +196,75 @@ function AdminDestinos() {
     }
   }
 
+  async function cargarDatosDeEjemplo() {
+    if (!window.confirm('Se cargarán los datos de ejemplo: departamentos (eslogan y portada), destinos, actividades, eventos, platos típicos, restaurantes y alojamientos, con sus fotos. Los registros de ejemplo se actualizan; lo que tú creaste no se toca. ¿Continuar?')) return
+    setError('')
+    setMensaje('')
+    try {
+      setActualizandoEjemplos(true)
+      const { cargadas, fallidas } = await actualizarDatosDeEjemplo()
+      // Con las reglas de seguridad ya publicadas este paso se rechaza (y ya
+      // no hace falta): no debe impedir que se carguen los datos.
+      await indexarAdministradoresPorCorreo().catch((errorIndice) => console.warn('No se indexaron los administradores:', errorIndice.code || errorIndice.message))
+      const resumen = Object.entries(cargadas).map(([coleccion, cantidad]) => `${cantidad} ${coleccion}`).join(', ')
+      if (resumen) setMensaje(`Datos de ejemplo cargados: ${resumen}.`)
+      if (fallidas.length > 0) {
+        setError(`No se pudieron cargar: ${fallidas.join(', ')}. Revisa que las reglas de Firestore publicadas incluyan esas colecciones y que tu cuenta sea administradora.`)
+      }
+      refrescar()
+    } catch (errorEscritura) {
+      console.error('Error al cargar los datos de ejemplo:', errorEscritura)
+      setError('No se pudieron cargar los datos de ejemplo. Revisa tu conexión y que tu cuenta tenga permiso de escritura.')
+    } finally {
+      setActualizandoEjemplos(false)
+    }
+  }
+
+  const vistaPreviaFotos = listaDeUrls([formulario.imagen_principal, formulario.imagenes].join('\n'))
+
   return (
-    <div className="min-h-screen bg-brand-50">
+    <div className="min-h-screen">
       <Navbar />
       <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
-        <h1 className="mb-6 text-3xl font-bold text-brand-900">Administración de destinos</h1>
+        <h1 className="mb-6 text-3xl font-bold text-slate-900">Administración de destinos</h1>
         <AdminNav />
 
         {error && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
         {mensaje && <p className="mb-5 rounded-lg bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-800" role="status">{mensaje}</p>}
 
-        <button
-          type="button"
-          onClick={abrirNuevo}
-          className="mb-6 rounded-xl bg-accent-600 px-5 py-3 font-bold text-white transition hover:bg-accent-700"
-        >
-          Nuevo destino
-        </button>
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={abrirNuevo}
+            className="rounded-xl boton-principal px-5 py-3 font-bold text-white transition"
+          >
+            Nuevo destino
+          </button>
+          <button
+            type="button"
+            onClick={cargarDatosDeEjemplo}
+            disabled={actualizandoEjemplos}
+            className="rounded-xl border border-neutral-300 bg-white px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {actualizandoEjemplos ? 'Cargando datos...' : 'Cargar datos de ejemplo'}
+          </button>
+        </div>
 
         {formularioAbierto && (
-          <form onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl bg-white p-6 shadow-lg shadow-brand-950/5">
-            <h2 className="text-xl font-bold text-brand-900">{destinoEditando ? 'Editar destino' : 'Nuevo destino'}</h2>
+          <form onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
+            <h2 className="text-xl font-bold text-slate-900">{destinoEditando ? 'Editar destino' : 'Nuevo destino'}</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block text-sm font-semibold text-slate-700">
                 Nombre
-                <input name="nombre" value={formulario.nombre} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20" />
+                <input name="nombre" value={formulario.nombre} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
               </label>
               <label className="block text-sm font-semibold text-slate-700">
                 Precio de entrada (Bs)
-                <input name="precio_ingreso" type="number" min="0" value={formulario.precio_ingreso} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20" />
+                <input name="precio_ingreso" type="number" min="0" value={formulario.precio_ingreso} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
               </label>
               <label className="block text-sm font-semibold text-slate-700">
                 Categoría
-                <select name="categoria" value={formulario.categoria} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20">
+                <select name="categoria" value={formulario.categoria} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30">
                   <option value="">Selecciona una categoría</option>
                   {categorias.map((categoria) => (
                     <option key={categoria.id || categoria.nombre} value={categoria.nombre}>{categoria.nombre}</option>
@@ -207,7 +273,7 @@ function AdminDestinos() {
               </label>
               <label className="block text-sm font-semibold text-slate-700">
                 Departamento
-                <select name="id_departamento" value={formulario.id_departamento} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20">
+                <select name="id_departamento" value={formulario.id_departamento} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30">
                   <option value="">Selecciona un departamento</option>
                   {departamentos.map((departamento) => (
                     <option key={departamento.id} value={departamento.id}>{departamento.nombre}</option>
@@ -216,7 +282,7 @@ function AdminDestinos() {
               </label>
               <label className="block text-sm font-semibold text-slate-700">
                 Municipio
-                <select name="id_municipio" value={formulario.id_municipio} onChange={actualizarCampo} disabled={!formulario.id_departamento} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 disabled:cursor-not-allowed disabled:bg-slate-100">
+                <select name="id_municipio" value={formulario.id_municipio} onChange={actualizarCampo} disabled={!formulario.id_departamento} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 disabled:cursor-not-allowed disabled:bg-slate-100">
                   <option value="">Selecciona un municipio</option>
                   {municipiosDelDepartamento.map((municipio) => (
                     <option key={municipio.id} value={municipio.id}>{municipio.nombre}</option>
@@ -225,7 +291,7 @@ function AdminDestinos() {
               </label>
               <label className="block text-sm font-semibold text-slate-700">
                 Región (opcional)
-                <select name="id_region" value={formulario.id_region} onChange={actualizarCampo} disabled={!formulario.id_municipio} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20 disabled:cursor-not-allowed disabled:bg-slate-100">
+                <select name="id_region" value={formulario.id_region} onChange={actualizarCampo} disabled={!formulario.id_municipio} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 disabled:cursor-not-allowed disabled:bg-slate-100">
                   <option value="">Sin región</option>
                   {regionesDelMunicipio.map((region) => (
                     <option key={region.id} value={region.id}>{region.nombre}</option>
@@ -234,36 +300,67 @@ function AdminDestinos() {
               </label>
               <label className="block text-sm font-semibold text-slate-700">
                 Horario
-                <input name="horario" value={formulario.horario} onChange={actualizarCampo} placeholder="Todos los días, 08:00 - 18:00" className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20" />
+                <input name="horario" value={formulario.horario} onChange={actualizarCampo} placeholder="Todos los días, 08:00 - 18:00" className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
               </label>
               <label className="block text-sm font-semibold text-slate-700">
                 URL de imagen principal
-                <input name="imagen_principal" value={formulario.imagen_principal} onChange={actualizarCampo} placeholder="https://..." className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20" />
+                <input name="imagen_principal" value={formulario.imagen_principal} onChange={actualizarCampo} placeholder="https://..." className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
               </label>
               <label className="block text-sm font-semibold text-slate-700">
                 Dirección
-                <input name="direccion" value={formulario.direccion} onChange={actualizarCampo} placeholder="Referencia o dirección" className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20" />
+                <input name="direccion" value={formulario.direccion} onChange={actualizarCampo} placeholder="Referencia o dirección" className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
               </label>
               <div className="grid grid-cols-2 gap-4">
                 <label className="block text-sm font-semibold text-slate-700">
                   Latitud
-                  <input name="latitud" type="number" step="any" value={formulario.latitud} onChange={actualizarCampo} placeholder="-17.4013" className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20" />
+                  <input name="latitud" type="number" step="any" value={formulario.latitud} onChange={actualizarCampo} placeholder="-17.4013" className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
                 </label>
                 <label className="block text-sm font-semibold text-slate-700">
                   Longitud
-                  <input name="longitud" type="number" step="any" value={formulario.longitud} onChange={actualizarCampo} placeholder="-66.1489" className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20" />
+                  <input name="longitud" type="number" step="any" value={formulario.longitud} onChange={actualizarCampo} placeholder="-66.1489" className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
                 </label>
               </div>
             </div>
+            <Suspense fallback={<div className="h-80 animate-pulse rounded-2xl bg-white/50" />}>
+              <SelectorUbicacion
+                latitud={formulario.latitud}
+                longitud={formulario.longitud}
+                clave={formulario.categoria}
+                onCambiar={(ubicacion) => setFormulario((actual) => ({ ...actual, ...ubicacion }))}
+              />
+            </Suspense>
             <label className="block text-sm font-semibold text-slate-700">
               Descripción
-              <textarea name="descripcion" value={formulario.descripcion} onChange={actualizarCampo} rows={3} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20" />
+              <textarea name="descripcion" value={formulario.descripcion} onChange={actualizarCampo} rows={3} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
+            </label>
+            <label className="block text-sm font-semibold text-slate-700">
+              Recomendaciones para el visitante
+              <textarea name="recomendaciones" value={formulario.recomendaciones} onChange={actualizarCampo} rows={2} placeholder="Qué llevar, mejor época, precauciones..." className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
+            </label>
+            <label className="block text-sm font-semibold text-slate-700">
+              Fotos de la galería (una URL por línea)
+              <textarea name="imagenes" value={formulario.imagenes} onChange={actualizarCampo} rows={3} placeholder={'https://.../foto-1.jpg\nhttps://.../foto-2.jpg'} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
+              <span className="mt-1 block text-xs font-normal text-slate-500">La imagen principal se agrega sola como primera foto. Usa enlaces directos a la imagen (.jpg, .png, .webp).</span>
+            </label>
+            {vistaPreviaFotos.length > 0 && (
+              <div>
+                <p className="mb-2 text-sm font-semibold text-slate-700">Vista previa ({vistaPreviaFotos.length})</p>
+                <div className="flex flex-wrap gap-3">
+                  {vistaPreviaFotos.map((url, indice) => (
+                    <ImagenSegura key={url} src={url} alt={`No se pudo cargar la foto ${indice + 1}`} className="h-20 w-28 rounded-lg object-cover text-xs" />
+                  ))}
+                </div>
+              </div>
+            )}
+            <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <input name="destacado" type="checkbox" checked={formulario.destacado} onChange={actualizarCampo} className="h-4 w-4 rounded border-neutral-300" />
+              Mostrar como destacado en la página de inicio
             </label>
             <div className="flex gap-3">
-              <button disabled={guardando} className="rounded-xl bg-brand-800 px-5 py-2.5 font-bold text-white transition hover:bg-brand-900 disabled:cursor-not-allowed disabled:opacity-60">
+              <button disabled={guardando} className="rounded-xl bg-brand-700 px-5 py-2.5 font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60">
                 {guardando ? 'Guardando...' : 'Guardar'}
               </button>
-              <button type="button" onClick={() => setFormularioAbierto(false)} className="rounded-xl border border-slate-300 px-5 py-2.5 font-bold text-slate-700 transition hover:bg-slate-100">
+              <button type="button" onClick={() => setFormularioAbierto(false)} className="rounded-xl border border-neutral-300 px-5 py-2.5 font-bold text-slate-700 transition hover:bg-slate-100">
                 Cancelar
               </button>
             </div>
@@ -271,11 +368,11 @@ function AdminDestinos() {
         )}
 
         {cargando ? (
-          <div className="h-64 animate-pulse rounded-2xl bg-white shadow-lg shadow-brand-950/5" />
+          <div className="h-64 animate-pulse rounded-2xl bg-white/50 cristal" />
         ) : (
-          <div className="overflow-x-auto rounded-2xl bg-white shadow-lg shadow-brand-950/5">
+          <div className="overflow-x-auto rounded-2xl cristal">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500">
+              <thead className="bg-white/40 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <tr>
                   <th className="px-5 py-3">Nombre</th>
                   <th className="px-5 py-3">Categoría</th>
@@ -285,11 +382,12 @@ function AdminDestinos() {
               </thead>
               <tbody>
                 {destinos.map((destino) => (
-                  <tr key={destino.id} className="border-t border-slate-100">
-                    <td className="px-5 py-3 font-semibold text-brand-900">{destino.nombre}</td>
+                  <tr key={destino.id} className="border-t border-neutral-100">
+                    <td className="px-5 py-3 font-semibold text-slate-900">{destino.nombre}</td>
                     <td className="px-5 py-3 text-slate-600">{destino.categoria}</td>
                     <td className="px-5 py-3 text-slate-600">{destino.ubicacion}</td>
-                    <td className="px-5 py-3 text-right">
+                    <td className="whitespace-nowrap px-5 py-3 text-right">
+                      <Link to={`/destinos/${destino.id}`} className="mr-3 font-semibold text-slate-700 hover:underline">Ver publicado</Link>
                       <button type="button" onClick={() => abrirEditar(destino)} className="mr-3 font-semibold text-brand-700 hover:underline">Editar</button>
                       <button type="button" onClick={() => eliminar(destino)} className="font-semibold text-red-700 hover:underline">Eliminar</button>
                     </td>

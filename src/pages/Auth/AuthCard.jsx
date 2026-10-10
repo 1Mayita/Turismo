@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth'
-import { useNavigate } from 'react-router-dom'
+import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/useAuth.js'
 import { auth } from '../../services/firebase.js'
+import { FOTOS } from '../../services/fotosDeEjemplo.js'
 import { crearUsuario, getUsuarioPorId } from '../../services/usuariosService.js'
 
 function mensajeDeErrorLogin(codigo) {
@@ -53,8 +55,43 @@ function esperarConLimite(promesa, milisegundos) {
   ])
 }
 
+// Campo de contraseña con botón para verla mientras se escribe.
+function CampoContrasena({ etiqueta, valor, onCambiar, autoComplete, ayuda, claseInput }) {
+  const [visible, setVisible] = useState(false)
+  return (
+    <label className="block text-sm font-semibold text-slate-700">
+      {etiqueta}
+      <span className="relative mt-2 block">
+        <input
+          type={visible ? 'text' : 'password'}
+          value={valor}
+          onChange={(evento) => onCambiar(evento.target.value)}
+          autoComplete={autoComplete}
+          className={`${claseInput} mt-0 pr-20`}
+        />
+        <button
+          type="button"
+          onClick={() => setVisible(!visible)}
+          aria-pressed={visible}
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1 text-xs font-bold text-brand-700 hover:bg-brand-50"
+        >
+          {visible ? 'Ocultar' : 'Mostrar'}
+        </button>
+      </span>
+      {ayuda && <span className="mt-1 block text-xs font-normal text-slate-500">{ayuda}</span>}
+    </label>
+  )
+}
+
+const LARGO_MINIMO_CONTRASENA = 6
+
 function AuthCard({ modoInicial = 'login' }) {
   const navegar = useNavigate()
+  const { usuario } = useAuth()
+  const ubicacion = useLocation()
+  // Página desde la que se llegó al login (ej. al tocar un corazón) y aviso a mostrar.
+  const [origen] = useState(() => ({ ruta: ubicacion.state?.desde || '/destinos', aviso: ubicacion.state?.aviso || '' }))
+  const [loginMensaje, setLoginMensaje] = useState('')
   const [mostrarRegistro, setMostrarRegistro] = useState(modoInicial === 'registro')
 
   const [loginForm, setLoginForm] = useState({ email: '', contrasena: '' })
@@ -68,13 +105,34 @@ function AuthCard({ modoInicial = 'login' }) {
   function voltear(hacia) {
     setMostrarRegistro(hacia === 'registro')
     setLoginError('')
+    setLoginMensaje('')
     setRegistroError('')
-    window.history.replaceState(null, '', hacia === 'registro' ? '/registro' : '/login')
+    // Solo cambia la URL visible; se conserva el estado que guarda React Router.
+    window.history.replaceState(window.history.state, '', hacia === 'registro' ? '/registro' : '/login')
+  }
+
+  async function recuperarContrasena() {
+    setLoginError('')
+    setLoginMensaje('')
+    if (!loginForm.email.trim()) {
+      setLoginError('Escribe tu correo electrónico arriba y vuelve a pulsar "¿Olvidaste tu contraseña?".')
+      return
+    }
+    try {
+      await sendPasswordResetEmail(auth, loginForm.email.trim())
+      setLoginMensaje('Si ese correo tiene una cuenta, te enviamos un enlace para crear una contraseña nueva. Revisa también tu carpeta de spam.')
+    } catch (errorFirebase) {
+      console.error('Error al enviar el correo de recuperación:', errorFirebase.code, errorFirebase.message)
+      setLoginError(errorFirebase.code === 'auth/invalid-email'
+        ? 'El correo electrónico no tiene un formato válido.'
+        : 'No pudimos enviar el correo de recuperación. Inténtalo de nuevo en unos minutos.')
+    }
   }
 
   async function iniciarSesion(evento) {
     evento.preventDefault()
     setLoginError('')
+    setLoginMensaje('')
     if (!loginForm.email || !loginForm.contrasena) {
       setLoginError('Completa tu correo electrónico y contraseña.')
       return
@@ -91,7 +149,7 @@ function AuthCard({ modoInicial = 'login' }) {
         return
       }
 
-      navegar('/destinos')
+      navegar(origen.ruta, { replace: true })
     } catch (errorFirebase) {
       console.error('Error al iniciar sesión:', errorFirebase.code, errorFirebase.message)
       setLoginError(mensajeDeErrorLogin(errorFirebase.code))
@@ -111,6 +169,10 @@ function AuthCard({ modoInicial = 'login' }) {
       setRegistroError('Ingresa un correo electrónico válido.')
       return
     }
+    if (registroForm.contrasena.length < LARGO_MINIMO_CONTRASENA) {
+      setRegistroError(`La contraseña debe tener al menos ${LARGO_MINIMO_CONTRASENA} caracteres.`)
+      return
+    }
 
     try {
       setRegistroEnviando(true)
@@ -126,7 +188,8 @@ function AuthCard({ modoInicial = 'login' }) {
         email: registroForm.email,
       }).catch((error) => console.error('No se pudo crear el documento de usuario:', error))
 
-      navegar('/destinos')
+      // Primera parada: elegir preferencias. Desde ahí puede seguir a donde iba.
+      navegar('/perfil?bienvenida=1', { replace: true, state: { desde: origen.ruta } })
     } catch (errorFirebase) {
       console.error('Error al registrar usuario:', errorFirebase.code, errorFirebase.message)
       setRegistroError(mensajeDeErrorRegistro(errorFirebase.code))
@@ -135,51 +198,62 @@ function AuthCard({ modoInicial = 'login' }) {
     }
   }
 
+  // Quien ya tiene sesión no necesita este formulario. Mientras se envía no se
+  // redirige aquí: lo hace cada función al terminar sus comprobaciones.
+  if (usuario && !loginEnviando && !registroEnviando) {
+    return <Navigate to={origen.ruta} replace />
+  }
+
   return (
     <main
       className="relative flex min-h-screen items-center justify-center overflow-hidden px-5 py-10"
       style={{
         backgroundImage:
-          'linear-gradient(160deg, rgba(16,58,37,0.85), rgba(10,39,24,0.92)), url(https://images.unsplash.com/photo-1531065208531-4036c0dba3ca?auto=format&fit=crop&w=1920&q=80)',
+          `linear-gradient(160deg, rgba(8,51,68,0.55), rgba(30,58,138,0.75)), url(${FOTOS['portada-acceso'].imagen_principal})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
     >
-      <a href="/" className="absolute left-6 top-6 text-xl font-bold tracking-tight text-white sm:left-10 sm:top-10">
-        Rutas de Bolivia
-      </a>
+      <Link to="/" className="absolute left-6 top-6 text-xl font-bold tracking-tight text-white sm:left-10 sm:top-10">
+        ← Rutas de Bolivia
+      </Link>
 
       <div className="w-full max-w-md [perspective:1600px]">
         <div
-          className="relative h-[640px] w-full transition-transform duration-700 [transform-style:preserve-3d]"
+          className="relative h-[680px] w-full transition-transform duration-700 [transform-style:preserve-3d]"
           style={{ transform: mostrarRegistro ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
         >
-          {/* Cara frontal: iniciar sesión */}
-          <section className="absolute inset-0 flex flex-col justify-center overflow-y-auto rounded-3xl bg-white p-8 shadow-2xl [backface-visibility:hidden] sm:p-10">
+          {/* Cara frontal: iniciar sesión. "inert" saca del foco de teclado y de
+              los lectores de pantalla a la cara que está oculta. */}
+          <section inert={mostrarRegistro} className="absolute inset-0 flex flex-col justify-center overflow-y-auto rounded-3xl bg-white p-8 shadow-2xl [backface-visibility:hidden] sm:p-10">
             <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Explora Bolivia</p>
-            <h1 className="mb-2 text-4xl font-bold text-brand-900">Bienvenido de vuelta</h1>
+            <h1 className="mb-2 text-4xl font-bold text-slate-900">Bienvenido de vuelta</h1>
             <p className="mb-8 text-slate-600">Ingresa para descubrir tu próximo destino.</p>
+            {origen.aviso && !loginError && !loginMensaje && <p className="mb-5 rounded-lg bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{origen.aviso}</p>}
             {loginError && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{loginError}</p>}
+            {loginMensaje && <p className="mb-5 rounded-lg bg-brand-100 px-4 py-3 text-sm font-semibold text-brand-800" role="status">{loginMensaje}</p>}
             <form onSubmit={iniciarSesion} className="space-y-5">
               <label className="block text-sm font-semibold text-slate-700">
                 Correo electrónico
                 <input
                   type="email"
+                  autoComplete="email"
                   value={loginForm.email}
                   onChange={(evento) => setLoginForm({ ...loginForm, email: evento.target.value })}
-                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
+                  className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-3 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
                 />
               </label>
-              <label className="block text-sm font-semibold text-slate-700">
-                Contraseña
-                <input
-                  type="password"
-                  value={loginForm.contrasena}
-                  onChange={(evento) => setLoginForm({ ...loginForm, contrasena: evento.target.value })}
-                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
-                />
-              </label>
-              <button disabled={loginEnviando} className="w-full rounded-xl bg-accent-600 px-4 py-3 font-bold text-white transition hover:bg-accent-700 disabled:cursor-not-allowed disabled:opacity-60">
+              <CampoContrasena
+                etiqueta="Contraseña"
+                valor={loginForm.contrasena}
+                onCambiar={(contrasena) => setLoginForm({ ...loginForm, contrasena })}
+                autoComplete="current-password"
+                claseInput="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-3 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+              />
+              <button type="button" onClick={recuperarContrasena} className="-mt-2 block text-sm font-semibold text-brand-700 underline">
+                ¿Olvidaste tu contraseña?
+              </button>
+              <button disabled={loginEnviando} className="w-full rounded-xl boton-principal px-4 py-3 font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-60">
                 {loginEnviando ? 'Ingresando...' : 'Iniciar sesión'}
               </button>
             </form>
@@ -193,11 +267,12 @@ function AuthCard({ modoInicial = 'login' }) {
 
           {/* Cara trasera: crear cuenta */}
           <section
+            inert={!mostrarRegistro}
             className="absolute inset-0 flex flex-col justify-center overflow-y-auto rounded-3xl bg-white p-8 shadow-2xl [backface-visibility:hidden] sm:p-10"
             style={{ transform: 'rotateY(180deg)' }}
           >
             <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Rutas de Bolivia</p>
-            <h1 className="mb-2 text-4xl font-bold text-brand-900">Crea tu cuenta</h1>
+            <h1 className="mb-2 text-4xl font-bold text-slate-900">Crea tu cuenta</h1>
             <p className="mb-6 text-slate-600">Guarda la inspiración para tu próxima aventura.</p>
             {registroError && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{registroError}</p>}
             <form onSubmit={registrarUsuario} className="space-y-4">
@@ -205,17 +280,19 @@ function AuthCard({ modoInicial = 'login' }) {
                 <label className="block text-sm font-semibold text-slate-700">
                   Nombre
                   <input
+                    autoComplete="given-name"
                     value={registroForm.nombre}
                     onChange={(evento) => setRegistroForm({ ...registroForm, nombre: evento.target.value })}
-                    className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
+                    className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
                   />
                 </label>
                 <label className="block text-sm font-semibold text-slate-700">
                   Apellido
                   <input
+                    autoComplete="family-name"
                     value={registroForm.apellido}
                     onChange={(evento) => setRegistroForm({ ...registroForm, apellido: evento.target.value })}
-                    className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
+                    className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
                   />
                 </label>
               </div>
@@ -223,21 +300,21 @@ function AuthCard({ modoInicial = 'login' }) {
                 Correo electrónico
                 <input
                   type="email"
+                  autoComplete="email"
                   value={registroForm.email}
                   onChange={(evento) => setRegistroForm({ ...registroForm, email: evento.target.value })}
-                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
+                  className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
                 />
               </label>
-              <label className="block text-sm font-semibold text-slate-700">
-                Contraseña
-                <input
-                  type="password"
-                  value={registroForm.contrasena}
-                  onChange={(evento) => setRegistroForm({ ...registroForm, contrasena: evento.target.value })}
-                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20"
-                />
-              </label>
-              <button disabled={registroEnviando} className="w-full rounded-xl bg-accent-600 px-4 py-3 font-bold text-white transition hover:bg-accent-700 disabled:cursor-not-allowed disabled:opacity-60">
+              <CampoContrasena
+                etiqueta="Contraseña"
+                valor={registroForm.contrasena}
+                onCambiar={(contrasena) => setRegistroForm({ ...registroForm, contrasena })}
+                autoComplete="new-password"
+                ayuda={`Mínimo ${LARGO_MINIMO_CONTRASENA} caracteres.`}
+                claseInput="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+              />
+              <button disabled={registroEnviando} className="w-full rounded-xl boton-principal px-4 py-3 font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-60">
                 {registroEnviando ? 'Creando cuenta...' : 'Registrarme'}
               </button>
             </form>

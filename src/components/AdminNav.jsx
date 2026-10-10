@@ -2,10 +2,11 @@ import { NavLink } from 'react-router-dom'
 
 const ENLACES = [
   { to: '/admin/destinos', etiqueta: 'Destinos' },
-  { to: '/admin/departamentos', etiqueta: 'Departamentos y regiones' },
+  { to: '/admin/departamentos', etiqueta: 'Departamentos' },
   { to: '/admin/categorias', etiqueta: 'Categorías' },
   { to: '/admin/actividades', etiqueta: 'Actividades' },
   { to: '/admin/eventos', etiqueta: 'Eventos' },
+  { to: '/admin/platos', etiqueta: 'Platos típicos' },
   { to: '/admin/restaurantes', etiqueta: 'Restaurantes' },
   { to: '/admin/alojamientos', etiqueta: 'Alojamientos' },
   { to: '/admin/resenas', etiqueta: 'Reseñas' },
@@ -14,7 +15,7 @@ const ENLACES = [
 
 function claseEnlace({ isActive }) {
   return `rounded-full px-4 py-2 text-sm font-semibold transition ${
-    isActive ? 'bg-brand-800 text-white' : 'bg-white text-brand-800 ring-1 ring-brand-900/10 hover:bg-brand-100'
+    isActive ? 'bg-brand-700 text-white' : 'bg-white text-brand-800 ring-1 ring-white/80 hover:bg-brand-100'
   }`
 }
 

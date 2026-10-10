@@ -6,6 +6,7 @@ import { AuthContext } from './authContext.js'
 
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null)
+  // null = todavía se está comprobando si el usuario es administrador.
   const [esAdmin, setEsAdmin] = useState(false)
   const [cargando, setCargando] = useState(true)
 
@@ -17,6 +18,7 @@ export function AuthProvider({ children }) {
       setCargando(false)
 
       if (usuarioActual) {
+        setEsAdmin(null)
         esCorreoAdministrador(usuarioActual.email)
           .then(setEsAdmin)
           .catch(() => setEsAdmin(false))

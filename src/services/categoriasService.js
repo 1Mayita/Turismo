@@ -1,29 +1,17 @@
-import { addDoc, collection, deleteDoc, doc, getDocs, query, updateDoc, where } from 'firebase/firestore'
-import { db } from './firebase.js'
-import { conLimiteDeTiempo } from './tiempoLimite.js'
+import { crearServicio } from './coleccion.js'
+import { categoriasDeEjemplo, destinosDeEjemplo } from './datosDeEjemplo.js'
 
-export { categoriasDeEjemplo } from './datosDeEjemplo.js'
+export { categoriasDeEjemplo }
 
-export async function getCategorias() {
-  const instantanea = await conLimiteDeTiempo(getDocs(collection(db, 'categorias')))
-  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
-}
+const categorias = crearServicio('categorias', categoriasDeEjemplo)
+const destinos = crearServicio('destinos', destinosDeEjemplo)
+
+export const getCategorias = categorias.todos
+export const crearCategoria = categorias.crear
+export const actualizarCategoria = categorias.actualizar
+export const eliminarCategoria = categorias.eliminar
 
 // Los destinos guardan el nombre de la categoría en el campo "categoria".
-export async function getDestinosPorCategoria(nombreCategoria) {
-  const consulta = query(collection(db, 'destinos'), where('categoria', '==', nombreCategoria))
-  const instantanea = await conLimiteDeTiempo(getDocs(consulta))
-  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
-}
-
-export async function crearCategoria(datos) {
-  await conLimiteDeTiempo(addDoc(collection(db, 'categorias'), datos))
-}
-
-export async function actualizarCategoria(id, datos) {
-  await conLimiteDeTiempo(updateDoc(doc(db, 'categorias', id), datos))
-}
-
-export async function eliminarCategoria(id) {
-  await conLimiteDeTiempo(deleteDoc(doc(db, 'categorias', id)))
+export function getDestinosPorCategoria(nombreCategoria) {
+  return destinos.donde({ categoria: nombreCategoria })
 }

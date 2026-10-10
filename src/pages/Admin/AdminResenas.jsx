@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
 import AdminNav from '../../components/AdminNav.jsx'
 import { Estrellas } from '../../components/Estrellas.jsx'
+import { getAlojamientos } from '../../services/alojamientosService.js'
 import { getDestinos } from '../../services/destinosService.js'
+import { getRestaurantes } from '../../services/restaurantesService.js'
 import { actualizarEstadoResena, eliminarResena, getTodasLasResenas } from '../../services/resenasService.js'
 
 function fechaLegible(fecha) {
@@ -13,9 +15,13 @@ function fechaLegible(fecha) {
     : 'Fecha no disponible'
 }
 
+const ETIQUETA_DE_TIPO = { destino: 'Destino', restaurante: 'Restaurante', alojamiento: 'Alojamiento' }
+const RUTA_DE_TIPO = { destino: '/destinos', restaurante: '/restaurantes', alojamiento: '/alojamientos' }
+
 function AdminResenas() {
   const [resenas, setResenas] = useState([])
-  const [destinos, setDestinos] = useState([])
+  // Nombres de los lugares reseñados: { 'destino:id': 'Nombre', 'restaurante:id': ... }
+  const [nombres, setNombres] = useState({})
   const [filtro, setFiltro] = useState('todas')
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
@@ -28,7 +34,12 @@ function AdminResenas() {
       setCargando(true)
       setError('')
       try {
-        const [listaResenas, listaDestinos] = await Promise.all([getTodasLasResenas(), getDestinos()])
+        const [listaResenas, listaDestinos, listaRestaurantes, listaAlojamientos] = await Promise.all([
+          getTodasLasResenas(),
+          getDestinos(),
+          getRestaurantes().catch(() => []),
+          getAlojamientos().catch(() => []),
+        ])
         listaResenas.sort((a, b) => {
           const fechaA = typeof a.fecha?.toMillis === 'function' ? a.fecha.toMillis() : 0
           const fechaB = typeof b.fecha?.toMillis === 'function' ? b.fecha.toMillis() : 0
@@ -36,7 +47,11 @@ function AdminResenas() {
         })
         if (!activo) return
         setResenas(listaResenas)
-        setDestinos(listaDestinos)
+        setNombres(Object.fromEntries([
+          ...listaDestinos.map((item) => [`destino:${item.id}`, item.nombre]),
+          ...listaRestaurantes.map((item) => [`restaurante:${item.id}`, item.nombre]),
+          ...listaAlojamientos.map((item) => [`alojamiento:${item.id}`, item.nombre]),
+        ]))
       } catch (errorLectura) {
         console.error('Error al cargar reseñas para moderación:', errorLectura)
         if (activo) setError('No se pudieron cargar las reseñas.')
@@ -83,13 +98,13 @@ function AdminResenas() {
     }
   }
 
-  const nombreDestino = (id) => destinos.find((destino) => destino.id === id)?.nombre || 'Destino no disponible'
+  const nombreDe = (resena) => nombres[`${resena.tipo_elemento}:${resena.id_elemento}`] || 'Ya no está disponible'
 
   return (
-    <div className="min-h-screen bg-brand-50">
+    <div className="min-h-screen">
       <Navbar />
       <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
-        <h1 className="mb-6 text-3xl font-bold text-brand-900">Moderación de reseñas</h1>
+        <h1 className="mb-6 text-3xl font-bold text-slate-900">Moderación de reseñas</h1>
         <AdminNav />
 
         {error && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
@@ -97,7 +112,7 @@ function AdminResenas() {
 
         <label className="mb-6 block max-w-xs text-sm font-semibold text-slate-700">
           Mostrar
-          <select value={filtro} onChange={(evento) => setFiltro(evento.target.value)} className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20">
+          <select value={filtro} onChange={(evento) => setFiltro(evento.target.value)} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30">
             <option value="todas">Todas las reseñas</option>
             <option value="publicadas">Publicadas</option>
             <option value="ocultas">Ocultas</option>
@@ -105,27 +120,27 @@ function AdminResenas() {
         </label>
 
         {cargando ? (
-          <div className="h-48 animate-pulse rounded-2xl bg-white shadow-lg shadow-brand-950/5" />
+          <div className="h-48 animate-pulse rounded-2xl bg-white/50 cristal" />
         ) : resenasVisibles.length === 0 ? (
-          <p className="rounded-2xl bg-white px-5 py-6 text-slate-600 shadow-lg shadow-brand-950/5">No hay reseñas para mostrar.</p>
+          <p className="rounded-2xl px-5 py-6 text-slate-600 cristal">No hay reseñas para mostrar.</p>
         ) : (
           <ul className="space-y-4">
             {resenasVisibles.map((resena) => {
               const oculta = resena.estado === 'oculta'
               return (
-                <li key={resena.id} className="rounded-2xl bg-white p-5 shadow-lg shadow-brand-950/5 ring-1 ring-brand-900/5">
+                <li key={resena.id} className="rounded-2xl p-5 cristal">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
                       <div className="mb-2 flex flex-wrap items-center gap-3">
-                        <p className="font-bold text-brand-900">{resena.nombre_usuario || 'Turista'}</p>
+                        <p className="font-bold text-slate-900">{resena.nombre_usuario || 'Turista'}</p>
                         <span className={`rounded-full px-3 py-1 text-xs font-bold ${oculta ? 'bg-red-50 text-red-700' : 'bg-brand-100 text-brand-800'}`}>
                           {oculta ? 'Oculta' : 'Publicada'}
                         </span>
                       </div>
                       <p className="text-sm text-slate-600">
-                        Destino:{' '}
-                        {resena.id_destino ? (
-                          <Link to={`/destinos/${resena.id_destino}`} className="font-semibold text-brand-700 underline">{nombreDestino(resena.id_destino)}</Link>
+                        {ETIQUETA_DE_TIPO[resena.tipo_elemento] || 'Lugar'}:{' '}
+                        {resena.id_elemento ? (
+                          <Link to={`${RUTA_DE_TIPO[resena.tipo_elemento] || '/destinos'}/${resena.id_elemento}`} className="font-semibold text-brand-700 underline">{nombreDe(resena)}</Link>
                         ) : 'No disponible'}
                         {' · '}{fechaLegible(resena.fecha)}
                       </p>

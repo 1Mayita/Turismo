@@ -1,28 +1,15 @@
-import { addDoc, collection, deleteDoc, doc, getDocs, query, updateDoc, where } from 'firebase/firestore'
-import { db } from './firebase.js'
-import { conLimiteDeTiempo } from './tiempoLimite.js'
+import { crearServicio } from './coleccion.js'
+import { municipiosDeEjemplo } from './datosDeEjemplo.js'
 
-export { municipiosDeEjemplo } from './datosDeEjemplo.js'
+export { municipiosDeEjemplo }
 
-export async function getMunicipios() {
-  const instantanea = await conLimiteDeTiempo(getDocs(collection(db, 'municipios')))
-  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
-}
+const municipios = crearServicio('municipios', municipiosDeEjemplo)
 
-export async function getMunicipiosPorDepartamento(idDepartamento) {
-  const consulta = query(collection(db, 'municipios'), where('id_departamento', '==', idDepartamento))
-  const instantanea = await conLimiteDeTiempo(getDocs(consulta))
-  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
-}
+export const getMunicipios = municipios.todos
+export const crearMunicipio = municipios.crear
+export const actualizarMunicipio = municipios.actualizar
+export const eliminarMunicipio = municipios.eliminar
 
-export async function crearMunicipio(datos) {
-  await conLimiteDeTiempo(addDoc(collection(db, 'municipios'), datos))
-}
-
-export async function actualizarMunicipio(id, datos) {
-  await conLimiteDeTiempo(updateDoc(doc(db, 'municipios', id), datos))
-}
-
-export async function eliminarMunicipio(id) {
-  await conLimiteDeTiempo(deleteDoc(doc(db, 'municipios', id)))
+export function getMunicipiosPorDepartamento(idDepartamento) {
+  return municipios.donde({ id_departamento: idDepartamento })
 }

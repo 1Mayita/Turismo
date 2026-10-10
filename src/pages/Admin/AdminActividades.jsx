@@ -7,7 +7,7 @@ import { sembrarCatalogoDeEjemplo } from '../../services/sembradoService.js'
 
 const FORMULARIO_VACIO = { nombre: '', descripcion: '', id_destino: '' }
 
-const CLASE_CAMPO = 'mt-2 w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20'
+const CLASE_CAMPO = 'mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30'
 
 function AdminActividades() {
   const [actividades, setActividades] = useState([])
@@ -121,17 +121,17 @@ function AdminActividades() {
   const actividadesVisibles = filtroDestino ? actividades.filter((actividad) => actividad.id_destino === filtroDestino) : actividades
 
   return (
-    <div className="min-h-screen bg-brand-50">
+    <div className="min-h-screen">
       <Navbar />
       <main className="mx-auto max-w-5xl px-5 py-12 lg:px-8">
-        <h1 className="mb-6 text-3xl font-bold text-brand-900">Administración de actividades</h1>
+        <h1 className="mb-6 text-3xl font-bold text-slate-900">Administración de actividades</h1>
         <AdminNav />
 
         {error && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
         {mensaje && <p className="mb-5 rounded-lg bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-800" role="status">{mensaje}</p>}
 
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <button type="button" onClick={abrirNueva} className="rounded-xl bg-accent-600 px-5 py-3 font-bold text-white transition hover:bg-accent-700">
+          <button type="button" onClick={abrirNueva} className="rounded-xl boton-principal px-5 py-3 font-bold text-white transition">
             Nueva actividad
           </button>
           <label className="block text-sm font-semibold text-slate-700">
@@ -146,8 +146,8 @@ function AdminActividades() {
         </div>
 
         {formularioAbierto && (
-          <form onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl bg-white p-6 shadow-lg shadow-brand-950/5">
-            <h2 className="text-xl font-bold text-brand-900">{actividadEditando ? 'Editar actividad' : 'Nueva actividad'}</h2>
+          <form onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
+            <h2 className="text-xl font-bold text-slate-900">{actividadEditando ? 'Editar actividad' : 'Nueva actividad'}</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block text-sm font-semibold text-slate-700">
                 Nombre
@@ -168,10 +168,10 @@ function AdminActividades() {
               <textarea name="descripcion" value={formulario.descripcion} onChange={actualizarCampo} rows={2} className={CLASE_CAMPO} />
             </label>
             <div className="flex gap-3">
-              <button disabled={guardando} className="rounded-xl bg-brand-800 px-5 py-2.5 font-bold text-white transition hover:bg-brand-900 disabled:cursor-not-allowed disabled:opacity-60">
+              <button disabled={guardando} className="rounded-xl bg-brand-700 px-5 py-2.5 font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60">
                 {guardando ? 'Guardando...' : 'Guardar'}
               </button>
-              <button type="button" onClick={() => setFormularioAbierto(false)} className="rounded-xl border border-slate-300 px-5 py-2.5 font-bold text-slate-700 transition hover:bg-slate-100">
+              <button type="button" onClick={() => setFormularioAbierto(false)} className="rounded-xl border border-neutral-300 px-5 py-2.5 font-bold text-slate-700 transition hover:bg-slate-100">
                 Cancelar
               </button>
             </div>
@@ -179,11 +179,11 @@ function AdminActividades() {
         )}
 
         {cargando ? (
-          <div className="h-48 animate-pulse rounded-2xl bg-white shadow-lg shadow-brand-950/5" />
+          <div className="h-48 animate-pulse rounded-2xl bg-white/50 cristal" />
         ) : (
-          <div className="overflow-x-auto rounded-2xl bg-white shadow-lg shadow-brand-950/5">
+          <div className="overflow-x-auto rounded-2xl cristal">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500">
+              <thead className="bg-white/40 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <tr>
                   <th className="px-5 py-3">Nombre</th>
                   <th className="px-5 py-3">Destino</th>
@@ -193,8 +193,8 @@ function AdminActividades() {
               </thead>
               <tbody>
                 {actividadesVisibles.map((actividad) => (
-                  <tr key={actividad.id} className="border-t border-slate-100">
-                    <td className="px-5 py-3 font-semibold text-brand-900">{actividad.nombre}</td>
+                  <tr key={actividad.id} className="border-t border-neutral-100">
+                    <td className="px-5 py-3 font-semibold text-slate-900">{actividad.nombre}</td>
                     <td className="px-5 py-3 text-slate-600">{nombreDestino(actividad.id_destino)}</td>
                     <td className="px-5 py-3 text-slate-600">{actividad.descripcion}</td>
                     <td className="whitespace-nowrap px-5 py-3 text-right">
