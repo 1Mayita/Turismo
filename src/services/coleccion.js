@@ -43,8 +43,10 @@ export function crearServicio(nombreColeccion, ejemplos = []) {
       return instantanea.docs.map(aRegistro)
     },
 
+    // Devuelve el id del documento creado.
     async crear(datos) {
-      await conLimiteDeTiempo(addDoc(referencia(), datos))
+      const nuevo = await conLimiteDeTiempo(addDoc(referencia(), datos))
+      return nuevo.id
     },
 
     async actualizar(id, datos) {

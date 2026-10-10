@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
+import AjustesNotificaciones from '../../components/AjustesNotificaciones.jsx'
 import InsigniaCategoria from '../../components/InsigniaCategoria.jsx'
 import ListaFavoritos from '../../components/ListaFavoritos.jsx'
 import { useAuth } from '../../context/useAuth.js'
@@ -109,8 +110,8 @@ function Perfil() {
   // Al llegar con /perfil#favoritos (desde el menú) se baja hasta esa sección
   // cuando el perfil ya terminó de cargar.
   useEffect(() => {
-    if (!cargando && ubicacion.hash === '#favoritos') {
-      document.getElementById('favoritos')?.scrollIntoView({ behavior: 'smooth' })
+    if (!cargando && ubicacion.hash) {
+      document.getElementById(ubicacion.hash.slice(1))?.scrollIntoView({ behavior: 'smooth' })
     }
   }, [cargando, ubicacion.hash, ubicacion.key])
 
@@ -352,6 +353,12 @@ function Perfil() {
         )}
 
         {/* En la bienvenida (recién registrado) todavía no hay favoritos que mostrar. */}
+        {!esBienvenida && !modoEdicion && (
+          <div className="mt-8">
+            <AjustesNotificaciones />
+          </div>
+        )}
+
         {!esBienvenida && !modoEdicion && (
           <section id="favoritos" className="mt-12 scroll-mt-24">
             <div className="mb-6 flex flex-wrap items-end justify-between gap-3">

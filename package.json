@@ -8,9 +8,14 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "sembrar": "node scripts/sembrarFirestore.js"
+    "sembrar": "node scripts/sembrarFirestore.js",
+    "emuladores": "npx firebase-tools emulators:start --only auth,firestore --project turismo-e0465",
+    "probar:sprint3": "node scripts/probarSprint3.js"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@tailwindcss/vite": "^4.3.3",
     "firebase": "^12.19.0",
     "leaflet": "^1.9.4",
@@ -18,6 +23,7 @@
     "react-dom": "^19.2.8",
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.18.4",
+    "recharts": "^3.10.1",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {

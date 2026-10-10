@@ -2,6 +2,7 @@
 // como ID del documento en Firestore, así las relaciones (id_departamento,
 // id_municipio, id_region) quedan enlazadas desde el primer sembrado.
 import { FOTOS, FOTOS_PLATOS } from './fotosDeEjemplo.js'
+import { INFO_PRACTICA } from './infoPracticaDeEjemplo.js'
 
 // Fecha "AAAA-MM-DD" a tantos días de hoy (negativo = en el pasado). Los
 // eventos de ejemplo se calculan al sembrar para que siempre haya próximos.
@@ -410,7 +411,7 @@ export const destinosDeEjemplo = [
     recomendaciones: 'Hace calor y humedad todo el año. Prueba los jugos de frutas amazónicas como el copoazú y el asaí.',
     destacado: true,
   },
-].map((destino) => ({ ...destino, ...FOTOS[destino.id] }))
+].map((destino) => ({ ...destino, ...FOTOS[destino.id], ...INFO_PRACTICA[destino.id] }))
 
 // ---------- Platos típicos, restaurantes y alojamientos ----------
 // Todo lo que sigue es contenido de demostración: los negocios son ficticios
@@ -677,3 +678,11 @@ export const eventosDeEjemplo = [
     recomendaciones: 'Lleva repelente, ropa liviana de manga larga y una botella de agua reutilizable.',
   },
 ].map(({ imagen: [clave, posicion], ...evento }) => ({ ...evento, imagen: FOTOS[clave].imagenes[posicion] }))
+
+// Novedades de ejemplo para la campana de notificaciones (la fecha se pone al sembrar).
+export const novedadesDeEjemplo = [
+  { id: 'bienvenida-sprint-3', tipo: 'aviso', titulo: '¡Nuevo! Arma tus viajes', mensaje: 'Crea un viaje, agrega destinos y ordénalos en el mapa.', enlace: '/viajes', categoria: '' },
+  { id: 'novedad-feria-cochabamba', tipo: 'evento', titulo: 'Nuevo evento: Feria Gastronómica de Cochabamba', mensaje: 'Plaza 14 de Septiembre, Cochabamba', enlace: '/eventos', categoria: '' },
+  { id: 'novedad-pampas-yacuma', tipo: 'destino', titulo: 'Nuevo destino: Pampas del Yacuma', mensaje: 'Aventura · Rurrenabaque, Beni', enlace: '/destinos/pampas-del-yacuma', categoria: 'Aventura' },
+  { id: 'novedad-isla-del-sol', tipo: 'destino', titulo: 'Nuevo destino: Isla del Sol', mensaje: 'Cultura · Copacabana, La Paz', enlace: '/destinos/isla-del-sol', categoria: 'Cultura' },
+]

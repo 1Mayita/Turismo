@@ -92,6 +92,9 @@ function AuthCard({ modoInicial = 'login' }) {
   // Página desde la que se llegó al login (ej. al tocar un corazón) y aviso a mostrar.
   const [origen] = useState(() => ({ ruta: ubicacion.state?.desde || '/destinos', aviso: ubicacion.state?.aviso || '' }))
   const [loginMensaje, setLoginMensaje] = useState('')
+  // true cuando este formulario ya decidió a dónde ir: evita que la
+  // redirección automática de abajo lo pise mientras carga la página siguiente.
+  const [redirigiendo, setRedirigiendo] = useState(false)
   const [mostrarRegistro, setMostrarRegistro] = useState(modoInicial === 'registro')
 
   const [loginForm, setLoginForm] = useState({ email: '', contrasena: '' })
@@ -149,6 +152,7 @@ function AuthCard({ modoInicial = 'login' }) {
         return
       }
 
+      setRedirigiendo(true)
       navegar(origen.ruta, { replace: true })
     } catch (errorFirebase) {
       console.error('Error al iniciar sesión:', errorFirebase.code, errorFirebase.message)
@@ -189,6 +193,7 @@ function AuthCard({ modoInicial = 'login' }) {
       }).catch((error) => console.error('No se pudo crear el documento de usuario:', error))
 
       // Primera parada: elegir preferencias. Desde ahí puede seguir a donde iba.
+      setRedirigiendo(true)
       navegar('/perfil?bienvenida=1', { replace: true, state: { desde: origen.ruta } })
     } catch (errorFirebase) {
       console.error('Error al registrar usuario:', errorFirebase.code, errorFirebase.message)
@@ -200,7 +205,7 @@ function AuthCard({ modoInicial = 'login' }) {
 
   // Quien ya tiene sesión no necesita este formulario. Mientras se envía no se
   // redirige aquí: lo hace cada función al terminar sus comprobaciones.
-  if (usuario && !loginEnviando && !registroEnviando) {
+  if (usuario && !loginEnviando && !registroEnviando && !redirigiendo) {
     return <Navigate to={origen.ruta} replace />
   }
 

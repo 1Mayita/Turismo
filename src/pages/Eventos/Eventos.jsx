@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import Navbar from '../../components/Navbar.jsx'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
+import BotonReportar from '../../components/BotonReportar.jsx'
 import Modal from '../../components/Modal.jsx'
 import { fechaHoyISO, formatearFechaEvento, getEventos, getEventosProximos } from '../../services/eventosService.js'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
@@ -142,6 +143,7 @@ function Eventos() {
                 <p className="text-sm leading-6 text-slate-700">{eventoAbierto.recomendaciones}</p>
               </div>
             )}
+            <BotonReportar tipo="evento" elemento={eventoAbierto} enlace="/eventos" />
           </div>
         </Modal>
       )}

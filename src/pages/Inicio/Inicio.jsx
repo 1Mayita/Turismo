@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
 import BarraBusqueda from '../../components/BarraBusqueda.jsx'
+import RecomendadoParaTi from '../../components/RecomendadoParaTi.jsx'
 import TarjetaDestino from '../../components/TarjetaDestino.jsx'
 import { GrillaEsqueleto } from '../../components/EsqueletoTarjeta.jsx'
 import { destinosDeEjemplo, getDestinos } from '../../services/destinosService.js'
@@ -129,6 +130,8 @@ function Inicio() {
 
       <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
         {error && <p className="mb-8 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{error}</p>}
+
+        <RecomendadoParaTi className="mb-14" />
 
         {categoriasConDestinos.length > 0 && (
           <section className="mb-14">

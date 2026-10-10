@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAuth } from './useAuth.js'
 import { FavoritosContext } from './favoritosContext.js'
 import { agregarFavorito, claveFavorito, getFavoritosDeUsuario, idElementoDeFavorito, quitarFavorito, tipoDeFavorito } from '../services/favoritosService.js'
@@ -12,17 +12,29 @@ export function FavoritosProvider({ children }) {
   // Se guarda de qué usuario son los IDs para no mostrar los de una sesión anterior.
   const [favoritos, setFavoritos] = useState({ uid: null, ids: SIN_FAVORITOS })
   const [error, setError] = useState('')
+  // Cambios hechos con el corazón mientras la lista se estaba cargando:
+  // { clave: { agregado, terminado (ms) } }. Sin esto, una carga que termina
+  // tarde pisaría el cambio recién hecho y el corazón se vería al revés.
+  const cambiosLocales = useRef(new Map())
 
   useEffect(() => {
     if (!usuario) return
     let activo = true
+    const inicioDeCarga = Date.now()
     getFavoritosDeUsuario(usuario.uid)
       .then((lista) => {
         if (!activo) return
-        setFavoritos({
-          uid: usuario.uid,
-          ids: new Set(lista.map((favorito) => claveFavorito(tipoDeFavorito(favorito), idElementoDeFavorito(favorito)))),
+        const ids = new Set(lista.map((favorito) => claveFavorito(tipoDeFavorito(favorito), idElementoDeFavorito(favorito))))
+        cambiosLocales.current.forEach((cambio, clave) => {
+          // Si el cambio terminó antes de empezar esta carga, el servidor ya lo incluye.
+          if (cambio.terminado && cambio.terminado < inicioDeCarga) {
+            cambiosLocales.current.delete(clave)
+            return
+          }
+          if (cambio.agregado) ids.add(clave)
+          else ids.delete(clave)
         })
+        setFavoritos({ uid: usuario.uid, ids })
         setError('')
       })
       .catch((errorLectura) => {
@@ -57,10 +69,13 @@ export function FavoritosProvider({ children }) {
     }
 
     aplicar(!eraFavorito)
+    cambiosLocales.current.set(clave, { agregado: !eraFavorito, terminado: null })
     try {
       if (eraFavorito) await quitarFavorito(usuario.uid, idElemento, tipo)
       else await agregarFavorito(usuario.uid, idElemento, tipo)
+      cambiosLocales.current.set(clave, { agregado: !eraFavorito, terminado: Date.now() })
     } catch (errorEscritura) {
+      cambiosLocales.current.delete(clave)
       aplicar(eraFavorito)
       throw errorEscritura
     }

@@ -21,6 +21,7 @@ const COLUMNAS = [
   {
     titulo: 'Tu cuenta',
     enlaces: [
+      { to: '/viajes', etiqueta: 'Mis viajes' },
       { to: '/perfil#favoritos', etiqueta: 'Mis favoritos' },
       { to: '/perfil', etiqueta: 'Mi perfil' },
     ],

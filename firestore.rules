@@ -65,13 +65,84 @@ service cloud.firestore {
     }
 
     match /favoritos/{id} {
-      allow read, delete: if conSesion() && (resource == null || resource.data.id_usuario == request.auth.uid);
+      // El administrador puede leerlos para las estadísticas.
+      allow read: if esAdmin() || (conSesion() && (resource == null || resource.data.id_usuario == request.auth.uid));
+      allow delete: if conSesion() && (resource == null || resource.data.id_usuario == request.auth.uid);
       allow create, update: if conSesion() && request.resource.data.id_usuario == request.auth.uid;
     }
 
     match /usuario_preferencias/{id} {
       allow read, delete: if conSesion() && (resource == null || resource.data.id_usuario == request.auth.uid);
       allow create, update: if conSesion() && request.resource.data.id_usuario == request.auth.uid;
+    }
+
+    // ---------- Sprint 3: viajes ----------
+    function viajeValido() {
+      let d = request.resource.data;
+      return d.nombre is string && d.nombre.size() > 0 && d.nombre.size() <= 80
+        && d.paradas is list && d.paradas.size() <= 30
+        && (!('notas' in d) || (d.notas is string && d.notas.size() <= 1000));
+    }
+
+    // Cada usuario solo ve, crea y modifica SUS viajes.
+    match /viajes/{id} {
+      allow read, delete: if conSesion() && resource.data.id_usuario == request.auth.uid;
+      allow create: if conSesion() && request.resource.data.id_usuario == request.auth.uid && viajeValido();
+      allow update: if conSesion() && resource.data.id_usuario == request.auth.uid
+        && request.resource.data.id_usuario == resource.data.id_usuario && viajeValido();
+    }
+
+    // Copia de solo lectura de un viaje compartido. Se abre con el token del
+    // enlace (get), pero nadie puede listar la colección para descubrir tokens.
+    match /viajes_compartidos/{token} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if conSesion() && token.size() >= 20 && request.resource.data.id_usuario == request.auth.uid;
+      allow update, delete: if conSesion() && resource.data.id_usuario == request.auth.uid;
+    }
+
+    // ---------- Sprint 3: notificaciones ----------
+    match /novedades/{id} {
+      allow read: if conSesion();
+      allow write: if esAdmin();
+    }
+
+    match /ajustes_notificaciones/{uid} {
+      allow read, write: if conSesion() && request.auth.uid == uid;
+    }
+
+    // ---------- Sprint 3: reportes de información ----------
+    // El id es "{usuario}_{tipo}_{elemento}": un reporte por persona y lugar.
+    function reporteValido() {
+      let d = request.resource.data;
+      return d.id_usuario == request.auth.uid
+        && d.estado == 'pendiente'
+        && d.tipo_elemento in ['destino', 'restaurante', 'alojamiento', 'evento']
+        && d.motivo in ['incorrecto', 'desactualizado', 'inapropiado', 'otro']
+        && d.descripcion is string && d.descripcion.size() <= 500;
+    }
+
+    match /reportes/{id} {
+      allow read: if esAdmin() || (conSesion() && (resource == null || resource.data.id_usuario == request.auth.uid));
+      allow create: if conSesion() && reporteValido()
+        && id == request.auth.uid + '_' + request.resource.data.tipo_elemento + '_' + request.resource.data.id_elemento;
+      // El autor solo puede volver a reportar si el anterior ya se cerró.
+      allow update: if esAdmin()
+        || (conSesion() && resource.data.id_usuario == request.auth.uid
+          && resource.data.estado in ['resuelto', 'descartado'] && reporteValido());
+      allow delete: if esAdmin();
+    }
+
+    // ---------- Sprint 3: visitas (estadísticas) ----------
+    // Cualquiera puede registrar una visita con estos tres campos; solo el
+    // administrador puede leerlas.
+    match /visitas/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['id_destino', 'id_usuario', 'fecha'])
+        && request.resource.data.id_destino is string && request.resource.data.id_destino.size() <= 120
+        && request.resource.data.fecha == request.time
+        && (request.resource.data.id_usuario == null || (conSesion() && request.resource.data.id_usuario == request.auth.uid));
+      allow read: if esAdmin();
+      allow update, delete: if false;
     }
 
     // ---------- Administradores ----------

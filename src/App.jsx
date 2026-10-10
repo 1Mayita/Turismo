@@ -27,6 +27,12 @@ const AlojamientoDetalle = lazy(() => import('./pages/Alojamientos/AlojamientoDe
 const Busqueda = lazy(() => import('./pages/Busqueda/Busqueda.jsx'))
 const Favoritos = lazy(() => import('./pages/Favoritos/Favoritos.jsx'))
 const Perfil = lazy(() => import('./pages/Perfil/Perfil.jsx'))
+const MisViajes = lazy(() => import('./pages/Viajes/MisViajes.jsx'))
+const ViajeDetalle = lazy(() => import('./pages/Viajes/ViajeDetalle.jsx'))
+const ViajeCompartido = lazy(() => import('./pages/Viajes/ViajeCompartido.jsx'))
+const Notificaciones = lazy(() => import('./pages/Notificaciones/Notificaciones.jsx'))
+const AdminReportes = lazy(() => import('./pages/Admin/AdminReportes.jsx'))
+const AdminEstadisticas = lazy(() => import('./pages/Admin/AdminEstadisticas.jsx'))
 const NoEncontrada = lazy(() => import('./pages/NoEncontrada/NoEncontrada.jsx'))
 const AdminDestinos = lazy(() => import('./pages/Admin/AdminDestinos.jsx'))
 const AdminDepartamentos = lazy(() => import('./pages/Admin/AdminDepartamentos.jsx'))
@@ -52,6 +58,9 @@ const TITULOS = [
   ['/alojamientos', 'Alojamientos'],
   ['/buscar', 'Búsqueda'],
   ['/favoritos', 'Mis favoritos'],
+  ['/viajes', 'Mis viajes'],
+  ['/viaje-compartido', 'Viaje compartido'],
+  ['/notificaciones', 'Notificaciones'],
   ['/perfil', 'Mi perfil'],
   ['/login', 'Iniciar sesión'],
   ['/registro', 'Crear cuenta'],
@@ -93,7 +102,12 @@ function App() {
           <Route path="/alojamientos/:id" element={<AlojamientoDetalle />} />
           <Route path="/buscar" element={<Busqueda />} />
 
+          <Route path="/viaje-compartido/:token" element={<ViajeCompartido />} />
+
           <Route path="/favoritos" element={<RutaPrivada><Favoritos /></RutaPrivada>} />
+          <Route path="/viajes" element={<RutaPrivada><MisViajes /></RutaPrivada>} />
+          <Route path="/viajes/:id" element={<RutaPrivada><ViajeDetalle /></RutaPrivada>} />
+          <Route path="/notificaciones" element={<RutaPrivada><Notificaciones /></RutaPrivada>} />
           <Route path="/perfil" element={<RutaPrivada><Perfil /></RutaPrivada>} />
 
           <Route path="/admin/destinos" element={<RutaAdmin><AdminDestinos /></RutaAdmin>} />
@@ -106,6 +120,8 @@ function App() {
           <Route path="/admin/alojamientos" element={<RutaAdmin><AdminAlojamientos /></RutaAdmin>} />
           <Route path="/admin/resenas" element={<RutaAdmin><AdminResenas /></RutaAdmin>} />
           <Route path="/admin/platos" element={<RutaAdmin><AdminPlatos /></RutaAdmin>} />
+          <Route path="/admin/reportes" element={<RutaAdmin><AdminReportes /></RutaAdmin>} />
+          <Route path="/admin/estadisticas" element={<RutaAdmin><AdminEstadisticas /></RutaAdmin>} />
 
           <Route path="*" element={<NoEncontrada />} />
         </Routes>

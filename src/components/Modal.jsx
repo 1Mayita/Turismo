@@ -1,7 +1,10 @@
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 
 // Ventana modal accesible: se cierra con Esc, con el botón × o al hacer clic
 // fuera; bloquea el scroll del fondo y devuelve el foco a quien la abrió.
+// Se dibuja al final de <body> (portal) para que no quede atrapada dentro de
+// otro elemento, como la ventanita de un marcador del mapa.
 function Modal({ titulo, onCerrar, children }) {
   const panel = useRef(null)
   // Se guarda la función más reciente para que el efecto de abajo corra una
@@ -28,8 +31,8 @@ function Modal({ titulo, onCerrar, children }) {
     }
   }, [])
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-brand-950/50 p-0 backdrop-blur-sm sm:items-center sm:p-6" onClick={onCerrar}>
+  return createPortal(
+    <div className="fixed inset-0 z-[1000] flex items-end justify-center bg-brand-950/50 p-0 backdrop-blur-sm sm:items-center sm:p-6" onClick={onCerrar}>
       <div
         ref={panel}
         role="dialog"
@@ -49,7 +52,8 @@ function Modal({ titulo, onCerrar, children }) {
         </button>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

@@ -24,6 +24,25 @@ export function distanciaEnKm(origen, lugar) {
   return 6371 * 2 * Math.atan2(Math.sqrt(segura), Math.sqrt(1 - segura))
 }
 
+// Estimación sencilla del viaje por tierra entre dos puntos a partir de la
+// distancia en línea recta: las carreteras suman cerca de un 30 % de recorrido
+// y se calcula a unos 50 km/h de promedio. Es solo orientativa.
+const FACTOR_CARRETERA = 1.3
+const VELOCIDAD_PROMEDIO_KMH = 50
+
+export function estimarTrayecto(distanciaLineaRectaKm) {
+  const kmPorCarretera = distanciaLineaRectaKm * FACTOR_CARRETERA
+  const minutos = Math.round((kmPorCarretera / VELOCIDAD_PROMEDIO_KMH) * 60)
+  return { kmPorCarretera, minutos }
+}
+
+export function formatearDuracion(minutos) {
+  if (minutos < 60) return `${Math.max(minutos, 5)} min`
+  const horas = Math.floor(minutos / 60)
+  const resto = Math.round((minutos % 60) / 5) * 5
+  return resto ? `${horas} h ${resto} min` : `${horas} h`
+}
+
 // Pide la ubicación al navegador. Resuelve con { latitud, longitud } o
 // rechaza con un Error cuyo mensaje ya está listo para mostrar al usuario.
 export function obtenerUbicacionDelUsuario() {

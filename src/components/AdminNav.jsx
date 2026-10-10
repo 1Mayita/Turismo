@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
 
 const ENLACES = [
+  { to: '/admin/estadisticas', etiqueta: 'Estadísticas' },
   { to: '/admin/destinos', etiqueta: 'Destinos' },
   { to: '/admin/departamentos', etiqueta: 'Departamentos' },
   { to: '/admin/categorias', etiqueta: 'Categorías' },
@@ -10,6 +11,7 @@ const ENLACES = [
   { to: '/admin/restaurantes', etiqueta: 'Restaurantes' },
   { to: '/admin/alojamientos', etiqueta: 'Alojamientos' },
   { to: '/admin/resenas', etiqueta: 'Reseñas' },
+  { to: '/admin/reportes', etiqueta: 'Reportes' },
   { to: '/admin/usuarios', etiqueta: 'Usuarios' },
 ]
 

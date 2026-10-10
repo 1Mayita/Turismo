@@ -1,7 +1,9 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
+import BotonCompartir from '../../components/BotonCompartir.jsx'
 import BotonFavorito from '../../components/BotonFavorito.jsx'
+import BotonReportar from '../../components/BotonReportar.jsx'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
 import Migas from '../../components/Migas.jsx'
 import VisorImagenes from '../../components/VisorImagenes.jsx'
@@ -124,6 +126,7 @@ function EstablecimientoDetalle({ tipo }) {
                   <h1 className="text-4xl font-bold text-slate-900">{lugar.nombre}</h1>
                   <BotonFavorito idElemento={lugar.id} tipo={tipo} />
                 </div>
+                <BotonCompartir className="mt-3" titulo={lugar.nombre} texto={`Mira ${lugar.nombre} en Rutas de Bolivia:`} />
                 {calificacion && <ResumenCalificacion promedio={calificacion.promedio} total={calificacion.total} className="mt-1" />}
                 {esRestaurante && lugar.especialidad && <p className="mt-2 font-semibold text-accent-600">{lugar.especialidad}</p>}
                 {lugar.ubicacion && <p className="mt-1 text-slate-600">{[lugar.ubicacion, lugar.direccion].filter(Boolean).join(' · ')}</p>}
@@ -227,6 +230,10 @@ function EstablecimientoDetalle({ tipo }) {
             )}
 
             <ResenasDestino tipo={tipo} idElemento={lugar.id} onResenaCreada={() => setVersionCalificacion((valorAnterior) => valorAnterior + 1)} />
+
+            <div className="border-t border-white/80 pt-6">
+              <BotonReportar tipo={tipo} elemento={lugar} enlace={`${configuracion.ruta}/${lugar.id}`} />
+            </div>
           </article>
         )}
       </main>

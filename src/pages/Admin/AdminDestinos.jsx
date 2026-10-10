@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
+import { publicarNovedad } from '../../services/notificacionesService.js'
 import AdminNav from '../../components/AdminNav.jsx'
 import { actualizarDestino, crearDestino, eliminarDestino, getDestinos } from '../../services/destinosService.js'
 import { categoriasDeEjemplo, getCategorias } from '../../services/categoriasService.js'
@@ -12,6 +13,24 @@ import { actualizarDatosDeEjemplo, indexarAdministradoresPorCorreo } from '../..
 
 // El mapa para marcar la ubicación (Leaflet) se descarga solo al abrir el formulario.
 const SelectorUbicacion = lazy(() => import('../../components/mapa/SelectorUbicacion.jsx'))
+
+// Transportes: una línea por opción con el formato "Medio | Desde | Tiempo | Detalle".
+function transportesATexto(transportes) {
+  return Array.isArray(transportes)
+    ? transportes.map((item) => [item.medio, item.desde, item.tiempo, item.detalle].map((parte) => parte || '').join(' | ').replace(/( \| )+$/, '')).join('\n')
+    : ''
+}
+
+function textoATransportes(texto) {
+  return texto.split(/\r?\n/).map((linea) => linea.trim()).filter(Boolean).map((linea) => {
+    const [medio = '', desde = '', tiempo = '', detalle = ''] = linea.split('|').map((parte) => parte.trim())
+    return { medio, desde, tiempo, detalle }
+  }).filter((item) => item.medio)
+}
+
+function lineasDe(texto) {
+  return texto.split(/\r?\n/).map((linea) => linea.trim()).filter(Boolean)
+}
 
 // Convierte el texto del formulario (una URL por línea) en una lista limpia.
 function listaDeUrls(texto) {
@@ -34,6 +53,13 @@ const FORMULARIO_VACIO = {
   imagenes: '',
   recomendaciones: '',
   destacado: false,
+  como_llegar: '',
+  transportes: '',
+  mejor_epoca: '',
+  clima_tipico: '',
+  consejos: '',
+  normas: '',
+  seguridad: '',
 }
 
 function AdminDestinos() {
@@ -109,6 +135,13 @@ function AdminDestinos() {
       imagen_principal: destino.imagen_principal || '',
       imagenes: (destino.imagenes || []).join('\n'),
       recomendaciones: destino.recomendaciones || '',
+      como_llegar: destino.como_llegar || '',
+      transportes: transportesATexto(destino.transportes),
+      mejor_epoca: destino.mejor_epoca || '',
+      clima_tipico: destino.clima_tipico || '',
+      consejos: Array.isArray(destino.consejos) ? destino.consejos.join('\n') : '',
+      normas: Array.isArray(destino.normas) ? destino.normas.join('\n') : '',
+      seguridad: destino.seguridad || '',
       destacado: Boolean(destino.destacado),
     })
     setFormularioAbierto(true)
@@ -162,6 +195,13 @@ function AdminDestinos() {
       precio_ingreso: Number(formulario.precio_ingreso) || 0,
       latitud: formulario.latitud === '' ? null : Number(formulario.latitud),
       longitud: formulario.longitud === '' ? null : Number(formulario.longitud),
+      como_llegar: formulario.como_llegar.trim(),
+      transportes: textoATransportes(formulario.transportes),
+      mejor_epoca: formulario.mejor_epoca.trim(),
+      clima_tipico: formulario.clima_tipico.trim(),
+      consejos: lineasDe(formulario.consejos),
+      normas: lineasDe(formulario.normas),
+      seguridad: formulario.seguridad.trim(),
     }
 
     try {
@@ -170,8 +210,16 @@ function AdminDestinos() {
         await actualizarDestino(destinoEditando.id, datos)
         setMensaje('Destino actualizado correctamente.')
       } else {
-        await crearDestino(datos)
-        setMensaje('Destino creado correctamente.')
+        const idNuevo = await crearDestino(datos)
+        // Notifica a los turistas (si falla, el destino igual queda creado).
+        await publicarNovedad({
+          tipo: 'destino',
+          titulo: `Nuevo destino: ${datos.nombre}`,
+          mensaje: [datos.categoria, datos.ubicacion].filter(Boolean).join(' · '),
+          enlace: `/destinos/${idNuevo}`,
+          categoria: datos.categoria,
+        }).catch((errorNovedad) => console.warn('No se publicó la notificación del destino:', errorNovedad))
+        setMensaje('Destino creado y notificado a los turistas.')
       }
       setFormularioAbierto(false)
       refrescar()
@@ -337,6 +385,40 @@ function AdminDestinos() {
               Recomendaciones para el visitante
               <textarea name="recomendaciones" value={formulario.recomendaciones} onChange={actualizarCampo} rows={2} placeholder="Qué llevar, mejor época, precauciones..." className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
             </label>
+            <fieldset className="space-y-4 rounded-2xl border border-sky-200 p-4">
+              <legend className="px-2 text-sm font-bold text-slate-900">Información práctica (cómo llegar y antes de ir)</legend>
+              <label className="block text-sm font-semibold text-slate-700">
+                Cómo llegar (resumen)
+                <textarea name="como_llegar" value={formulario.como_llegar} onChange={actualizarCampo} rows={2} placeholder="Desde qué ciudad se sale y por dónde se entra." className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
+              </label>
+              <label className="block text-sm font-semibold text-slate-700">
+                Medios de transporte (uno por línea: Medio | Desde | Tiempo | Detalle)
+                <textarea name="transportes" value={formulario.transportes} onChange={actualizarCampo} rows={3} placeholder={'Bus | La Paz | 9 h | Salidas nocturnas\nAvión | La Paz | 1 h | Vuelos diarios'} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 font-mono text-sm" />
+              </label>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block text-sm font-semibold text-slate-700">
+                  Mejor época para ir
+                  <input name="mejor_epoca" value={formulario.mejor_epoca} onChange={actualizarCampo} placeholder="Ej.: abril a octubre" className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
+                </label>
+                <label className="block text-sm font-semibold text-slate-700">
+                  Clima típico
+                  <input name="clima_tipico" value={formulario.clima_tipico} onChange={actualizarCampo} placeholder="Ej.: días soleados y noches frías" className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
+                </label>
+                <label className="block text-sm font-semibold text-slate-700">
+                  Consejos (uno por línea)
+                  <textarea name="consejos" value={formulario.consejos} onChange={actualizarCampo} rows={3} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
+                </label>
+                <label className="block text-sm font-semibold text-slate-700">
+                  Normas del lugar (una por línea)
+                  <textarea name="normas" value={formulario.normas} onChange={actualizarCampo} rows={3} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
+                </label>
+              </div>
+              <label className="block text-sm font-semibold text-slate-700">
+                Seguridad
+                <textarea name="seguridad" value={formulario.seguridad} onChange={actualizarCampo} rows={2} placeholder="Precauciones, zonas a evitar, salud (altura, vacunas)..." className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
+              </label>
+              <p className="text-xs text-slate-500">El clima actual se muestra solo a partir de la ubicación en el mapa (Open-Meteo); aquí va el clima típico por época.</p>
+            </fieldset>
             <label className="block text-sm font-semibold text-slate-700">
               Fotos de la galería (una URL por línea)
               <textarea name="imagenes" value={formulario.imagenes} onChange={actualizarCampo} rows={3} placeholder={'https://.../foto-1.jpg\nhttps://.../foto-2.jpg'} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />

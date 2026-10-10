@@ -1,7 +1,10 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
+import BotonAgregarAViaje from '../../components/BotonAgregarAViaje.jsx'
+import BotonCompartir from '../../components/BotonCompartir.jsx'
 import BotonFavorito from '../../components/BotonFavorito.jsx'
+import BotonReportar from '../../components/BotonReportar.jsx'
 import EstablecimientosCercanos from '../../components/EstablecimientosCercanos.jsx'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
 import InsigniaCategoria from '../../components/InsigniaCategoria.jsx'
@@ -14,6 +17,9 @@ import { useTituloPagina } from '../../hooks/useTituloPagina.js'
 import { coordenadasValidas } from '../../utils/geo.js'
 import { getPromedioCalificacion } from '../../services/resenasService.js'
 import ActividadesDestino from './ActividadesDestino.jsx'
+import InfoPractica from './InfoPractica.jsx'
+import { useAuth } from '../../context/useAuth.js'
+import { registrarVisita } from '../../services/estadisticasService.js'
 import ResenasDestino from './ResenasDestino.jsx'
 
 // El mapa (Leaflet) se descarga aparte, solo cuando el destino tiene coordenadas.
@@ -21,6 +27,7 @@ const MapaUbicacion = lazy(() => import('../../components/mapa/MapaUbicacion.jsx
 
 function DestinoDetalle() {
   const { id } = useParams()
+  const { usuario } = useAuth()
   const [destino, setDestino] = useState(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
@@ -78,6 +85,13 @@ function DestinoDetalle() {
 
   useTituloPagina(destino?.nombre || 'Destinos')
 
+  // Cuenta la visita para las estadísticas (una vez cada 30 min por navegador).
+  const idDestinoCargado = destino?.id
+  const idUsuario = usuario?.uid || null
+  useEffect(() => {
+    if (idDestinoCargado) registrarVisita(idDestinoCargado, idUsuario)
+  }, [idDestinoCargado, idUsuario])
+
   const migas = [
     { etiqueta: 'Inicio', to: '/' },
     { etiqueta: 'Destinos', to: '/destinos' },
@@ -112,6 +126,10 @@ function DestinoDetalle() {
                 <div className="flex items-center gap-3">
                   <h1 className="text-4xl font-bold text-slate-900">{destino.nombre}</h1>
                   <BotonFavorito idDestino={destino.id} />
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <BotonAgregarAViaje destino={destino} />
+                  <BotonCompartir titulo={destino.nombre} texto={`Mira ${destino.nombre} en Rutas de Bolivia:`} />
                 </div>
                 {errorCalificacion ? (
                   <p className="mt-1 text-sm font-semibold text-red-700" role="alert">{errorCalificacion}</p>
@@ -152,12 +170,14 @@ function DestinoDetalle() {
 
             {coordenadasValidas(destino.latitud, destino.longitud) && (
               <section className="mb-10">
-                <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Cómo llegar</p>
+                <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Ubicación</p>
                 <Suspense fallback={<div className="h-72 animate-pulse rounded-2xl bg-white/50" />}>
                   <MapaUbicacion latitud={destino.latitud} longitud={destino.longitud} titulo={destino.nombre} clave={destino.categoria} />
                 </Suspense>
               </section>
             )}
+
+            <InfoPractica destino={destino} />
 
             <ActividadesDestino idDestino={destino.id} />
 
@@ -194,6 +214,10 @@ function DestinoDetalle() {
             )}
 
             <ResenasDestino idDestino={destino.id} onResenaCreada={() => setVersionCalificacion((valorAnterior) => valorAnterior + 1)} />
+
+            <div className="border-t border-white/80 pt-6">
+              <BotonReportar tipo="destino" elemento={destino} enlace={`/destinos/${destino.id}`} />
+            </div>
           </article>
         )}
       </main>

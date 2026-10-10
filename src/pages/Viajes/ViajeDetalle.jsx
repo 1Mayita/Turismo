@@ -1,0 +1,251 @@
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import Navbar from '../../components/Navbar.jsx'
+import Migas from '../../components/Migas.jsx'
+import Modal from '../../components/Modal.jsx'
+import { OpcionesCompartir } from '../../components/BotonCompartir.jsx'
+import { useAuth } from '../../context/useAuth.js'
+import { useTituloPagina } from '../../hooks/useTituloPagina.js'
+import { getDestinos } from '../../services/destinosService.js'
+import {
+  activarEnlaceCompartido,
+  desactivarEnlaceCompartido,
+  editarDatosDeViaje,
+  eliminarViaje,
+  enlaceDeViajeCompartido,
+  getViaje,
+  guardarParadas,
+  quitarDestinoDeViaje,
+} from '../../services/viajesService.js'
+import FormularioViaje from './FormularioViaje.jsx'
+import Itinerario from './Itinerario.jsx'
+import { paradasConDestino, textoDeFechas } from './utilidades.js'
+
+function ViajeDetalle() {
+  const { id } = useParams()
+  const { usuario } = useAuth()
+  const navegar = useNavigate()
+  const [viaje, setViaje] = useState(null)
+  const [destinos, setDestinos] = useState([])
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState('')
+  const [estadoGuardado, setEstadoGuardado] = useState('')
+  const [ventana, setVentana] = useState(null) // 'editar' | 'compartir' | 'eliminar'
+  const [procesando, setProcesando] = useState(false)
+  const [errorVentana, setErrorVentana] = useState('')
+
+  useEffect(() => {
+    let activo = true
+    async function cargar() {
+      try {
+        const [encontrado, listaDestinos] = await Promise.all([getViaje(id), getDestinos()])
+        if (!activo) return
+        // Las reglas de Firestore ya impiden leer viajes ajenos; esto cubre el caso
+        // de un documento que existe pero no es de esta persona.
+        if (!encontrado || encontrado.id_usuario !== usuario.uid) setError('No encontramos este viaje en tu cuenta.')
+        else setViaje(encontrado)
+        setDestinos(listaDestinos)
+      } catch (errorLectura) {
+        console.error('Error al cargar el viaje:', errorLectura)
+        if (activo) setError(errorLectura.code === 'permission-denied' ? 'No encontramos este viaje en tu cuenta.' : 'No pudimos cargar el viaje. Revisa tu conexión e inténtalo de nuevo.')
+      } finally {
+        if (activo) setCargando(false)
+      }
+    }
+    cargar()
+    return () => {
+      activo = false
+    }
+  }, [id, usuario.uid])
+
+  useTituloPagina(viaje?.nombre || 'Mis viajes')
+
+  // Cambia la pantalla al instante y, si Firestore falla, vuelve atrás.
+  async function guardarConRespaldo(cambio) {
+    const anterior = viaje
+    setEstadoGuardado('Guardando...')
+    try {
+      const actualizado = await cambio()
+      setViaje(actualizado)
+      setEstadoGuardado('✓ Guardado')
+      setTimeout(() => setEstadoGuardado(''), 2000)
+    } catch (errorGuardado) {
+      console.error('Error al guardar el viaje:', errorGuardado)
+      setViaje(anterior)
+      setEstadoGuardado('')
+      setError(errorGuardado.message || 'No se pudo guardar el cambio. Inténtalo de nuevo.')
+    }
+  }
+
+  function reordenar(paradas) {
+    setError('')
+    setViaje({ ...viaje, paradas })
+    guardarConRespaldo(() => guardarParadas(viaje, paradas))
+  }
+
+  function quitar(idDestino, nombre) {
+    if (!window.confirm(`¿Quitar "${nombre}" de este viaje?`)) return
+    setError('')
+    guardarConRespaldo(() => quitarDestinoDeViaje(viaje, idDestino))
+  }
+
+  async function guardarDatos(datos) {
+    const actualizado = await editarDatosDeViaje(viaje, datos)
+    setViaje(actualizado)
+    setVentana(null)
+  }
+
+  async function ejecutar(accion) {
+    setErrorVentana('')
+    setProcesando(true)
+    try {
+      await accion()
+    } catch (errorAccion) {
+      console.error('Error en la acción del viaje:', errorAccion)
+      setErrorVentana('No se pudo completar la acción. Inténtalo de nuevo.')
+    } finally {
+      setProcesando(false)
+    }
+  }
+
+  const items = viaje ? paradasConDestino(viaje.paradas, destinos) : []
+  const migas = [
+    { etiqueta: 'Inicio', to: '/' },
+    { etiqueta: 'Mis viajes', to: '/viajes' },
+    { etiqueta: viaje?.nombre || 'Viaje' },
+  ]
+
+  return (
+    <div className="min-h-screen">
+      <Navbar />
+      <main className="mx-auto max-w-6xl px-5 py-10 lg:px-8">
+        <Migas pasos={migas} />
+
+        {cargando ? (
+          <div className="space-y-4">
+            <div className="h-28 animate-pulse rounded-3xl bg-white/50" />
+            <div className="h-80 animate-pulse rounded-3xl bg-white/50" />
+          </div>
+        ) : !viaje ? (
+          <div className="rounded-2xl p-6 cristal">
+            <p className="font-semibold text-slate-800">{error}</p>
+            <Link to="/viajes" className="mt-3 inline-block font-semibold text-brand-700 underline">Ir a mis viajes</Link>
+          </div>
+        ) : (
+          <>
+            <header className="mb-6 flex flex-wrap items-start justify-between gap-4 rounded-[2rem] p-6 cristal sm:p-8">
+              <div className="min-w-0">
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Mi viaje · {textoDeFechas(viaje)}</p>
+                <h1 className="mt-1 break-words text-3xl font-extrabold text-slate-900 sm:text-4xl">{viaje.nombre}</h1>
+                <p className="mt-1 text-sm text-slate-600">{items.length} {items.length === 1 ? 'destino' : 'destinos'}{viaje.token_compartido ? ' · Compartido con enlace' : ''}</p>
+                {viaje.notas && <p className="mt-3 max-w-2xl whitespace-pre-line text-slate-700">{viaje.notas}</p>}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={() => { setErrorVentana(''); setVentana('compartir') }} className="rounded-xl boton-principal px-4 py-2.5 text-sm font-bold">Compartir</button>
+                <button type="button" onClick={() => setVentana('editar')} className="rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-brand-800 ring-1 ring-sky-100 transition hover:bg-brand-50">Editar</button>
+                <button type="button" onClick={() => { setErrorVentana(''); setVentana('eliminar') }} className="rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-red-700 ring-1 ring-red-100 transition hover:bg-red-50">Eliminar</button>
+              </div>
+            </header>
+
+            {error && <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
+
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-2xl font-bold text-slate-900">Itinerario</h2>
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-semibold text-emerald-700" aria-live="polite">{estadoGuardado}</span>
+                <Link to="/destinos" className="rounded-xl bg-white/70 px-4 py-2 text-sm font-bold text-brand-800 ring-1 ring-white/80 transition hover:bg-white">+ Agregar destinos</Link>
+              </div>
+            </div>
+
+            {items.length === 0 ? (
+              <div className="rounded-3xl p-8 text-center cristal">
+                <p className="text-lg font-bold text-slate-900">Tu viaje todavía no tiene destinos</p>
+                <p className="mt-1 text-slate-600">Busca lugares en el catálogo o el mapa y toca “Agregar a mi viaje”.</p>
+                <div className="mt-4 flex flex-wrap justify-center gap-3">
+                  <Link to="/destinos" className="rounded-xl boton-principal px-5 py-2.5 font-bold">Explorar destinos</Link>
+                  <Link to="/mapa" className="rounded-xl bg-white px-5 py-2.5 font-bold text-brand-800 ring-1 ring-sky-100">Abrir el mapa</Link>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p className="mb-3 text-sm text-slate-600">Arrastra con el ícono ⠿ o usa las flechas ↑ ↓ para ordenar las paradas. Los cambios se guardan solos.</p>
+                <Itinerario items={items} editable onReordenar={reordenar} onQuitar={quitar} />
+              </>
+            )}
+          </>
+        )}
+      </main>
+
+      {ventana === 'editar' && (
+        <Modal titulo="Editar viaje" onCerrar={() => setVentana(null)}>
+          <div className="p-6 sm:p-8">
+            <h2 className="mb-5 pr-10 text-2xl font-bold text-slate-900">Editar viaje</h2>
+            <FormularioViaje inicial={viaje} textoBoton="Guardar cambios" onGuardar={guardarDatos} onCancelar={() => setVentana(null)} />
+          </div>
+        </Modal>
+      )}
+
+      {ventana === 'compartir' && (
+        <Modal titulo="Compartir viaje" onCerrar={() => setVentana(null)}>
+          <div className="space-y-5 p-6 sm:p-8">
+            <h2 className="pr-10 text-2xl font-bold text-slate-900">Compartir “{viaje.nombre}”</h2>
+            {errorVentana && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{errorVentana}</p>}
+            {viaje.token_compartido ? (
+              <>
+                <p className="text-sm text-slate-600">Quien tenga este enlace verá el itinerario en modo solo lectura y podrá copiarlo a su cuenta. Los cambios que hagas se verán en el enlace.</p>
+                <OpcionesCompartir
+                  titulo={viaje.nombre}
+                  texto={`Mira mi viaje "${viaje.nombre}" en Rutas de Bolivia:`}
+                  url={enlaceDeViajeCompartido(viaje.token_compartido)}
+                />
+                <button
+                  type="button"
+                  disabled={procesando}
+                  onClick={() => ejecutar(async () => setViaje(await desactivarEnlaceCompartido(viaje)))}
+                  className="w-full rounded-xl bg-red-50 px-4 py-3 text-sm font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
+                >
+                  {procesando ? 'Desactivando...' : 'Desactivar el enlace (dejará de funcionar para todos)'}
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-slate-600">Tu viaje es privado. Crea un enlace para compartirlo en modo solo lectura; podrás desactivarlo cuando quieras.</p>
+                <button
+                  type="button"
+                  disabled={procesando}
+                  onClick={() => ejecutar(async () => setViaje(await activarEnlaceCompartido(viaje, usuario.displayName?.split(' ')[0])))}
+                  className="w-full rounded-xl boton-principal px-4 py-3 font-bold disabled:opacity-60"
+                >
+                  {procesando ? 'Creando enlace...' : 'Crear enlace para compartir'}
+                </button>
+              </>
+            )}
+          </div>
+        </Modal>
+      )}
+
+      {ventana === 'eliminar' && (
+        <Modal titulo="Eliminar viaje" onCerrar={() => setVentana(null)}>
+          <div className="space-y-4 p-6 sm:p-8">
+            <h2 className="pr-10 text-2xl font-bold text-slate-900">¿Eliminar este viaje?</h2>
+            <p className="text-slate-600">Se borrará “{viaje.nombre}” con sus {items.length} paradas{viaje.token_compartido ? ' y el enlace compartido dejará de funcionar' : ''}. Esta acción no se puede deshacer.</p>
+            {errorVentana && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{errorVentana}</p>}
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                disabled={procesando}
+                onClick={() => ejecutar(async () => { await eliminarViaje(viaje); navegar('/viajes', { replace: true }) })}
+                className="flex-1 rounded-xl bg-red-600 px-4 py-3 font-bold text-white transition hover:bg-red-700 disabled:opacity-60"
+              >
+                {procesando ? 'Eliminando...' : 'Sí, eliminar'}
+              </button>
+              <button type="button" onClick={() => setVentana(null)} className="rounded-xl border border-sky-200 bg-white px-5 py-3 font-bold text-slate-700">Cancelar</button>
+            </div>
+          </div>
+        </Modal>
+      )}
+    </div>
+  )
+}
+
+export default ViajeDetalle

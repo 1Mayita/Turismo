@@ -87,6 +87,13 @@ export async function getPromedioDe(tipo, idElemento) {
   return { promedio: total ? suma / total : 0, total }
 }
 
+// Reseñas que escribió una persona (para recomendaciones y estadísticas).
+export async function getResenasDeUsuario(idUsuario) {
+  const consulta = query(collection(db, COLECCION_RESENAS), where('id_usuario', '==', idUsuario))
+  const instantanea = await conLimiteDeTiempo(getDocs(consulta))
+  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
+}
+
 export function getResenasPorDestino(idDestino) {
   return getResenasDe('destino', idDestino)
 }

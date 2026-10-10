@@ -4,6 +4,7 @@ import { NavLink, useLocation, useNavigate, useSearchParams } from 'react-router
 import { useAuth } from '../context/useAuth.js'
 import { auth } from '../services/firebase.js'
 import BarraBusqueda from './BarraBusqueda.jsx'
+import Campana from './Campana.jsx'
 
 // Estructura del menú: un enlace directo a lo más usado y el resto agrupado.
 const GRUPO_EXPLORAR = {
@@ -108,7 +109,9 @@ function Navbar() {
   const busquedaActual = pathname === '/buscar' ? parametros.get('buscar') || '' : ''
 
   const enlacesCuenta = [
+    { to: '/viajes', etiqueta: 'Mis viajes' },
     { to: '/perfil#favoritos', etiqueta: 'Mis favoritos' },
+    { to: '/notificaciones', etiqueta: 'Notificaciones' },
     { to: '/perfil', etiqueta: 'Mi perfil' },
     ...(esAdmin ? [{ to: '/admin/destinos', etiqueta: 'Panel de administración' }] : []),
   ]
@@ -146,6 +149,7 @@ function Navbar() {
         <BarraBusqueda key={busquedaActual} valorInicial={busquedaActual} onBuscar={buscar} placeholder="Buscar en Bolivia..." className="hidden min-w-0 max-w-xs flex-1 lg:block" />
 
         <div className="hidden shrink-0 items-center gap-3 lg:flex">
+          {usuario && <Campana />}
           {usuario ? (
             <MenuDesplegable etiqueta={nombreCorto} enlaces={enlacesCuenta} alinear="right">
               <button type="button" onClick={cerrarSesion} className="block w-full rounded-xl px-4 py-2.5 text-left text-sm font-semibold text-red-700 transition hover:bg-red-50">
@@ -166,6 +170,8 @@ function Navbar() {
         </div>
 
         {/* Móvil y tablet */}
+        <div className="flex items-center gap-1 lg:hidden">
+        {usuario && <Campana />}
         <button
           type="button"
           onClick={() => setMenuMovilAbierto(!menuMovilAbierto)}
@@ -176,6 +182,7 @@ function Navbar() {
         >
           <span aria-hidden="true">{menuMovilAbierto ? '✕' : '☰'}</span>
         </button>
+        </div>
       </nav>
 
       {menuMovilAbierto && (

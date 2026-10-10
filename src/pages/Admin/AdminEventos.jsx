@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Navbar from '../../components/Navbar.jsx'
+import { publicarNovedad } from '../../services/notificacionesService.js'
 import AdminNav from '../../components/AdminNav.jsx'
 import { actualizarEvento, crearEvento, eliminarEvento, fechaHoyISO, formatearFechaEvento, getEventos } from '../../services/eventosService.js'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
@@ -109,7 +110,14 @@ function AdminEventos() {
         setMensaje('Evento actualizado.')
       } else {
         await crearEvento(datos)
-        setMensaje('Evento creado.')
+        // Notifica a los turistas (si falla, el evento igual queda creado).
+        await publicarNovedad({
+          tipo: 'evento',
+          titulo: `Nuevo evento: ${datos.nombre.trim()}`,
+          mensaje: [formatearFechaEvento(datos.fecha_inicio), datos.ubicacion].filter(Boolean).join(' · '),
+          enlace: '/eventos',
+        }).catch((errorNovedad) => console.warn('No se publicó la notificación del evento:', errorNovedad))
+        setMensaje('Evento creado y notificado a los turistas.')
       }
       setFormularioAbierto(false)
       refrescar()

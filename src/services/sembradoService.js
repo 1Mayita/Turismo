@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, limit, query, setDoc, writeBatch } from 'firebase/firestore'
+import { collection, doc, getDocs, limit, query, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore'
 import { db } from './firebase.js'
 import { conLimiteDeTiempo } from './tiempoLimite.js'
 import {
@@ -9,6 +9,7 @@ import {
   destinosDeEjemplo,
   eventosDeEjemplo,
   municipiosDeEjemplo,
+  novedadesDeEjemplo,
   platosDeEjemplo,
   regionesDeEjemplo,
   restaurantesDeEjemplo,
@@ -85,6 +86,7 @@ export async function actualizarDatosDeEjemplo() {
     platos: platosDeEjemplo,
     restaurantes: restaurantesDeEjemplo,
     alojamientos: alojamientosDeEjemplo,
+    novedades: novedadesDeEjemplo.map((novedad) => ({ ...novedad, fecha: serverTimestamp() })),
   }
   const cargadas = {}
   const fallidas = []

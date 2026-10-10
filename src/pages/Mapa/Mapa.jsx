@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { CircleMarker, MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import Navbar from '../../components/Navbar.jsx'
+import BotonAgregarAViaje from '../../components/BotonAgregarAViaje.jsx'
 import { ResumenCalificacion } from '../../components/Estrellas.jsx'
 import { estiloDeMarcador, iconoDeMarcador } from '../../components/mapa/iconos.js'
 import { destinosDeEjemplo, getDestinos } from '../../services/destinosService.js'
@@ -309,6 +310,9 @@ function Mapa() {
                           <Link to={item.enlace} className="mt-1 block font-semibold text-brand-700 underline">
                             Ver más
                           </Link>
+                        )}
+                        {item.tipo === 'destino' && item.id && (
+                          <BotonAgregarAViaje destino={{ id: item.id, nombre: item.nombre }} className="mt-2 px-3! py-1.5! text-xs!" />
                         )}
                       </Popup>
                     </Marker>

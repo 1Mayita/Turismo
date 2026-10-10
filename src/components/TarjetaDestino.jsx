@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import BotonAgregarAViaje from './BotonAgregarAViaje.jsx'
 import BotonFavorito from './BotonFavorito.jsx'
 import ImagenSegura from './ImagenSegura.jsx'
 import InsigniaCategoria from './InsigniaCategoria.jsx'
@@ -69,6 +70,7 @@ function TarjetaDestino({ destino, distanciaKm }) {
         </div>
       </Contenedor>
       {destino.id && <BotonFavorito idDestino={destino.id} className="absolute right-3 top-3" />}
+      {destino.id && <BotonAgregarAViaje destino={destino} variante="icono" className="absolute right-3 top-[3.75rem]" />}
     </div>
   )
 }
