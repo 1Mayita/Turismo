@@ -4,6 +4,7 @@ import { useAuth } from './useAuth.js'
 import { NotificacionesContext } from './notificacionesContext.js'
 import { categoriasDeEjemplo, getCategorias } from '../services/categoriasService.js'
 import { getPreferenciasDeUsuario } from '../services/preferenciasService.js'
+import { getReportesDeUsuario } from '../services/reportesService.js'
 import {
   TIPOS_POR_DEFECTO,
   armarNotificaciones,
@@ -19,21 +20,25 @@ const AJUSTES_VACIOS = { leidas: [], leidas_hasta: null, tipos: TIPOS_POR_DEFECT
 // dos minutos y las comparte con la campana, la página y el perfil.
 export function NotificacionesProvider({ children }) {
   const { usuario } = useAuth()
-  const [estado, setEstado] = useState({ uid: null, novedades: [], ajustes: AJUSTES_VACIOS, preferidas: [] })
+  const [estado, setEstado] = useState({ uid: null, novedades: [], ajustes: AJUSTES_VACIOS, preferidas: [], reportes: [] })
   const [error, setError] = useState('')
 
   const cargar = useCallback(async () => {
     if (!usuario) return
     try {
-      const [novedades, ajustes, preferencias, categorias] = await Promise.all([
+      const [novedades, ajustes, preferencias, categorias, reportes] = await Promise.all([
         getNovedadesRecientes(),
         getAjustesDeNotificaciones(usuario.uid),
         getPreferenciasDeUsuario(usuario.uid).catch(() => []),
         getCategorias().catch(() => categoriasDeEjemplo),
+        getReportesDeUsuario(usuario.uid).catch((errorReportes) => {
+          console.error('Error al cargar tus reportes:', errorReportes)
+          return []
+        }),
       ])
       const idsPreferidos = new Set(preferencias.map((preferencia) => preferencia.id_categoria))
       const preferidas = (categorias.length > 0 ? categorias : categoriasDeEjemplo).filter((categoria) => idsPreferidos.has(categoria.id)).map((categoria) => categoria.nombre)
-      setEstado({ uid: usuario.uid, novedades, ajustes, preferidas })
+      setEstado({ uid: usuario.uid, novedades, ajustes, preferidas, reportes })
       setError('')
     } catch (errorLectura) {
       console.error('Error al cargar notificaciones:', errorLectura)
@@ -54,7 +59,7 @@ export function NotificacionesProvider({ children }) {
   }, [usuario, cargar])
 
   const listo = Boolean(usuario) && estado.uid === usuario.uid
-  const notificaciones = listo ? armarNotificaciones(estado.novedades, estado.ajustes, estado.preferidas) : []
+  const notificaciones = listo ? armarNotificaciones(estado.novedades, estado.ajustes, estado.preferidas, estado.reportes) : []
   const noLeidas = notificaciones.filter((notificacion) => !notificacion.leida).length
 
   // Cambia la pantalla al instante y guarda; si falla, vuelve atrás.

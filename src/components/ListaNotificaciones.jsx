@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useNotificaciones } from '../context/useNotificaciones.js'
 
-const ICONO_POR_TIPO = { eventos: '🎉', destinos: '📍', recomendaciones: '✨', avisos: '📢' }
+const ICONO_POR_TIPO = { eventos: '🎉', destinos: '📍', recomendaciones: '✨', reportes: '🛠️', avisos: '📢' }
 
 function tiempoRelativo(fecha) {
   if (typeof fecha?.toDate !== 'function') return ''
