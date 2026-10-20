@@ -96,7 +96,7 @@ function BotonAgregarAViaje({ destino, variante = 'boton', className = '' }) {
           <IconoMaleta />
         </button>
       ) : (
-        <button type="button" onClick={abrir} className={`inline-flex items-center gap-2 rounded-xl boton-principal px-4 py-2.5 text-sm font-bold ${className}`}>
+        <button type="button" onClick={abrir} className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-control boton-principal px-5 text-sm font-bold ${className}`}>
           <IconoMaleta /> Agregar a mi viaje
         </button>
       )}

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth.js'
 import { Estrellas, SelectorEstrellas } from '../../components/Estrellas.jsx'
+import TituloSeccion from '../../components/ui/TituloSeccion.jsx'
+import { claseBoton, claseControl, claseEtiqueta } from '../../components/ui/estilos.js'
 import { crearResena, getResenasDe } from '../../services/resenasService.js'
 
 function formatearFecha(fecha) {
@@ -77,21 +79,21 @@ function ResenasDestino({ idDestino, tipo = 'destino', idElemento = idDestino, o
   }
 
   return (
-    <section className="mb-10">
-      <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Reseñas</p>
+    <section className="mb-14" aria-labelledby="titulo-resenas">
+      <TituloSeccion id="titulo-resenas">Reseñas</TituloSeccion>
 
       {!usuario ? (
         <p className="mb-6 text-sm text-piedra-texto">
-          <Link to="/login" state={{ desde: ubicacion.pathname, aviso: 'Inicia sesión para dejar tu reseña.' }} className="font-semibold text-cielo-700 underline">Inicia sesión</Link> para dejar tu reseña.
+          <Link to="/login" state={{ desde: ubicacion.pathname, aviso: 'Inicia sesión para dejar tu reseña.' }} className="font-bold text-cielo-700 underline">Inicia sesión</Link> para dejar tu reseña.
         </p>
       ) : yaReseno ? (
-        <p className="mb-6 rounded-xl bg-cielo px-4 py-3 text-sm font-semibold text-cielo-700">Ya dejaste tu reseña de este lugar. ¡Gracias!</p>
+        <p className="mb-6 rounded-control bg-cielo px-4 py-3 text-sm font-bold text-noche">Ya dejaste tu reseña de este lugar. ¡Gracias!</p>
       ) : (
-        <form onSubmit={enviar} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
+        <form onSubmit={enviar} className="mb-8 space-y-4 rounded-tarjeta border border-borde bg-white p-5 shadow-suave sm:p-6">
           <h3 className="text-lg font-bold text-noche">Deja tu reseña</h3>
-          {errorFormulario && <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{errorFormulario}</p>}
+          {errorFormulario && <p className="rounded-control bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{errorFormulario}</p>}
           <SelectorEstrellas valor={calificacion} onCambiar={setCalificacion} />
-          <label className="block text-sm font-semibold text-noche/80">
+          <label className={claseEtiqueta}>
             Comentario
             <textarea
               value={comentario}
@@ -99,27 +101,32 @@ function ResenasDestino({ idDestino, tipo = 'destino', idElemento = idDestino, o
               rows={3}
               maxLength={1000}
               placeholder="¿Qué te pareció tu visita?"
-              className="mt-2 w-full rounded-xl border border-borde bg-white/70 px-4 py-2.5 font-normal outline-none focus:border-cielo-600 focus:ring-2 focus:ring-cielo-600/30"
+              className={`${claseControl} mt-2 min-h-28 font-normal`}
             />
           </label>
-          <button disabled={enviando} className="rounded-xl boton-principal px-5 py-2.5 font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-60">
+          <button disabled={enviando} className={claseBoton('primario')}>
             {enviando ? 'Publicando...' : 'Publicar reseña'}
           </button>
         </form>
       )}
 
       {cargando ? (
-        <div className="h-24 animate-pulse rounded-2xl bg-sal-2" />
+        <div className="h-24 animate-pulse rounded-tarjeta bg-sal-2" />
       ) : error ? (
-        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
+        <p className="rounded-control border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
       ) : resenas.length === 0 ? (
-        <p className="text-piedra-texto">Todavía no hay reseñas. ¡Sé la primera persona en opinar!</p>
+        <p className="rounded-control bg-sal-2 px-4 py-3 text-sm text-piedra-texto">Todavía no hay reseñas. ¡Sé la primera persona en opinar!</p>
       ) : (
         <ul className="space-y-4">
           {resenas.map((resena) => (
-            <li key={resena.id} className="rounded-2xl p-5 cristal">
+            <li key={resena.id} className="rounded-tarjeta border border-borde bg-white p-5 shadow-suave">
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                <p className="font-bold text-noche">{resena.nombre_usuario || 'Turista'}</p>
+                <p className="flex items-center gap-2.5 font-bold text-noche">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-cielo text-sm font-extrabold text-cielo-700" aria-hidden="true">
+                    {(resena.nombre_usuario || 'T').charAt(0).toLocaleUpperCase('es')}
+                  </span>
+                  {resena.nombre_usuario || 'Turista'}
+                </p>
                 <p className="text-xs text-piedra-texto">{formatearFecha(resena.fecha)}</p>
               </div>
               <Estrellas valor={resena.calificacion} />

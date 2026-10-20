@@ -8,7 +8,7 @@ export function Estrellas({ valor, className = 'text-base' }) {
   return (
     <span className={`inline-flex ${className}`} aria-label={`${valor} de 5 estrellas`}>
       {VALORES.map((numero) => (
-        <span key={numero} aria-hidden="true" className={numero <= redondeado ? 'text-amber-400' : 'text-piedra/40'}>★</span>
+        <span key={numero} aria-hidden="true" className={numero <= redondeado ? 'text-atardecer' : 'text-piedra/40'}>★</span>
       ))}
     </span>
   )
@@ -30,7 +30,7 @@ export function SelectorEstrellas({ valor, onCambiar }) {
           aria-label={`${numero} ${numero === 1 ? 'estrella' : 'estrellas'}`}
           onClick={() => onCambiar(numero)}
           onMouseEnter={() => setResaltado(numero)}
-          className={`text-3xl leading-none transition hover:scale-110 ${numero <= mostrado ? 'text-amber-400' : 'text-piedra/40'}`}
+          className={`text-3xl leading-none transition hover:scale-110 ${numero <= mostrado ? 'text-atardecer' : 'text-piedra/40'}`}
         >
           ★
         </button>
@@ -56,7 +56,7 @@ export function ResumenCalificacion({ promedio = 0, total = 0, compacto = false,
   if (!total) return <span className={`text-sm text-piedra-texto ${className}`}>Sin reseñas todavía</span>
   return (
     <span className={`inline-flex items-center gap-1 text-sm font-semibold text-noche/80 ${className}`}>
-      <span className="text-amber-400" aria-hidden="true">★</span>
+      <span className="text-atardecer" aria-hidden="true">★</span>
       {promedio.toFixed(1)}
       <span className="font-normal text-piedra-texto">({total} {total === 1 ? 'reseña' : 'reseñas'})</span>
     </span>

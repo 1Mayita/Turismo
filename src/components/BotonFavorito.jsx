@@ -10,7 +10,9 @@ function IconoCorazon({ relleno }) {
 
 // Corazón para marcar/desmarcar un elemento como favorito. A quien no inició
 // sesión lo lleva al login y, al entrar, lo devuelve a la página donde estaba.
-function BotonFavorito({ idDestino, idElemento = idDestino, tipo = 'destino', className = '' }) {
+// conTexto: botón con la palabra "Guardar"/"Guardado" (barra de acciones del
+// detalle); sin él, solo el corazón redondo que flota sobre las fotos.
+function BotonFavorito({ idDestino, idElemento = idDestino, tipo = 'destino', conTexto = false, className = '' }) {
   const { usuario } = useAuth()
   const { esFavorito, alternarFavorito } = useFavoritos()
   const [guardando, setGuardando] = useState(false)
@@ -35,6 +37,26 @@ function BotonFavorito({ idDestino, idElemento = idDestino, tipo = 'destino', cl
     } finally {
       setGuardando(false)
     }
+  }
+
+  if (conTexto) {
+    return (
+      <div className={className}>
+        <button
+          type="button"
+          onClick={alternar}
+          disabled={guardando}
+          aria-pressed={activo}
+          className={`inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-control border px-4 text-sm font-bold transition duration-150 disabled:opacity-60 ${
+            activo ? 'border-atardecer/40 bg-atardecer/10 text-atardecer-700' : 'border-borde bg-white text-noche hover:bg-cielo'
+          }`}
+        >
+          <span className={activo ? 'text-atardecer' : 'text-piedra-texto'}><IconoCorazon relleno={activo} /></span>
+          {activo ? 'Guardado' : 'Guardar'}
+        </button>
+        {error && <p className="mt-1 rounded-lg bg-red-50 px-2 py-1 text-xs font-semibold text-red-700" role="alert">{error}</p>}
+      </div>
+    )
   }
 
   return (

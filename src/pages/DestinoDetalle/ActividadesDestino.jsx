@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
+import { Mountain } from 'lucide-react'
 import BotonFavorito from '../../components/BotonFavorito.jsx'
+import TituloSeccion from '../../components/ui/TituloSeccion.jsx'
 import { getActividadesPorDestino } from '../../services/actividadesService.js'
 
 function ActividadesDestino({ idDestino }) {
@@ -23,27 +25,32 @@ function ActividadesDestino({ idDestino }) {
   }, [idDestino])
 
   return (
-    <section className="mb-10">
-      <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Actividades disponibles</p>
+    <section className="mb-14" aria-labelledby="titulo-actividades">
+      <TituloSeccion id="titulo-actividades">Actividades disponibles</TituloSeccion>
       {cargando ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="h-20 animate-pulse rounded-2xl bg-sal-2" />
-          <div className="h-20 animate-pulse rounded-2xl bg-sal-2" />
+          <div className="h-20 animate-pulse rounded-tarjeta bg-sal-2" />
+          <div className="h-20 animate-pulse rounded-tarjeta bg-sal-2" />
         </div>
       ) : error ? (
-        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
+        <p className="rounded-control border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
       ) : actividades.length === 0 ? (
-        <p className="text-piedra-texto">Todavía no hay actividades registradas para este destino.</p>
+        <p className="rounded-control bg-sal-2 px-4 py-3 text-sm text-piedra-texto">Todavía no hay actividades registradas para este destino.</p>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {actividades.map((actividad) => (
-            <div key={actividad.id} className="relative rounded-2xl p-5 pr-16 cristal">
-              <p className="font-bold text-noche">{actividad.nombre}</p>
-              {actividad.descripcion && <p className="mt-1 text-sm text-piedra-texto">{actividad.descripcion}</p>}
+            <li key={actividad.id} className="relative flex gap-3 rounded-tarjeta border border-borde bg-white p-4 pr-16 shadow-suave">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-cielo text-cielo-700" aria-hidden="true">
+                <Mountain />
+              </span>
+              <div>
+                <h3 className="font-bold text-noche">{actividad.nombre}</h3>
+                {actividad.descripcion && <p className="mt-1 text-sm text-piedra-texto">{actividad.descripcion}</p>}
+              </div>
               <BotonFavorito idElemento={actividad.id} tipo="actividad" className="absolute right-3 top-3" />
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </section>
   )

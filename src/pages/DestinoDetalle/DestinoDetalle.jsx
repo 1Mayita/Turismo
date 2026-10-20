@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
+import { Clock, Images, Lightbulb, MapPin, Ticket } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
 import BotonAgregarAViaje from '../../components/BotonAgregarAViaje.jsx'
@@ -7,7 +8,8 @@ import BotonFavorito from '../../components/BotonFavorito.jsx'
 import BotonReportar from '../../components/BotonReportar.jsx'
 import EstablecimientosCercanos from '../../components/EstablecimientosCercanos.jsx'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
-import InsigniaCategoria from '../../components/InsigniaCategoria.jsx'
+import { ChipCategoria } from '../../components/ui/Chip.jsx'
+import TituloSeccion from '../../components/ui/TituloSeccion.jsx'
 import Migas from '../../components/Migas.jsx'
 import VisorImagenes from '../../components/VisorImagenes.jsx'
 import { ResumenCalificacion } from '../../components/Estrellas.jsx'
@@ -24,6 +26,71 @@ import ResenasDestino from './ResenasDestino.jsx'
 
 // El mapa (Leaflet) se descarga aparte, solo cuando el destino tiene coordenadas.
 const MapaUbicacion = lazy(() => import('../../components/mapa/MapaUbicacion.jsx'))
+
+const MAXIMO_EN_MOSAICO = 5
+
+// Dato clave con icono: horario, entrada, dirección...
+function DatoClave({ icono: Icono, etiqueta, children, ancho = false }) {
+  return (
+    <div className={`flex gap-3 rounded-tarjeta border border-borde bg-white p-4 shadow-suave ${ancho ? 'sm:col-span-2' : ''}`}>
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cielo text-cielo-700" aria-hidden="true">
+        <Icono size={20} />
+      </span>
+      <div className="min-w-0">
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-cobre-texto">{etiqueta}</p>
+        <p className="mt-0.5 text-[15px] leading-relaxed text-noche">{children}</p>
+      </div>
+    </div>
+  )
+}
+
+// Mosaico de fotos arriba del detalle. En celular se ve la foto principal y
+// un botón con la cantidad; en escritorio, la principal grande y 4 más chicas.
+function Galeria({ fotos, nombre, credito, alAbrir }) {
+  const visibles = fotos.slice(0, MAXIMO_EN_MOSAICO)
+  const unaSola = visibles.length === 1
+  const chicas = visibles.length - 1
+  // Las fotos chicas llenan las 4 casillas de la derecha sin dejar huecos.
+  function claseChica(indice) {
+    if (chicas === 1) return 'sm:col-span-2 sm:row-span-2'
+    if (chicas === 2) return 'sm:col-span-2'
+    if (chicas === 3 && indice === 3) return 'sm:col-span-2'
+    return ''
+  }
+  return (
+    <section aria-label={`Fotos de ${nombre}`}>
+      <div className={`grid gap-2 overflow-hidden rounded-tarjeta sm:h-[440px] ${unaSola ? '' : 'sm:grid-cols-4 sm:grid-rows-2'}`}>
+        {visibles.map((url, indice) => (
+          <button
+            key={url + indice}
+            type="button"
+            onClick={() => alAbrir(indice)}
+            aria-label={`Ampliar foto ${indice + 1} de ${fotos.length}`}
+            className={`group relative overflow-hidden bg-sal-2 ${indice === 0 ? `aspect-[4/3] sm:aspect-auto ${unaSola ? '' : 'sm:col-span-2 sm:row-span-2'}` : `hidden sm:block ${claseChica(indice)}`}`}
+          >
+            <ImagenSegura
+              key={url}
+              src={url}
+              alt={indice === 0 ? nombre : `${nombre}, foto ${indice + 1}`}
+              loading={indice === 0 ? 'eager' : 'lazy'}
+              decoding="async"
+              className="h-full w-full object-cover transition duration-500 ease-salida group-hover:scale-[1.03]"
+            />
+          </button>
+        ))}
+      </div>
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+        {credito ? <p className="text-xs text-piedra-texto">{credito}</p> : <span />}
+        {fotos.length > 1 && (
+          <button type="button" onClick={() => alAbrir(0)} className="inline-flex min-h-11 items-center gap-2 rounded-control px-3 text-sm font-bold text-cielo-700 hover:bg-sal-2">
+            <Images aria-hidden="true" size={18} />
+            Ver las {fotos.length} fotos
+          </button>
+        )}
+      </div>
+    </section>
+  )
+}
 
 function DestinoDetalle() {
   const { id } = useParams()
@@ -99,128 +166,116 @@ function DestinoDetalle() {
     { etiqueta: destino?.nombre || 'Destino' },
   ]
 
+  const precio = destino && (destino.precio_ingreso > 0 ? `Bs ${destino.precio_ingreso}` : 'Entrada libre')
+
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="contenedor max-w-5xl py-12">
+      <main className="contenedor max-w-6xl pb-32 pt-8 lg:pb-12">
         <Migas pasos={migas} />
 
         {cargando ? (
-          <div className="animate-pulse space-y-6">
-            <div className="h-80 w-full rounded-3xl bg-white" />
-            <div className="h-6 w-1/3 rounded bg-white" />
-            <div className="h-4 w-2/3 rounded bg-white" />
+          <div className="space-y-6" aria-hidden="true">
+            <div className="h-80 w-full animate-pulse rounded-tarjeta bg-sal-2 sm:h-[440px]" />
+            <div className="h-10 w-1/2 animate-pulse rounded-control bg-sal-2" />
+            <div className="h-4 w-2/3 animate-pulse rounded-control bg-sal-2" />
           </div>
         ) : error ? (
-          <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
+          <p className="rounded-control border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
         ) : (
           <article>
-            <div className="relative mb-8 h-72 w-full overflow-hidden rounded-3xl sm:h-[26rem]">
-              <ImagenSegura key={destino.imagen_principal} src={destino.imagen_principal} alt={destino.nombre} className="h-full w-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-noche/50 via-transparent to-transparent" />
-              <InsigniaCategoria categoria={destino.categoria} className="absolute bottom-4 left-4 px-4 py-1.5 text-sm shadow-sm" />
-            </div>
+            <Galeria fotos={galeria} nombre={destino.nombre} credito={destino.credito_imagenes} alAbrir={setIndiceVisor} />
 
-            <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-3">
-                  <h1 className="text-4xl font-bold text-noche">{destino.nombre}</h1>
-                  <BotonFavorito idDestino={destino.id} />
+            <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_330px] lg:gap-12">
+              <div className="min-w-0">
+                <header className="mb-8">
+                  {destino.categoria && <ChipCategoria nombre={destino.categoria} tamano="pequeno" className="mb-3" />}
+                  <h1 className="titulo-display text-[40px] sm:text-[52px]">{destino.nombre}</h1>
+                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                    {errorCalificacion ? (
+                      <p className="text-sm font-semibold text-red-700" role="alert">{errorCalificacion}</p>
+                    ) : calificacion && (
+                      <ResumenCalificacion promedio={calificacion.promedio} total={calificacion.total} />
+                    )}
+                    <p className="flex items-center gap-1.5 text-piedra-texto">
+                      <MapPin aria-hidden="true" size={18} className="text-piedra" /> {destino.ubicacion}
+                    </p>
+                  </div>
+                  {/* En celular, compartir va aquí; guardar y agregar van en la barra de abajo. */}
+                  <BotonCompartir titulo={destino.nombre} texto={`Mira ${destino.nombre} en Rutas de Bolivia:`} className="mt-4 lg:hidden" />
+                </header>
+
+                <p className="texto-lectura mb-8 text-lg text-noche/85">{destino.descripcion}</p>
+
+                <div className="mb-14 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <DatoClave icono={Ticket} etiqueta="Entrada">{precio}</DatoClave>
+                  {destino.horario && <DatoClave icono={Clock} etiqueta="Horario">{destino.horario}</DatoClave>}
+                  {destino.direccion && <DatoClave icono={MapPin} etiqueta="Dirección">{destino.direccion}</DatoClave>}
+                  {destino.recomendaciones && <DatoClave icono={Lightbulb} etiqueta="Recomendaciones" ancho>{destino.recomendaciones}</DatoClave>}
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <BotonAgregarAViaje destino={destino} />
-                  <BotonCompartir titulo={destino.nombre} texto={`Mira ${destino.nombre} en Rutas de Bolivia:`} />
-                </div>
-                {errorCalificacion ? (
-                  <p className="mt-1 text-sm font-semibold text-red-700" role="alert">{errorCalificacion}</p>
-                ) : calificacion && (
-                  <ResumenCalificacion promedio={calificacion.promedio} total={calificacion.total} className="mt-1" />
+
+                {coordenadasValidas(destino.latitud, destino.longitud) && (
+                  <section className="mb-14" aria-labelledby="titulo-ubicacion">
+                    <TituloSeccion id="titulo-ubicacion">Ubicación</TituloSeccion>
+                    <div className="overflow-hidden rounded-tarjeta border border-borde shadow-suave">
+                      <Suspense fallback={<div className="h-72 animate-pulse bg-sal-2" />}>
+                        <MapaUbicacion latitud={destino.latitud} longitud={destino.longitud} titulo={destino.nombre} clave={destino.categoria} />
+                      </Suspense>
+                    </div>
+                  </section>
                 )}
-                <p className="mt-2 flex items-center gap-1 text-piedra-texto">
-                  <span aria-hidden="true">📍</span> {destino.ubicacion}
-                </p>
+
+                <InfoPractica destino={destino} />
+
+                <ActividadesDestino idDestino={destino.id} />
+
+                <EstablecimientosCercanos
+                  idDepartamento={destino.id_departamento}
+                  idMunicipio={destino.id_municipio}
+                  nombreDepartamento={departamento?.nombre}
+                  angosto
+                />
+
+                <ResenasDestino idDestino={destino.id} onResenaCreada={() => setVersionCalificacion((valorAnterior) => valorAnterior + 1)} />
+
+                <div className="border-t border-borde pt-6">
+                  <BotonReportar tipo="destino" elemento={destino} enlace={`/destinos/${destino.id}`} />
+                </div>
               </div>
-              <p className="whitespace-nowrap rounded-full bg-cielo px-4 py-2 text-sm font-bold text-cielo-700">
-                {destino.precio_ingreso > 0 ? `Bs ${destino.precio_ingreso}` : 'Entrada libre'}
-              </p>
-            </div>
 
-            <p className="mb-8 text-lg leading-7 text-noche/80">{destino.descripcion}</p>
-
-            <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {destino.horario && (
-                <div className="rounded-2xl p-5 cristal">
-                  <p className="mb-1 text-xs font-bold uppercase tracking-wider text-cobre-texto">Horario</p>
-                  <p className="text-noche/80">{destino.horario}</p>
+              {/* Escritorio: acciones siempre a la vista mientras se baja. */}
+              <aside className="hidden lg:block" aria-label="Acciones">
+                <div className="sticky top-24 rounded-tarjeta border border-borde bg-white p-5 shadow-suave">
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-cobre-texto">Entrada</p>
+                  <p className="titulo-display text-[36px] leading-tight">{precio}</p>
+                  {calificacion?.total > 0 && <ResumenCalificacion promedio={calificacion.promedio} total={calificacion.total} className="mt-1" />}
+                  <div className="mt-5 space-y-2.5">
+                    <BotonAgregarAViaje destino={destino} className="w-full" />
+                    <BotonFavorito idDestino={destino.id} conTexto />
+                    <BotonCompartir titulo={destino.nombre} texto={`Mira ${destino.nombre} en Rutas de Bolivia:`} className="w-full" />
+                  </div>
+                  {destino.horario && (
+                    <p className="mt-5 flex gap-2 border-t border-borde pt-4 text-sm text-piedra-texto">
+                      <Clock aria-hidden="true" size={18} className="shrink-0 text-piedra" />
+                      {destino.horario}
+                    </p>
+                  )}
                 </div>
-              )}
-              {destino.direccion && (
-                <div className="rounded-2xl p-5 cristal">
-                  <p className="mb-1 text-xs font-bold uppercase tracking-wider text-cobre-texto">Dirección</p>
-                  <p className="text-noche/80">{destino.direccion}</p>
-                </div>
-              )}
-              {destino.recomendaciones && (
-                <div className="rounded-2xl p-5 cristal">
-                  <p className="mb-1 text-xs font-bold uppercase tracking-wider text-cobre-texto">Recomendaciones</p>
-                  <p className="text-noche/80">{destino.recomendaciones}</p>
-                </div>
-              )}
-            </div>
-
-            {coordenadasValidas(destino.latitud, destino.longitud) && (
-              <section className="mb-10">
-                <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Ubicación</p>
-                <Suspense fallback={<div className="h-72 animate-pulse rounded-2xl bg-sal-2" />}>
-                  <MapaUbicacion latitud={destino.latitud} longitud={destino.longitud} titulo={destino.nombre} clave={destino.categoria} />
-                </Suspense>
-              </section>
-            )}
-
-            <InfoPractica destino={destino} />
-
-            <ActividadesDestino idDestino={destino.id} />
-
-            <EstablecimientosCercanos
-              idDepartamento={destino.id_departamento}
-              idMunicipio={destino.id_municipio}
-              nombreDepartamento={departamento?.nombre}
-            />
-
-            {galeria.length > 0 && (
-              <div className="mb-10">
-                <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Galería</p>
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                  {galeria.map((url, indice) => (
-                    <button
-                      key={url + indice}
-                      type="button"
-                      onClick={() => setIndiceVisor(indice)}
-                      aria-label={`Ampliar foto ${indice + 1} de ${galeria.length}`}
-                      className="overflow-hidden rounded-xl focus:outline-none focus:ring-2 focus:ring-cielo-600"
-                    >
-                      <ImagenSegura
-                        src={url}
-                        alt={`${destino.nombre}, foto ${indice + 1}`}
-                        loading="lazy"
-                        decoding="async"
-                        className="h-32 w-full object-cover transition hover:scale-105"
-                      />
-                    </button>
-                  ))}
-                </div>
-                {destino.credito_imagenes && <p className="mt-3 text-xs text-piedra-texto">{destino.credito_imagenes}</p>}
-              </div>
-            )}
-
-            <ResenasDestino idDestino={destino.id} onResenaCreada={() => setVersionCalificacion((valorAnterior) => valorAnterior + 1)} />
-
-            <div className="border-t border-white/80 pt-6">
-              <BotonReportar tipo="destino" elemento={destino} enlace={`/destinos/${destino.id}`} />
+              </aside>
             </div>
           </article>
         )}
       </main>
+
+      {/* Celular: guardar y agregar al viaje siempre a mano (DESIGN.md §7). */}
+      {destino && !cargando && !error && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-borde bg-white/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur lg:hidden">
+          <div className="mx-auto grid max-w-md grid-cols-[auto_1fr] gap-3">
+            <BotonFavorito idDestino={destino.id} conTexto />
+            <BotonAgregarAViaje destino={destino} className="w-full" />
+          </div>
+        </div>
+      )}
 
       {indiceVisor !== null && (
         <VisorImagenes

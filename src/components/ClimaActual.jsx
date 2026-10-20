@@ -1,21 +1,22 @@
 import { useEffect, useState } from 'react'
+import { Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudSnow, CloudSun, Sun, Thermometer } from 'lucide-react'
 
 // Clima actual y de los próximos días con Open-Meteo (https://open-meteo.com):
 // es gratuito, no pide clave ni registro y permite llamadas desde el navegador.
 const DESCRIPCIONES = [
-  [[0], '☀️', 'Despejado'],
-  [[1, 2], '🌤️', 'Parcialmente nublado'],
-  [[3], '☁️', 'Nublado'],
-  [[45, 48], '🌫️', 'Niebla'],
-  [[51, 53, 55, 56, 57], '🌦️', 'Llovizna'],
-  [[61, 63, 65, 66, 67, 80, 81, 82], '🌧️', 'Lluvia'],
-  [[71, 73, 75, 77, 85, 86], '🌨️', 'Nieve'],
-  [[95, 96, 99], '⛈️', 'Tormenta'],
+  [[0], Sun, 'Despejado'],
+  [[1, 2], CloudSun, 'Parcialmente nublado'],
+  [[3], Cloud, 'Nublado'],
+  [[45, 48], CloudFog, 'Niebla'],
+  [[51, 53, 55, 56, 57], CloudDrizzle, 'Llovizna'],
+  [[61, 63, 65, 66, 67, 80, 81, 82], CloudRain, 'Lluvia'],
+  [[71, 73, 75, 77, 85, 86], CloudSnow, 'Nieve'],
+  [[95, 96, 99], CloudLightning, 'Tormenta'],
 ]
 
 function describir(codigo) {
   const encontrado = DESCRIPCIONES.find(([codigos]) => codigos.includes(codigo))
-  return encontrado ? { icono: encontrado[1], texto: encontrado[2] } : { icono: '🌡️', texto: 'Sin datos' }
+  return encontrado ? { icono: encontrado[1], texto: encontrado[2] } : { icono: Thermometer, texto: 'Sin datos' }
 }
 
 function ClimaActual({ latitud, longitud }) {
@@ -40,9 +41,10 @@ function ClimaActual({ latitud, longitud }) {
   }, [latitud, longitud])
 
   if (error) return <p className="text-sm text-piedra-texto">No pudimos consultar el clima en este momento.</p>
-  if (!clima) return <div className="h-20 animate-pulse rounded-xl bg-sal-2" aria-label="Cargando el clima" />
+  if (!clima) return <div className="h-20 animate-pulse rounded-control bg-sal-2" aria-label="Cargando el clima" />
 
   const ahora = describir(clima.current?.weather_code)
+  const IconoAhora = ahora.icono
   const dias = (clima.daily?.time || []).map((fecha, indice) => ({
     fecha,
     ...describir(clima.daily.weather_code[indice]),
@@ -54,20 +56,23 @@ function ClimaActual({ latitud, longitud }) {
   return (
     <div>
       <div className="flex items-center gap-3">
-        <span className="text-4xl" aria-hidden="true">{ahora.icono}</span>
+        <IconoAhora aria-hidden="true" size={40} strokeWidth={1.5} className="text-atardecer" />
         <div>
-          <p className="text-2xl font-extrabold text-noche">{Math.round(clima.current?.temperature_2m)} °C</p>
-          <p className="text-sm text-piedra-texto">{ahora.texto} · viento {Math.round(clima.current?.wind_speed_10m)} km/h</p>
+          <p className="titulo-display text-[32px] leading-none">{Math.round(clima.current?.temperature_2m)} °C</p>
+          <p className="mt-1 text-sm text-piedra-texto">{ahora.texto} · viento {Math.round(clima.current?.wind_speed_10m)} km/h</p>
         </div>
       </div>
-      <ul className="mt-3 grid grid-cols-3 gap-2">
-        {dias.map((dia, indice) => (
-          <li key={dia.fecha} className="rounded-xl bg-white/70 px-2 py-2 text-center text-xs">
-            <p className="font-semibold capitalize text-noche/80">{nombreDia(dia.fecha, indice)}</p>
-            <p className="text-lg" aria-label={dia.texto}>{dia.icono}</p>
-            <p className="text-noche/80"><span className="font-bold">{dia.maxima}°</span> / {dia.minima}°</p>
-          </li>
-        ))}
+      <ul className="mt-4 grid grid-cols-3 gap-2">
+        {dias.map((dia, indice) => {
+          const Icono = dia.icono
+          return (
+            <li key={dia.fecha} className="flex flex-col items-center gap-1 rounded-control bg-sal-2 px-2 py-2.5 text-center text-xs">
+              <p className="font-bold capitalize text-noche">{nombreDia(dia.fecha, indice)}</p>
+              <Icono aria-label={dia.texto} size={22} className="text-cielo-700" />
+              <p className="text-noche/80"><span className="font-bold">{dia.maxima}°</span> / {dia.minima}°</p>
+            </li>
+          )
+        })}
       </ul>
       <p className="mt-2 text-[11px] text-piedra-texto">Pronóstico de Open-Meteo.</p>
     </div>

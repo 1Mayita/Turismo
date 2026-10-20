@@ -1,15 +1,10 @@
 import { useState } from 'react'
+import { Check, Copy, Mail, MessageCircle, Share, Share2 } from 'lucide-react'
 import Modal from './Modal.jsx'
+import { claseBoton, claseControl, claseEtiqueta } from './ui/estilos.js'
 
 function IconoCompartir() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden="true">
-      <circle cx="18" cy="5" r="2.5" stroke="currentColor" strokeWidth="2" />
-      <circle cx="6" cy="12" r="2.5" stroke="currentColor" strokeWidth="2" />
-      <circle cx="18" cy="19" r="2.5" stroke="currentColor" strokeWidth="2" />
-      <path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  )
+  return <Share2 aria-hidden="true" className="shrink-0" />
 }
 
 // Opciones para compartir un enlace: copiar, WhatsApp, correo y, si el
@@ -40,28 +35,32 @@ export function OpcionesCompartir({ titulo, texto, url }) {
     }
   }
 
-  const claseOpcion = 'flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition'
+  const claseOpcion = 'flex min-h-11 items-center justify-center gap-2 rounded-control px-4 text-sm font-bold transition'
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-semibold text-noche/80">
+      <label className={claseEtiqueta}>
         Enlace
         <span className="mt-2 flex gap-2">
-          <input readOnly value={url} onFocus={(evento) => evento.target.select()} className="min-w-0 flex-1 rounded-xl border border-borde bg-sal px-3 py-2.5 text-sm font-normal text-noche/80" />
-          <button type="button" onClick={copiar} className={`${claseOpcion} shrink-0 ${copiado ? 'bg-emerald-600 text-white' : 'bg-noche text-white hover:bg-noche/90'}`} aria-live="polite">
-            {copiado ? '✓ Copiado' : 'Copiar'}
+          <input readOnly value={url} onFocus={(evento) => evento.target.select()} className={`${claseControl} min-w-0 flex-1 bg-sal text-sm font-normal`} />
+          <button type="button" onClick={copiar} className={`${claseOpcion} shrink-0 ${copiado ? 'bg-emerald-700 text-white' : 'bg-noche text-white hover:bg-noche/90'}`} aria-live="polite">
+            {copiado ? <Check aria-hidden="true" size={18} /> : <Copy aria-hidden="true" size={18} />}
+            {copiado ? 'Copiado' : 'Copiar'}
           </button>
         </span>
       </label>
       <div className="grid gap-2 sm:grid-cols-3">
-        <a href={`https://wa.me/?text=${encodeURIComponent(mensaje)}`} target="_blank" rel="noreferrer" className={`${claseOpcion} bg-[#25D366] text-white hover:brightness-95`}>
+        <a href={`https://wa.me/?text=${encodeURIComponent(mensaje)}`} target="_blank" rel="noreferrer" className={`${claseOpcion} bg-[#1f8a4c] text-white hover:brightness-110`}>
+          <MessageCircle aria-hidden="true" size={18} />
           WhatsApp
         </a>
-        <a href={`mailto:?subject=${encodeURIComponent(titulo)}&body=${encodeURIComponent(mensaje)}`} className={`${claseOpcion} bg-sal-2 text-noche hover:bg-cielo`}>
+        <a href={`mailto:?subject=${encodeURIComponent(titulo)}&body=${encodeURIComponent(mensaje)}`} className={`${claseOpcion} border border-borde bg-white text-noche hover:bg-cielo`}>
+          <Mail aria-hidden="true" size={18} />
           Correo
         </a>
         {puedeCompartirNativo && (
-          <button type="button" onClick={compartirNativo} className={`${claseOpcion} bg-sal-2 text-noche hover:bg-cielo`}>
+          <button type="button" onClick={compartirNativo} className={`${claseOpcion} border border-borde bg-white text-noche hover:bg-cielo`}>
+            <Share aria-hidden="true" size={18} />
             Más opciones
           </button>
         )}
@@ -78,13 +77,13 @@ function BotonCompartir({ titulo, texto, url = typeof window !== 'undefined' ? w
 
   return (
     <>
-      <button type="button" onClick={() => setAbierto(true)} className={`inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-cielo-700 shadow-sm ring-1 ring-borde transition hover:bg-cielo/50 ${className}`}>
+      <button type="button" onClick={() => setAbierto(true)} className={claseBoton('secundario', 'pequeno', `bg-white ${className}`)}>
         <IconoCompartir /> Compartir
       </button>
       {abierto && (
         <Modal titulo={`Compartir ${titulo}`} onCerrar={() => setAbierto(false)}>
           <div className="p-6 sm:p-8">
-            <h2 className="mb-1 pr-10 text-2xl font-bold text-noche">Compartir</h2>
+            <h2 className="titulo-display mb-1 pr-12 text-[32px]">Compartir</h2>
             <p className="mb-5 text-sm text-piedra-texto">{titulo}</p>
             <OpcionesCompartir titulo={titulo} texto={texto} url={url} />
           </div>

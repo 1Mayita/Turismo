@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { X } from 'lucide-react'
 
 // Ventana modal accesible: se cierra con Esc, con el botón × o al hacer clic
 // fuera; bloquea el scroll del fondo y devuelve el foco a quien la abrió.
@@ -40,15 +41,15 @@ function Modal({ titulo, onCerrar, children }) {
         aria-label={titulo}
         tabIndex={-1}
         onClick={(evento) => evento.stopPropagation()}
-        className="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl bg-white shadow-2xl outline-none sm:rounded-3xl"
+        className="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-t-tarjeta bg-white shadow-elevada outline-none sm:rounded-tarjeta"
       >
         <button
           type="button"
           onClick={onCerrar}
           aria-label="Cerrar"
-          className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-2xl font-bold text-noche/80 shadow-md transition hover:bg-white"
+          className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-noche shadow-suave transition hover:bg-sal-2"
         >
-          ×
+          <X aria-hidden="true" />
         </button>
         {children}
       </div>
