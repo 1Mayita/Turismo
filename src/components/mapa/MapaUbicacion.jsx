@@ -26,7 +26,7 @@ function MapaUbicacion({ latitud, longitud, titulo, clave }) {
         href={`https://www.google.com/maps/dir/?api=1&destination=${posicion[0]},${posicion[1]}`}
         target="_blank"
         rel="noreferrer"
-        className="mt-3 inline-block text-sm font-semibold text-brand-700 underline"
+        className="mt-3 inline-block text-sm font-semibold text-cielo-700 underline"
       >
         Cómo llegar (abre Google Maps)
       </a>

@@ -32,7 +32,7 @@ function Modal({ titulo, onCerrar, children }) {
   }, [])
 
   return createPortal(
-    <div className="fixed inset-0 z-[1000] flex items-end justify-center bg-brand-950/50 p-0 backdrop-blur-sm sm:items-center sm:p-6" onClick={onCerrar}>
+    <div className="fixed inset-0 z-[1000] flex items-end justify-center bg-noche/50 p-0 backdrop-blur-sm sm:items-center sm:p-6" onClick={onCerrar}>
       <div
         ref={panel}
         role="dialog"
@@ -46,7 +46,7 @@ function Modal({ titulo, onCerrar, children }) {
           type="button"
           onClick={onCerrar}
           aria-label="Cerrar"
-          className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-2xl font-bold text-slate-700 shadow-md transition hover:bg-white"
+          className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-2xl font-bold text-noche/80 shadow-md transition hover:bg-white"
         >
           ×
         </button>

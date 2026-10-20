@@ -104,8 +104,8 @@ function BotonAgregarAViaje({ destino, variante = 'boton', className = '' }) {
       {abierto && (
         <Modal titulo="Agregar a mi viaje" onCerrar={() => setAbierto(false)}>
           <div className="p-6 sm:p-8">
-            <h2 className="pr-10 text-2xl font-bold text-slate-900">Agregar a mi viaje</h2>
-            <p className="mt-1 text-sm text-slate-600">{destino.nombre}</p>
+            <h2 className="pr-10 text-2xl font-bold text-noche">Agregar a mi viaje</h2>
+            <p className="mt-1 text-sm text-piedra-texto">{destino.nombre}</p>
 
             {agregadoEn && (
               <div className="mt-5 rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-900" role="status">
@@ -118,24 +118,24 @@ function BotonAgregarAViaje({ destino, variante = 'boton', className = '' }) {
             )}
             {error && <p className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
 
-            <h3 className="mb-2 mt-6 text-sm font-bold uppercase tracking-wider text-slate-500">Mis viajes</h3>
+            <h3 className="mb-2 mt-6 text-sm font-bold uppercase tracking-wider text-piedra-texto">Mis viajes</h3>
             {cargando ? (
               <div className="space-y-2">
-                <div className="h-14 animate-pulse rounded-xl bg-slate-100" />
-                <div className="h-14 animate-pulse rounded-xl bg-slate-100" />
+                <div className="h-14 animate-pulse rounded-xl bg-sal-2" />
+                <div className="h-14 animate-pulse rounded-xl bg-sal-2" />
               </div>
             ) : viajes.length === 0 ? (
-              <p className="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600">Aún no tienes viajes. Crea el primero aquí abajo.</p>
+              <p className="rounded-xl bg-sal px-4 py-3 text-sm text-piedra-texto">Aún no tienes viajes. Crea el primero aquí abajo.</p>
             ) : (
               <ul className="max-h-64 space-y-2 overflow-y-auto">
                 {viajes.map((viaje) => {
                   const yaEsta = estaEn(viaje)
                   const lleno = (viaje.paradas || []).length >= MAXIMO_PARADAS
                   return (
-                    <li key={viaje.id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-3">
+                    <li key={viaje.id} className="flex items-center justify-between gap-3 rounded-xl bg-sal px-4 py-3">
                       <span className="min-w-0">
-                        <span className="block truncate font-semibold text-slate-900">{viaje.nombre}</span>
-                        <span className="text-xs text-slate-500">{(viaje.paradas || []).length} {(viaje.paradas || []).length === 1 ? 'destino' : 'destinos'}</span>
+                        <span className="block truncate font-semibold text-noche">{viaje.nombre}</span>
+                        <span className="text-xs text-piedra-texto">{(viaje.paradas || []).length} {(viaje.paradas || []).length === 1 ? 'destino' : 'destinos'}</span>
                       </span>
                       {yaEsta ? (
                         <span className="shrink-0 text-sm font-semibold text-emerald-700">✓ Ya está</span>
@@ -145,7 +145,7 @@ function BotonAgregarAViaje({ destino, variante = 'boton', className = '' }) {
                           onClick={() => agregarA(viaje)}
                           disabled={Boolean(guardandoEn) || lleno}
                           title={lleno ? `Este viaje ya tiene ${MAXIMO_PARADAS} destinos` : undefined}
-                          className="shrink-0 rounded-lg bg-brand-700 px-3 py-1.5 text-sm font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="shrink-0 rounded-lg bg-noche px-3 py-1.5 text-sm font-bold text-white transition hover:bg-noche/90 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {guardandoEn === viaje.id ? 'Agregando...' : lleno ? 'Lleno' : 'Agregar'}
                         </button>
@@ -156,8 +156,8 @@ function BotonAgregarAViaje({ destino, variante = 'boton', className = '' }) {
               </ul>
             )}
 
-            <form onSubmit={crearYAgregar} className="mt-6 rounded-2xl border border-dashed border-sky-300 p-4">
-              <label className="block text-sm font-semibold text-slate-700">
+            <form onSubmit={crearYAgregar} className="mt-6 rounded-2xl border border-dashed border-borde p-4">
+              <label className="block text-sm font-semibold text-noche/80">
                 O crea un viaje nuevo con este destino
                 <span className="mt-2 flex flex-wrap gap-2">
                   <input
@@ -165,7 +165,7 @@ function BotonAgregarAViaje({ destino, variante = 'boton', className = '' }) {
                     onChange={(evento) => setNombreNuevo(evento.target.value)}
                     maxLength={80}
                     placeholder="Ej.: Vacaciones en el altiplano"
-                    className="min-w-0 flex-1 rounded-xl border border-sky-200 bg-white px-4 py-2.5 font-normal outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+                    className="min-w-0 flex-1 rounded-xl border border-borde bg-white px-4 py-2.5 font-normal outline-none focus:border-cielo-600 focus:ring-2 focus:ring-cielo-600/30"
                   />
                   <button disabled={Boolean(guardandoEn)} className="rounded-xl boton-principal px-4 py-2.5 text-sm font-bold disabled:opacity-60">
                     {guardandoEn === 'nuevo' ? 'Creando...' : 'Crear y agregar'}

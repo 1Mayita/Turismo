@@ -26,8 +26,8 @@ const REDES = [
 function Dato({ titulo, children }) {
   return (
     <div className="rounded-2xl cristal p-5">
-      <p className="mb-1 text-xs font-bold uppercase tracking-wider text-accent-600">{titulo}</p>
-      <div className="text-slate-700">{children}</div>
+      <p className="mb-1 text-xs font-bold uppercase tracking-wider text-cobre-texto">{titulo}</p>
+      <div className="text-noche/80">{children}</div>
     </div>
   )
 }
@@ -115,7 +115,7 @@ function EstablecimientoDetalle({ tipo }) {
           <article>
             <div className="relative mb-8 h-72 w-full overflow-hidden rounded-3xl sm:h-[26rem]">
               <ImagenSegura key={lugar.imagen_principal} src={lugar.imagen_principal} alt={lugar.nombre} className="h-full w-full object-cover" />
-              <span className="absolute bottom-4 left-4 rounded-full bg-white/90 px-4 py-1.5 text-sm font-semibold text-brand-800 shadow-sm">
+              <span className="absolute bottom-4 left-4 rounded-full bg-white/90 px-4 py-1.5 text-sm font-semibold text-cielo-700 shadow-sm">
                 {esRestaurante ? 'Restaurante' : lugar.tipo || 'Alojamiento'}
               </span>
             </div>
@@ -123,23 +123,23 @@ function EstablecimientoDetalle({ tipo }) {
             <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
               <div>
                 <div className="flex items-center gap-3">
-                  <h1 className="text-4xl font-bold text-slate-900">{lugar.nombre}</h1>
+                  <h1 className="text-4xl font-bold text-noche">{lugar.nombre}</h1>
                   <BotonFavorito idElemento={lugar.id} tipo={tipo} />
                 </div>
                 <BotonCompartir className="mt-3" titulo={lugar.nombre} texto={`Mira ${lugar.nombre} en Rutas de Bolivia:`} />
                 {calificacion && <ResumenCalificacion promedio={calificacion.promedio} total={calificacion.total} className="mt-1" />}
-                {esRestaurante && lugar.especialidad && <p className="mt-2 font-semibold text-accent-600">{lugar.especialidad}</p>}
-                {lugar.ubicacion && <p className="mt-1 text-slate-600">{[lugar.ubicacion, lugar.direccion].filter(Boolean).join(' · ')}</p>}
+                {esRestaurante && lugar.especialidad && <p className="mt-2 font-semibold text-cobre-texto">{lugar.especialidad}</p>}
+                {lugar.ubicacion && <p className="mt-1 text-piedra-texto">{[lugar.ubicacion, lugar.direccion].filter(Boolean).join(' · ')}</p>}
               </div>
               {!esRestaurante && lugar.precio_noche != null && (
-                <p className="whitespace-nowrap rounded-2xl bg-brand-100 px-5 py-3 text-brand-900">
+                <p className="whitespace-nowrap rounded-2xl bg-cielo px-5 py-3 text-noche">
                   <span className="text-2xl font-extrabold">Bs {Number(lugar.precio_noche).toFixed(0)}</span>
                   <span className="text-sm"> por noche (referencial)</span>
                 </p>
               )}
             </div>
 
-            {lugar.descripcion && <p className="mb-8 text-lg leading-7 text-slate-700">{lugar.descripcion}</p>}
+            {lugar.descripcion && <p className="mb-8 text-lg leading-7 text-noche/80">{lugar.descripcion}</p>}
 
             <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {esRestaurante && lugar.horario && <Dato titulo="Días y horarios de atención">{lugar.horario}</Dato>}
@@ -151,7 +151,7 @@ function EstablecimientoDetalle({ tipo }) {
               )}
               {lugar.telefono && (
                 <Dato titulo="Teléfono de contacto">
-                  <a href={`tel:${String(lugar.telefono).replace(/\s+/g, '')}`} className="font-semibold text-brand-700 underline">{lugar.telefono}</a>
+                  <a href={`tel:${String(lugar.telefono).replace(/\s+/g, '')}`} className="font-semibold text-cielo-700 underline">{lugar.telefono}</a>
                 </Dato>
               )}
               {redes.length > 0 && (
@@ -159,7 +159,7 @@ function EstablecimientoDetalle({ tipo }) {
                   <ul className="flex flex-wrap gap-2">
                     {redes.map((red) => (
                       <li key={red.campo}>
-                        <a href={lugar[red.campo]} target="_blank" rel="noreferrer" className="inline-block rounded-full bg-brand-100 px-3 py-1 text-sm font-semibold text-brand-800 transition hover:bg-brand-200">
+                        <a href={lugar[red.campo]} target="_blank" rel="noreferrer" className="inline-block rounded-full bg-cielo px-3 py-1 text-sm font-semibold text-cielo-700 transition hover:bg-cielo">
                           {red.etiqueta} ↗
                         </a>
                       </li>
@@ -171,19 +171,19 @@ function EstablecimientoDetalle({ tipo }) {
 
             {esRestaurante && (menu.length > 0 || platos.length > 0) && (
               <section className="mb-10">
-                <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Menú</p>
+                <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Menú</p>
                 {menu.length > 0 ? (
                   <ul className="divide-y divide-white/80 rounded-2xl cristal px-5">
                     {menu.map((plato) => (
                       <li key={plato.nombre} className="flex items-center justify-between gap-4 py-3">
-                        <span className="font-semibold text-slate-800">{plato.nombre}</span>
-                        {plato.precio != null && plato.precio !== '' && <span className="whitespace-nowrap font-bold text-brand-800">Bs {plato.precio}</span>}
+                        <span className="font-semibold text-noche">{plato.nombre}</span>
+                        {plato.precio != null && plato.precio !== '' && <span className="whitespace-nowrap font-bold text-cielo-700">Bs {plato.precio}</span>}
                       </li>
                     ))}
                   </ul>
                 ) : (
                   <ul className="flex flex-wrap gap-2">
-                    {platos.map((plato) => <li key={plato} className="rounded-full bg-white/70 px-4 py-1.5 text-sm font-semibold text-slate-700 ring-1 ring-white/80">{plato}</li>)}
+                    {platos.map((plato) => <li key={plato} className="rounded-full bg-white/70 px-4 py-1.5 text-sm font-semibold text-noche/80 ring-1 ring-white/80">{plato}</li>)}
                   </ul>
                 )}
               </section>
@@ -191,7 +191,7 @@ function EstablecimientoDetalle({ tipo }) {
 
             {!esRestaurante && servicios.length > 0 && (
               <section className="mb-10">
-                <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Servicios incluidos</p>
+                <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Servicios incluidos</p>
                 <ul className="flex flex-wrap gap-2">
                   {servicios.map((servicio) => (
                     <li key={servicio} className="rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-semibold text-emerald-800">✓ {servicio}</li>
@@ -202,7 +202,7 @@ function EstablecimientoDetalle({ tipo }) {
 
             {tieneMapa && (
               <section className="mb-10">
-                <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Ubicación</p>
+                <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Ubicación</p>
                 <Suspense fallback={<div className="h-72 animate-pulse rounded-2xl bg-sal-2" />}>
                   <MapaUbicacion latitud={lugar.latitud} longitud={lugar.longitud} titulo={lugar.nombre} clave={tipo} />
                 </Suspense>
@@ -211,7 +211,7 @@ function EstablecimientoDetalle({ tipo }) {
 
             {galeria.length > 0 && (
               <section className="mb-10">
-                <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Galería</p>
+                <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Galería</p>
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                   {galeria.map((url, indice) => (
                     <button
@@ -219,13 +219,13 @@ function EstablecimientoDetalle({ tipo }) {
                       type="button"
                       onClick={() => setIndiceVisor(indice)}
                       aria-label={`Ampliar foto ${indice + 1} de ${galeria.length}`}
-                      className="overflow-hidden rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600"
+                      className="overflow-hidden rounded-xl focus:outline-none focus:ring-2 focus:ring-cielo-600"
                     >
                       <ImagenSegura src={url} alt={`${lugar.nombre}, foto ${indice + 1}`} loading="lazy" decoding="async" className="h-32 w-full object-cover transition hover:scale-105" />
                     </button>
                   ))}
                 </div>
-                <p className="mt-3 text-xs text-slate-500">Fotos referenciales de Wikimedia Commons (licencias Creative Commons).</p>
+                <p className="mt-3 text-xs text-piedra-texto">Fotos referenciales de Wikimedia Commons (licencias Creative Commons).</p>
               </section>
             )}
 

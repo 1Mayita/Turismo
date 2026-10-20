@@ -40,7 +40,7 @@ function Avatar({ fotoUrl, nombre, apellido, onError }) {
   }
   const iniciales = `${nombre?.[0] || ''}${apellido?.[0] || ''}`.toUpperCase()
   return (
-    <div className="flex h-28 w-28 items-center justify-center rounded-full bg-linear-to-br from-sky-500 to-brand-700 text-4xl font-extrabold text-white shadow-lg ring-4 ring-white">
+    <div className="flex h-28 w-28 items-center justify-center rounded-full bg-linear-to-br from-cielo-600 to-noche text-4xl font-extrabold text-white shadow-lg ring-4 ring-white">
       {iniciales || (
         // Sin nombre todavía: silueta en vez de iniciales.
         <svg viewBox="0 0 24 24" fill="currentColor" className="h-14 w-14" aria-hidden="true">
@@ -190,11 +190,11 @@ function Perfil() {
       <main className="contenedor max-w-6xl py-10">
         {esBienvenida && (
           <div className="mb-6 rounded-2xl p-5 cristal">
-            <p className="text-lg font-bold text-slate-900">¡Tu cuenta está lista!</p>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="text-lg font-bold text-noche">¡Tu cuenta está lista!</p>
+            <p className="mt-1 text-sm text-piedra-texto">
               Marca abajo las categorías que más te interesan y guarda los cambios. Puedes cambiarlas cuando quieras desde tu perfil.
             </p>
-            <Link to={rutaSiguiente} replace className="mt-3 inline-block text-sm font-semibold text-brand-700 underline">
+            <Link to={rutaSiguiente} replace className="mt-3 inline-block text-sm font-semibold text-cielo-700 underline">
               Omitir por ahora y empezar a explorar
             </Link>
           </div>
@@ -213,7 +213,7 @@ function Perfil() {
           </div>
         ) : modoEdicion ? (
           <section className="mx-auto max-w-3xl rounded-[2rem] p-6 cristal sm:p-8">
-            <h1 className="mb-6 text-2xl font-bold text-slate-900">Editar perfil</h1>
+            <h1 className="mb-6 text-2xl font-bold text-noche">Editar perfil</h1>
             <form onSubmit={guardarPerfil} className="space-y-6">
               <div className="flex flex-wrap items-center gap-5">
                 <Avatar
@@ -223,9 +223,9 @@ function Perfil() {
                   apellido={formulario.apellido}
                   onError={() => setFotoConError(true)}
                 />
-                <label className="block min-w-60 flex-1 text-sm font-semibold text-slate-700">
+                <label className="block min-w-60 flex-1 text-sm font-semibold text-noche/80">
                   URL de foto de perfil
-                  <input name="fotoUrl" value={formulario.fotoUrl} onChange={actualizarCampo} placeholder="https://..." className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-3 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
+                  <input name="fotoUrl" value={formulario.fotoUrl} onChange={actualizarCampo} placeholder="https://..." className="mt-2 w-full rounded-xl border border-borde bg-white/70 px-4 py-3 outline-none focus:border-cielo-600 focus:ring-2 focus:ring-cielo-600/30" />
                   {fotoConError && (
                     <span className="mt-2 block text-xs font-semibold text-red-600">
                       No pudimos cargar esa imagen. Verifica que el enlace apunte directo a un archivo (termina en .jpg, .png, .webp...) y no a una página web.
@@ -235,29 +235,29 @@ function Perfil() {
               </div>
 
               <div className="grid gap-5 sm:grid-cols-2">
-                <label className="block text-sm font-semibold text-slate-700">
+                <label className="block text-sm font-semibold text-noche/80">
                   Nombre
-                  <input name="nombre" autoComplete="given-name" value={formulario.nombre} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-3 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
+                  <input name="nombre" autoComplete="given-name" value={formulario.nombre} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-borde bg-white/70 px-4 py-3 outline-none focus:border-cielo-600 focus:ring-2 focus:ring-cielo-600/30" />
                 </label>
-                <label className="block text-sm font-semibold text-slate-700">
+                <label className="block text-sm font-semibold text-noche/80">
                   Apellido
-                  <input name="apellido" autoComplete="family-name" value={formulario.apellido} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-3 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
+                  <input name="apellido" autoComplete="family-name" value={formulario.apellido} onChange={actualizarCampo} className="mt-2 w-full rounded-xl border border-borde bg-white/70 px-4 py-3 outline-none focus:border-cielo-600 focus:ring-2 focus:ring-cielo-600/30" />
                 </label>
               </div>
 
-              <label className="block text-sm font-semibold text-slate-700">
+              <label className="block text-sm font-semibold text-noche/80">
                 Teléfono
-                <input name="telefono" type="tel" autoComplete="tel" value={formulario.telefono} onChange={actualizarCampo} placeholder="Ej: 71234567" className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-3 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
+                <input name="telefono" type="tel" autoComplete="tel" value={formulario.telefono} onChange={actualizarCampo} placeholder="Ej: 71234567" className="mt-2 w-full rounded-xl border border-borde bg-white/70 px-4 py-3 outline-none focus:border-cielo-600 focus:ring-2 focus:ring-cielo-600/30" />
               </label>
 
               <fieldset>
-                <legend className="text-sm font-semibold text-slate-700">¿Qué te gusta hacer cuando viajas?</legend>
-                <p className="mb-3 mt-1 text-xs text-slate-500">Toca las categorías que te interesan. Puedes elegir varias.</p>
+                <legend className="text-sm font-semibold text-noche/80">¿Qué te gusta hacer cuando viajas?</legend>
+                <p className="mb-3 mt-1 text-xs text-piedra-texto">Toca las categorías que te interesan. Puedes elegir varias.</p>
                 <div className="flex flex-wrap gap-2">
                   {categorias.map((categoria) => (
                     <label
                       key={categoria.id}
-                      className="cursor-pointer select-none rounded-full bg-white/70 px-4 py-2 text-sm font-semibold text-slate-700 ring-1 ring-sky-200 transition hover:bg-white has-[:checked]:bg-brand-700 has-[:checked]:text-white has-[:checked]:ring-brand-700 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-500"
+                      className="cursor-pointer select-none rounded-full bg-white/70 px-4 py-2 text-sm font-semibold text-noche/80 ring-1 ring-borde transition hover:bg-white has-[:checked]:bg-noche has-[:checked]:text-white has-[:checked]:ring-cielo-600 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-cielo-600"
                     >
                       <input
                         type="checkbox"
@@ -277,7 +277,7 @@ function Perfil() {
                   {guardando ? 'Guardando...' : 'Guardar cambios'}
                 </button>
                 {!esBienvenida && (
-                  <button type="button" onClick={cancelarEdicion} className="rounded-xl border border-sky-200 bg-white/70 px-5 py-3 font-bold text-slate-700 transition hover:bg-white">
+                  <button type="button" onClick={cancelarEdicion} className="rounded-xl border border-borde bg-white/70 px-5 py-3 font-bold text-noche/80 transition hover:bg-white">
                     Cancelar
                   </button>
                 )}
@@ -288,10 +288,10 @@ function Perfil() {
           <>
             {/* Tarjeta de presentación: portada con degradado y avatar superpuesto. */}
             <section className="overflow-hidden rounded-[2rem] cristal">
-              <div className="relative h-36 overflow-hidden bg-linear-to-r from-blue-600 via-sky-500 to-brand-400 sm:h-44">
+              <div className="relative h-36 overflow-hidden bg-linear-to-r from-blue-600 via-cielo-600 to-cielo-600 sm:h-44">
                 <div className="absolute -right-10 -top-16 h-56 w-56 rounded-full bg-white/15" aria-hidden="true" />
                 <div className="absolute right-40 top-16 h-32 w-32 rounded-full bg-white/10" aria-hidden="true" />
-                <div className="absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-accent-200/25" aria-hidden="true" />
+                <div className="absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-cobre/10" aria-hidden="true" />
               </div>
 
               <div className="px-6 pb-7 sm:px-10">
@@ -299,24 +299,24 @@ function Perfil() {
                   <div className="relative">
                     <Avatar fotoUrl={datosGuardados.fotoUrl} nombre={datosGuardados.nombre} apellido={datosGuardados.apellido} />
                   </div>
-                  <button type="button" onClick={abrirEdicion} className="flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-brand-800 shadow-md ring-1 ring-sky-100 transition hover:bg-brand-50">
+                  <button type="button" onClick={abrirEdicion} className="flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-cielo-700 shadow-md ring-1 ring-borde transition hover:bg-cielo/50">
                     <IconoLapiz /> Editar perfil
                   </button>
                 </div>
 
-                <p className="mt-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Mi perfil</p>
-                <h1 className="mt-1 text-3xl font-extrabold capitalize text-slate-900 sm:text-4xl">{nombreCompleto}</h1>
+                <p className="mt-4 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Mi perfil</p>
+                <h1 className="mt-1 text-3xl font-extrabold capitalize text-noche sm:text-4xl">{nombreCompleto}</h1>
 
-                <dl className="mt-4 flex flex-wrap gap-x-8 gap-y-2 text-sm text-slate-600">
+                <dl className="mt-4 flex flex-wrap gap-x-8 gap-y-2 text-sm text-piedra-texto">
                   <div className="flex items-center gap-2">
-                    <dt className="font-semibold text-slate-500">Correo</dt>
-                    <dd className="font-semibold text-slate-800">{usuario.email}</dd>
+                    <dt className="font-semibold text-piedra-texto">Correo</dt>
+                    <dd className="font-semibold text-noche">{usuario.email}</dd>
                   </div>
                   <div className="flex items-center gap-2">
-                    <dt className="font-semibold text-slate-500">Teléfono</dt>
-                    <dd className="font-semibold text-slate-800">
+                    <dt className="font-semibold text-piedra-texto">Teléfono</dt>
+                    <dd className="font-semibold text-noche">
                       {datosGuardados.telefono || (
-                        <button type="button" onClick={abrirEdicion} className="text-brand-700 underline">Agregar</button>
+                        <button type="button" onClick={abrirEdicion} className="text-cielo-700 underline">Agregar</button>
                       )}
                     </dd>
                   </div>
@@ -324,19 +324,19 @@ function Perfil() {
 
                 <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-[auto_auto_1fr]">
                   <a href="#favoritos" className="rounded-2xl bg-white/70 px-6 py-4 text-center ring-1 ring-white/80 transition hover:bg-white">
-                    <span className="block text-3xl font-extrabold text-brand-700">{idsFavoritos.size}</span>
-                    <span className="text-sm font-semibold text-slate-600">{idsFavoritos.size === 1 ? 'Favorito' : 'Favoritos'}</span>
+                    <span className="block text-3xl font-extrabold text-cielo-700">{idsFavoritos.size}</span>
+                    <span className="text-sm font-semibold text-piedra-texto">{idsFavoritos.size === 1 ? 'Favorito' : 'Favoritos'}</span>
                   </a>
                   <div className="rounded-2xl bg-white/70 px-6 py-4 text-center ring-1 ring-white/80">
-                    <span className="block text-3xl font-extrabold text-brand-700">{categoriasPreferidas.length}</span>
-                    <span className="text-sm font-semibold text-slate-600">{categoriasPreferidas.length === 1 ? 'Interés' : 'Intereses'}</span>
+                    <span className="block text-3xl font-extrabold text-cielo-700">{categoriasPreferidas.length}</span>
+                    <span className="text-sm font-semibold text-piedra-texto">{categoriasPreferidas.length === 1 ? 'Interés' : 'Intereses'}</span>
                   </div>
                   <div className="col-span-2 rounded-2xl bg-white/70 px-6 py-4 ring-1 ring-white/80 sm:col-span-1">
-                    <h2 className="text-sm font-bold text-slate-900">Mis intereses de viaje</h2>
+                    <h2 className="text-sm font-bold text-noche">Mis intereses de viaje</h2>
                     {categoriasPreferidas.length === 0 ? (
-                      <p className="mt-2 text-sm text-slate-600">
+                      <p className="mt-2 text-sm text-piedra-texto">
                         Aún no elegiste categorías.{' '}
-                        <button type="button" onClick={abrirEdicion} className="font-semibold text-brand-700 underline">Elegir ahora</button>
+                        <button type="button" onClick={abrirEdicion} className="font-semibold text-cielo-700 underline">Elegir ahora</button>
                       </p>
                     ) : (
                       <div className="mt-2 flex flex-wrap gap-2">
@@ -363,10 +363,10 @@ function Perfil() {
           <section id="favoritos" className="mt-12 scroll-mt-24">
             <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className="mb-2 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Guardados</p>
-                <h2 className="text-3xl font-bold text-slate-900">Mis favoritos</h2>
+                <p className="mb-2 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Guardados</p>
+                <h2 className="text-3xl font-bold text-noche">Mis favoritos</h2>
               </div>
-              <Link to="/destinos" className="rounded-xl bg-white/70 px-4 py-2 text-sm font-bold text-brand-800 ring-1 ring-white/80 transition hover:bg-white">
+              <Link to="/destinos" className="rounded-xl bg-white/70 px-4 py-2 text-sm font-bold text-cielo-700 ring-1 ring-white/80 transition hover:bg-white">
                 Explorar más destinos →
               </Link>
             </div>

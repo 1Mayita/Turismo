@@ -10,13 +10,13 @@ function iconoDe(medio = '') {
 }
 
 function SinDatos({ texto }) {
-  return <p className="rounded-xl bg-white/60 px-4 py-3 text-sm text-slate-600">{texto}</p>
+  return <p className="rounded-xl bg-white/60 px-4 py-3 text-sm text-piedra-texto">{texto}</p>
 }
 
 function Bloque({ titulo, children }) {
   return (
     <div className="rounded-2xl p-5 cristal">
-      <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-accent-600">{titulo}</h3>
+      <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-cobre-texto">{titulo}</h3>
       {children}
     </div>
   )
@@ -33,19 +33,19 @@ function InfoPractica({ destino }) {
   return (
     <>
       <section className="mb-10" aria-labelledby="titulo-como-llegar">
-        <h2 id="titulo-como-llegar" className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Cómo llegar</h2>
-        {destino.como_llegar && <p className="mb-4 text-slate-700">{destino.como_llegar}</p>}
+        <h2 id="titulo-como-llegar" className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Cómo llegar</h2>
+        {destino.como_llegar && <p className="mb-4 text-noche/80">{destino.como_llegar}</p>}
         {transportes.length > 0 ? (
           <ul className="grid gap-3 sm:grid-cols-2">
             {transportes.map((transporte, indice) => (
               <li key={`${transporte.medio}-${transporte.desde}-${indice}`} className="flex gap-3 rounded-2xl p-4 cristal">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-2xl" aria-hidden="true">{iconoDe(transporte.medio)}</span>
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cielo/50 text-2xl" aria-hidden="true">{iconoDe(transporte.medio)}</span>
                 <div>
-                  <p className="font-bold text-slate-900">
+                  <p className="font-bold text-noche">
                     {transporte.medio}{transporte.desde ? ` desde ${transporte.desde}` : ''}
                   </p>
-                  {transporte.tiempo && <p className="text-sm font-semibold text-brand-700">⏱ {transporte.tiempo} aprox.</p>}
-                  {transporte.detalle && <p className="mt-1 text-sm text-slate-600">{transporte.detalle}</p>}
+                  {transporte.tiempo && <p className="text-sm font-semibold text-cielo-700">⏱ {transporte.tiempo} aprox.</p>}
+                  {transporte.detalle && <p className="mt-1 text-sm text-piedra-texto">{transporte.detalle}</p>}
                 </div>
               </li>
             ))}
@@ -56,23 +56,23 @@ function InfoPractica({ destino }) {
       </section>
 
       <section className="mb-10" aria-labelledby="titulo-antes-de-ir">
-        <h2 id="titulo-antes-de-ir" className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Antes de ir</h2>
+        <h2 id="titulo-antes-de-ir" className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Antes de ir</h2>
         <div className="grid gap-4 md:grid-cols-2">
           <Bloque titulo="Clima">
             {tieneCoordenadas && <ClimaActual latitud={Number(destino.latitud)} longitud={Number(destino.longitud)} />}
             {destino.clima_tipico
-              ? <p className={`text-sm text-slate-700 ${tieneCoordenadas ? 'mt-3 border-t border-white/80 pt-3' : ''}`}><span className="font-semibold">Clima típico:</span> {destino.clima_tipico}</p>
+              ? <p className={`text-sm text-noche/80 ${tieneCoordenadas ? 'mt-3 border-t border-white/80 pt-3' : ''}`}><span className="font-semibold">Clima típico:</span> {destino.clima_tipico}</p>
               : !tieneCoordenadas && <SinDatos texto="Sin información del clima para este destino." />}
           </Bloque>
 
           <Bloque titulo="Horarios y mejor época">
-            <p className="text-sm text-slate-700"><span className="font-semibold">Horario:</span> {destino.horario || 'No informado.'}</p>
-            <p className="mt-2 text-sm text-slate-700"><span className="font-semibold">Mejor época:</span> {destino.mejor_epoca || 'No informada.'}</p>
+            <p className="text-sm text-noche/80"><span className="font-semibold">Horario:</span> {destino.horario || 'No informado.'}</p>
+            <p className="mt-2 text-sm text-noche/80"><span className="font-semibold">Mejor época:</span> {destino.mejor_epoca || 'No informada.'}</p>
           </Bloque>
 
           <Bloque titulo="Consejos">
             {consejos.length > 0 ? (
-              <ul className="space-y-1.5 text-sm text-slate-700">
+              <ul className="space-y-1.5 text-sm text-noche/80">
                 {consejos.map((consejo) => <li key={consejo} className="flex gap-2"><span aria-hidden="true">💡</span>{consejo}</li>)}
               </ul>
             ) : <SinDatos texto="Aún no hay consejos cargados." />}
@@ -80,7 +80,7 @@ function InfoPractica({ destino }) {
 
           <Bloque titulo="Normas del lugar">
             {normas.length > 0 ? (
-              <ul className="space-y-1.5 text-sm text-slate-700">
+              <ul className="space-y-1.5 text-sm text-noche/80">
                 {normas.map((norma) => <li key={norma} className="flex gap-2"><span aria-hidden="true">📋</span>{norma}</li>)}
               </ul>
             ) : <SinDatos texto="No hay normas especiales registradas. Respeta siempre el lugar y a las comunidades." />}
@@ -88,7 +88,7 @@ function InfoPractica({ destino }) {
 
           <div className="md:col-span-2">
             <Bloque titulo="Seguridad">
-              <p className="flex gap-2 text-sm text-slate-700">
+              <p className="flex gap-2 text-sm text-noche/80">
                 <span aria-hidden="true">🛡️</span>
                 {destino.seguridad || 'No hay avisos de seguridad para este destino. Como en todo viaje, cuida tus pertenencias y viaja con seguro.'}
               </p>

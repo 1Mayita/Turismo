@@ -9,7 +9,7 @@ const COLORES = {
   Entretenimiento: 'bg-amber-100 text-amber-800',
   Gastronomía: 'bg-orange-100 text-orange-800',
 }
-const COLOR_POR_DEFECTO = 'bg-brand-100 text-brand-800'
+const COLOR_POR_DEFECTO = 'bg-cielo text-cielo-700'
 
 function InsigniaCategoria({ categoria, className = '' }) {
   if (!categoria) return null

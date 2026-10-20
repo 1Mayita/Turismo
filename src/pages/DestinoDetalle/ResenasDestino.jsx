@@ -78,20 +78,20 @@ function ResenasDestino({ idDestino, tipo = 'destino', idElemento = idDestino, o
 
   return (
     <section className="mb-10">
-      <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Reseñas</p>
+      <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Reseñas</p>
 
       {!usuario ? (
-        <p className="mb-6 text-sm text-slate-600">
-          <Link to="/login" state={{ desde: ubicacion.pathname, aviso: 'Inicia sesión para dejar tu reseña.' }} className="font-semibold text-brand-700 underline">Inicia sesión</Link> para dejar tu reseña.
+        <p className="mb-6 text-sm text-piedra-texto">
+          <Link to="/login" state={{ desde: ubicacion.pathname, aviso: 'Inicia sesión para dejar tu reseña.' }} className="font-semibold text-cielo-700 underline">Inicia sesión</Link> para dejar tu reseña.
         </p>
       ) : yaReseno ? (
-        <p className="mb-6 rounded-xl bg-brand-100 px-4 py-3 text-sm font-semibold text-brand-800">Ya dejaste tu reseña de este lugar. ¡Gracias!</p>
+        <p className="mb-6 rounded-xl bg-cielo px-4 py-3 text-sm font-semibold text-cielo-700">Ya dejaste tu reseña de este lugar. ¡Gracias!</p>
       ) : (
         <form onSubmit={enviar} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
-          <h3 className="text-lg font-bold text-slate-900">Deja tu reseña</h3>
+          <h3 className="text-lg font-bold text-noche">Deja tu reseña</h3>
           {errorFormulario && <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{errorFormulario}</p>}
           <SelectorEstrellas valor={calificacion} onCambiar={setCalificacion} />
-          <label className="block text-sm font-semibold text-slate-700">
+          <label className="block text-sm font-semibold text-noche/80">
             Comentario
             <textarea
               value={comentario}
@@ -99,7 +99,7 @@ function ResenasDestino({ idDestino, tipo = 'destino', idElemento = idDestino, o
               rows={3}
               maxLength={1000}
               placeholder="¿Qué te pareció tu visita?"
-              className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 font-normal outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+              className="mt-2 w-full rounded-xl border border-borde bg-white/70 px-4 py-2.5 font-normal outline-none focus:border-cielo-600 focus:ring-2 focus:ring-cielo-600/30"
             />
           </label>
           <button disabled={enviando} className="rounded-xl boton-principal px-5 py-2.5 font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-60">
@@ -113,17 +113,17 @@ function ResenasDestino({ idDestino, tipo = 'destino', idElemento = idDestino, o
       ) : error ? (
         <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
       ) : resenas.length === 0 ? (
-        <p className="text-slate-600">Todavía no hay reseñas. ¡Sé la primera persona en opinar!</p>
+        <p className="text-piedra-texto">Todavía no hay reseñas. ¡Sé la primera persona en opinar!</p>
       ) : (
         <ul className="space-y-4">
           {resenas.map((resena) => (
             <li key={resena.id} className="rounded-2xl p-5 cristal">
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                <p className="font-bold text-slate-900">{resena.nombre_usuario || 'Turista'}</p>
-                <p className="text-xs text-slate-500">{formatearFecha(resena.fecha)}</p>
+                <p className="font-bold text-noche">{resena.nombre_usuario || 'Turista'}</p>
+                <p className="text-xs text-piedra-texto">{formatearFecha(resena.fecha)}</p>
               </div>
               <Estrellas valor={resena.calificacion} />
-              <p className="mt-2 text-sm leading-6 text-slate-700">{resena.comentario}</p>
+              <p className="mt-2 text-sm leading-6 text-noche/80">{resena.comentario}</p>
             </li>
           ))}
         </ul>

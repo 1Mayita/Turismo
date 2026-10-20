@@ -20,7 +20,7 @@ function IconoArrastrar() {
 function Tramo({ tramo }) {
   if (!tramo) return null
   return (
-    <p className="ml-14 flex items-center gap-2 py-1 text-xs font-semibold text-slate-500">
+    <p className="ml-14 flex items-center gap-2 py-1 text-xs font-semibold text-piedra-texto">
       <span aria-hidden="true">↓</span>
       ≈ {tramo.km.toFixed(0)} km en línea recta · ~{formatearDuracion(tramo.minutos)} por tierra
     </p>
@@ -36,30 +36,30 @@ function Parada({ item, indice, total, tramo, editable, onMover, onQuitar }) {
   const estilo = { transform: CSS.Transform.toString(transform), transition }
   const nombre = destino?.nombre || 'Destino que ya no está disponible'
 
-  const claseBoton = 'flex h-9 w-9 items-center justify-center rounded-lg bg-white text-slate-700 ring-1 ring-sky-100 transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-30'
+  const claseBoton = 'flex h-9 w-9 items-center justify-center rounded-lg bg-white text-noche/80 ring-1 ring-borde transition hover:bg-cielo/50 disabled:cursor-not-allowed disabled:opacity-30'
 
   return (
     <li ref={setNodeRef} style={estilo} className={`relative ${isDragging ? 'z-10' : ''}`}>
       {indice > 0 && <Tramo tramo={tramo} />}
-      <div className={`flex items-center gap-3 rounded-2xl p-3 cristal ${isDragging ? 'shadow-xl ring-2 ring-brand-400' : ''}`}>
+      <div className={`flex items-center gap-3 rounded-2xl p-3 cristal ${isDragging ? 'shadow-xl ring-2 ring-cielo-600' : ''}`}>
       {editable && (
-        <button type="button" {...attributes} {...listeners} aria-label={`Arrastrar ${nombre} para cambiar el orden`} className="flex h-10 w-7 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg text-slate-400 hover:text-brand-700 active:cursor-grabbing">
+        <button type="button" {...attributes} {...listeners} aria-label={`Arrastrar ${nombre} para cambiar el orden`} className="flex h-10 w-7 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg text-piedra hover:text-cielo-700 active:cursor-grabbing">
           <IconoArrastrar />
         </button>
       )}
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-600 to-brand-700 text-sm font-extrabold text-white" aria-hidden="true">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-600 to-noche text-sm font-extrabold text-white" aria-hidden="true">
         {indice + 1}
       </span>
       <ImagenSegura src={destino?.imagen_principal} alt="" className="hidden h-14 w-20 shrink-0 rounded-xl object-cover text-[0px] sm:block" />
       <div className="min-w-0 flex-1">
         {destino ? (
-          <Link to={`/destinos/${destino.id}`} className="block truncate font-bold text-slate-900 hover:text-brand-700">
+          <Link to={`/destinos/${destino.id}`} className="block truncate font-bold text-noche hover:text-cielo-700">
             <span className="sr-only">Parada {indice + 1}: </span>{nombre}
           </Link>
         ) : (
-          <p className="font-bold text-slate-500">{nombre}</p>
+          <p className="font-bold text-piedra-texto">{nombre}</p>
         )}
-        {destino?.ubicacion && <p className="truncate text-sm text-gray-500">{destino.ubicacion}</p>}
+        {destino?.ubicacion && <p className="truncate text-sm text-piedra-texto">{destino.ubicacion}</p>}
       </div>
       {editable && (
         <div className="flex shrink-0 gap-1">
@@ -121,16 +121,16 @@ function Itinerario({ items, editable = false, onReordenar, onQuitar }) {
         ) : lista}
 
         {items.length > 1 && totalKm > 0 && (
-          <div className="mt-4 rounded-2xl bg-brand-50 px-5 py-4 text-sm text-brand-900">
+          <div className="mt-4 rounded-2xl bg-cielo/50 px-5 py-4 text-sm text-noche">
             <p className="font-bold">Recorrido total aproximado: {totalKm.toFixed(0)} km en línea recta · ~{formatearDuracion(totalMinutos)} por tierra</p>
-            <p className="mt-1 text-xs text-brand-800">Es una estimación orientativa (carretera ≈ 1,3 veces la línea recta, a unos 50 km/h). Consulta horarios reales de buses y vuelos.</p>
+            <p className="mt-1 text-xs text-cielo-700">Es una estimación orientativa (carretera ≈ 1,3 veces la línea recta, a unos 50 km/h). Consulta horarios reales de buses y vuelos.</p>
           </div>
         )}
       </div>
 
       <div>
         {puntos.length === 0 ? (
-          <div className="flex h-full min-h-60 items-center justify-center rounded-3xl p-6 text-center text-sm text-slate-600 cristal">
+          <div className="flex h-full min-h-60 items-center justify-center rounded-3xl p-6 text-center text-sm text-piedra-texto cristal">
             Los destinos de este viaje todavía no tienen ubicación en el mapa.
           </div>
         ) : (

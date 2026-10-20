@@ -9,8 +9,8 @@ import { getRestaurantes } from '../../services/restaurantesService.js'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
 import { coincideConBusqueda, normalizar } from '../../utils/texto.js'
 
-const CLASE_CAMPO = 'mt-1 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 text-sm font-normal normal-case tracking-normal text-slate-800 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30'
-const CLASE_ETIQUETA = 'block text-xs font-bold uppercase tracking-wider text-slate-500'
+const CLASE_CAMPO = 'mt-1 w-full rounded-xl border border-borde bg-white/70 px-4 py-2.5 text-sm font-normal normal-case tracking-normal text-noche outline-none focus:border-cielo-600 focus:ring-2 focus:ring-cielo-600/30'
+const CLASE_ETIQUETA = 'block text-xs font-bold uppercase tracking-wider text-piedra-texto'
 
 function Gastronomia() {
   const [platos, setPlatos] = useState([])
@@ -73,9 +73,9 @@ function Gastronomia() {
       <Navbar />
       <main className="contenedor max-w-6xl py-12">
         <div className="mb-8 max-w-3xl">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Sabores de Bolivia</p>
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">Gastronomía típica</h1>
-          <p className="mt-4 text-lg text-slate-600">Los platos que hay que probar en cada región y dónde encontrarlos.</p>
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Sabores de Bolivia</p>
+          <h1 className="text-4xl font-bold tracking-tight text-noche sm:text-5xl">Gastronomía típica</h1>
+          <p className="mt-4 text-lg text-piedra-texto">Los platos que hay que probar en cada región y dónde encontrarlos.</p>
         </div>
 
         <div className="mb-8 grid gap-4 rounded-2xl cristal p-5 sm:grid-cols-[2fr_1fr]">
@@ -99,9 +99,9 @@ function Gastronomia() {
         {cargando ? (
           <GrillaEsqueleto cantidad={6} />
         ) : visibles.length === 0 ? (
-          <div className="rounded-2xl bg-white/60 px-5 py-6 text-slate-600 ring-1 ring-white/80">
+          <div className="rounded-2xl bg-white/60 px-5 py-6 text-piedra-texto ring-1 ring-white/80">
             <p>No encontramos platos que coincidan con tu búsqueda.</p>
-            <button type="button" onClick={() => { setBusqueda(''); setIdDepartamento('') }} className="mt-3 font-semibold text-brand-700 underline">
+            <button type="button" onClick={() => { setBusqueda(''); setIdDepartamento('') }} className="mt-3 font-semibold text-cielo-700 underline">
               Ver todos los platos
             </button>
           </div>
@@ -116,8 +116,8 @@ function Gastronomia() {
                   </span>
                 </div>
                 <div className="flex flex-1 flex-col px-5 pb-5 pt-3">
-                  <h2 className="text-xl font-bold text-slate-900">{plato.nombre}</h2>
-                  {plato.descripcion && <p className="mt-2 line-clamp-3 text-sm leading-6 text-gray-600">{plato.descripcion}</p>}
+                  <h2 className="text-xl font-bold text-noche">{plato.nombre}</h2>
+                  {plato.descripcion && <p className="mt-2 line-clamp-3 text-sm leading-6 text-piedra-texto">{plato.descripcion}</p>}
                   <div className="mt-auto pt-4">
                     <button type="button" onClick={() => setPlatoAbierto(plato)} className="rounded-xl boton-principal px-4 py-2 text-sm font-bold">
                       Ver más
@@ -135,14 +135,14 @@ function Gastronomia() {
           <ImagenSegura src={platoAbierto.imagen} alt={platoAbierto.nombre} className="h-64 w-full object-cover sm:rounded-t-3xl" />
           <div className="space-y-5 p-6 sm:p-8">
             <div>
-              <p className="text-sm font-bold text-accent-600">Origen: {platoAbierto.origen || nombreDepartamento(platoAbierto.id_departamento) || 'Bolivia'}</p>
-              <h2 className="mt-1 text-2xl font-bold text-slate-900">{platoAbierto.nombre}</h2>
+              <p className="text-sm font-bold text-cobre-texto">Origen: {platoAbierto.origen || nombreDepartamento(platoAbierto.id_departamento) || 'Bolivia'}</p>
+              <h2 className="mt-1 text-2xl font-bold text-noche">{platoAbierto.nombre}</h2>
             </div>
-            {platoAbierto.descripcion && <p className="leading-7 text-slate-700">{platoAbierto.descripcion}</p>}
+            {platoAbierto.descripcion && <p className="leading-7 text-noche/80">{platoAbierto.descripcion}</p>}
 
             {ingredientes.length > 0 && (
               <div>
-                <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-slate-500">Ingredientes principales</h3>
+                <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-piedra-texto">Ingredientes principales</h3>
                 <ul className="flex flex-wrap gap-2">
                   {ingredientes.map((ingrediente) => (
                     <li key={ingrediente} className="rounded-full bg-orange-100 px-3 py-1 text-sm font-semibold text-orange-800">{ingrediente}</li>
@@ -152,28 +152,28 @@ function Gastronomia() {
             )}
 
             <div>
-              <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-slate-500">Dónde probarlo</h3>
-              {platoAbierto.lugares_tradicionales && <p className="mb-3 text-sm leading-6 text-slate-700">{platoAbierto.lugares_tradicionales}</p>}
+              <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-piedra-texto">Dónde probarlo</h3>
+              {platoAbierto.lugares_tradicionales && <p className="mb-3 text-sm leading-6 text-noche/80">{platoAbierto.lugares_tradicionales}</p>}
               {lugaresDelPlatoAbierto.length > 0 ? (
                 <ul className="space-y-2">
                   {lugaresDelPlatoAbierto.map((restaurante) => (
                     <li key={restaurante.id}>
-                      <Link to={`/restaurantes/${restaurante.id}`} className="flex items-center justify-between gap-3 rounded-xl bg-brand-50 px-4 py-3 transition hover:bg-brand-100">
+                      <Link to={`/restaurantes/${restaurante.id}`} className="flex items-center justify-between gap-3 rounded-xl bg-cielo/50 px-4 py-3 transition hover:bg-cielo">
                         <span>
-                          <span className="block font-bold text-slate-900">{restaurante.nombre}</span>
-                          <span className="block text-sm text-gray-500">{restaurante.ubicacion}</span>
+                          <span className="block font-bold text-noche">{restaurante.nombre}</span>
+                          <span className="block text-sm text-piedra-texto">{restaurante.ubicacion}</span>
                         </span>
-                        <span className="shrink-0 text-sm font-semibold text-brand-700">Ver restaurante →</span>
+                        <span className="shrink-0 text-sm font-semibold text-cielo-700">Ver restaurante →</span>
                       </Link>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-slate-600">Todavía no hay restaurantes registrados que lo tengan en su menú.</p>
+                <p className="text-sm text-piedra-texto">Todavía no hay restaurantes registrados que lo tengan en su menú.</p>
               )}
             </div>
 
-            {platoAbierto.credito_imagen && <p className="text-xs text-slate-500">{platoAbierto.credito_imagen}</p>}
+            {platoAbierto.credito_imagen && <p className="text-xs text-piedra-texto">{platoAbierto.credito_imagen}</p>}
           </div>
         </Modal>
       )}

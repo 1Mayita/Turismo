@@ -22,15 +22,15 @@ function Bloque({ titulo, tipo, lista, idMunicipio, nombreDepartamento, textoVac
   return (
     <div className="mb-10">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-        <h3 className="text-2xl font-bold text-slate-900">{titulo}</h3>
-        <Link to={enlace} className="text-sm font-semibold text-brand-700 underline">{textoEnlace}</Link>
+        <h3 className="text-2xl font-bold text-noche">{titulo}</h3>
+        <Link to={enlace} className="text-sm font-semibold text-cielo-700 underline">{textoEnlace}</Link>
       </div>
       {visibles.length === 0 ? (
-        <p className="rounded-2xl bg-white/60 px-5 py-4 text-sm text-slate-600 ring-1 ring-white/80">{textoVacio}</p>
+        <p className="rounded-2xl bg-white/60 px-5 py-4 text-sm text-piedra-texto ring-1 ring-white/80">{textoVacio}</p>
       ) : (
         <>
           {soloDepartamento && (
-            <p className="mb-4 text-sm text-slate-600">No hay registros en este municipio. Estas son opciones en el resto de {nombreDepartamento}.</p>
+            <p className="mb-4 text-sm text-piedra-texto">No hay registros en este municipio. Estas son opciones en el resto de {nombreDepartamento}.</p>
           )}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {visibles.slice(0, MAXIMO_VISIBLE).map((item) => (
@@ -79,7 +79,7 @@ function EstablecimientosCercanos({ idDepartamento, idMunicipio, nombreDepartame
 
   return (
     <section>
-      <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Dónde comer y dónde dormir</p>
+      <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Dónde comer y dónde dormir</p>
       {cargando ? (
         <div className="mb-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <div className="h-64 animate-pulse rounded-3xl bg-sal-2" />

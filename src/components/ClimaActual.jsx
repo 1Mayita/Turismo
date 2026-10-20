@@ -39,7 +39,7 @@ function ClimaActual({ latitud, longitud }) {
     return () => control.abort()
   }, [latitud, longitud])
 
-  if (error) return <p className="text-sm text-slate-500">No pudimos consultar el clima en este momento.</p>
+  if (error) return <p className="text-sm text-piedra-texto">No pudimos consultar el clima en este momento.</p>
   if (!clima) return <div className="h-20 animate-pulse rounded-xl bg-sal-2" aria-label="Cargando el clima" />
 
   const ahora = describir(clima.current?.weather_code)
@@ -56,20 +56,20 @@ function ClimaActual({ latitud, longitud }) {
       <div className="flex items-center gap-3">
         <span className="text-4xl" aria-hidden="true">{ahora.icono}</span>
         <div>
-          <p className="text-2xl font-extrabold text-slate-900">{Math.round(clima.current?.temperature_2m)} °C</p>
-          <p className="text-sm text-slate-600">{ahora.texto} · viento {Math.round(clima.current?.wind_speed_10m)} km/h</p>
+          <p className="text-2xl font-extrabold text-noche">{Math.round(clima.current?.temperature_2m)} °C</p>
+          <p className="text-sm text-piedra-texto">{ahora.texto} · viento {Math.round(clima.current?.wind_speed_10m)} km/h</p>
         </div>
       </div>
       <ul className="mt-3 grid grid-cols-3 gap-2">
         {dias.map((dia, indice) => (
           <li key={dia.fecha} className="rounded-xl bg-white/70 px-2 py-2 text-center text-xs">
-            <p className="font-semibold capitalize text-slate-700">{nombreDia(dia.fecha, indice)}</p>
+            <p className="font-semibold capitalize text-noche/80">{nombreDia(dia.fecha, indice)}</p>
             <p className="text-lg" aria-label={dia.texto}>{dia.icono}</p>
-            <p className="text-slate-700"><span className="font-bold">{dia.maxima}°</span> / {dia.minima}°</p>
+            <p className="text-noche/80"><span className="font-bold">{dia.maxima}°</span> / {dia.minima}°</p>
           </li>
         ))}
       </ul>
-      <p className="mt-2 text-[11px] text-slate-500">Pronóstico de Open-Meteo.</p>
+      <p className="mt-2 text-[11px] text-piedra-texto">Pronóstico de Open-Meteo.</p>
     </div>
   )
 }

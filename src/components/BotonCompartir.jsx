@@ -44,11 +44,11 @@ export function OpcionesCompartir({ titulo, texto, url }) {
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-semibold text-slate-700">
+      <label className="block text-sm font-semibold text-noche/80">
         Enlace
         <span className="mt-2 flex gap-2">
-          <input readOnly value={url} onFocus={(evento) => evento.target.select()} className="min-w-0 flex-1 rounded-xl border border-sky-200 bg-slate-50 px-3 py-2.5 text-sm font-normal text-slate-700" />
-          <button type="button" onClick={copiar} className={`${claseOpcion} shrink-0 ${copiado ? 'bg-emerald-600 text-white' : 'bg-brand-700 text-white hover:bg-brand-800'}`} aria-live="polite">
+          <input readOnly value={url} onFocus={(evento) => evento.target.select()} className="min-w-0 flex-1 rounded-xl border border-borde bg-sal px-3 py-2.5 text-sm font-normal text-noche/80" />
+          <button type="button" onClick={copiar} className={`${claseOpcion} shrink-0 ${copiado ? 'bg-emerald-600 text-white' : 'bg-noche text-white hover:bg-noche/90'}`} aria-live="polite">
             {copiado ? '✓ Copiado' : 'Copiar'}
           </button>
         </span>
@@ -57,11 +57,11 @@ export function OpcionesCompartir({ titulo, texto, url }) {
         <a href={`https://wa.me/?text=${encodeURIComponent(mensaje)}`} target="_blank" rel="noreferrer" className={`${claseOpcion} bg-[#25D366] text-white hover:brightness-95`}>
           WhatsApp
         </a>
-        <a href={`mailto:?subject=${encodeURIComponent(titulo)}&body=${encodeURIComponent(mensaje)}`} className={`${claseOpcion} bg-slate-100 text-slate-800 hover:bg-slate-200`}>
+        <a href={`mailto:?subject=${encodeURIComponent(titulo)}&body=${encodeURIComponent(mensaje)}`} className={`${claseOpcion} bg-sal-2 text-noche hover:bg-cielo`}>
           Correo
         </a>
         {puedeCompartirNativo && (
-          <button type="button" onClick={compartirNativo} className={`${claseOpcion} bg-slate-100 text-slate-800 hover:bg-slate-200`}>
+          <button type="button" onClick={compartirNativo} className={`${claseOpcion} bg-sal-2 text-noche hover:bg-cielo`}>
             Más opciones
           </button>
         )}
@@ -78,14 +78,14 @@ function BotonCompartir({ titulo, texto, url = typeof window !== 'undefined' ? w
 
   return (
     <>
-      <button type="button" onClick={() => setAbierto(true)} className={`inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-brand-800 shadow-sm ring-1 ring-sky-100 transition hover:bg-brand-50 ${className}`}>
+      <button type="button" onClick={() => setAbierto(true)} className={`inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-cielo-700 shadow-sm ring-1 ring-borde transition hover:bg-cielo/50 ${className}`}>
         <IconoCompartir /> Compartir
       </button>
       {abierto && (
         <Modal titulo={`Compartir ${titulo}`} onCerrar={() => setAbierto(false)}>
           <div className="p-6 sm:p-8">
-            <h2 className="mb-1 pr-10 text-2xl font-bold text-slate-900">Compartir</h2>
-            <p className="mb-5 text-sm text-slate-600">{titulo}</p>
+            <h2 className="mb-1 pr-10 text-2xl font-bold text-noche">Compartir</h2>
+            <p className="mb-5 text-sm text-piedra-texto">{titulo}</p>
             <OpcionesCompartir titulo={titulo} texto={texto} url={url} />
           </div>
         </Modal>

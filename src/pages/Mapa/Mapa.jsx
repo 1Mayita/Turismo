@@ -24,8 +24,8 @@ const CAPAS = [
   { id: 'alojamiento', etiqueta: 'Alojamientos' },
 ]
 
-const CLASE_CAMPO = 'mt-1 w-full rounded-xl border border-sky-200 bg-white/80 px-3 py-2 text-sm font-normal normal-case tracking-normal text-slate-800 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 disabled:cursor-not-allowed disabled:bg-slate-100'
-const CLASE_ETIQUETA = 'block text-xs font-bold uppercase tracking-wider text-slate-500'
+const CLASE_CAMPO = 'mt-1 w-full rounded-xl border border-borde bg-white/80 px-3 py-2 text-sm font-normal normal-case tracking-normal text-noche outline-none focus:border-cielo-600 focus:ring-2 focus:ring-cielo-600/30 disabled:cursor-not-allowed disabled:bg-sal-2'
+const CLASE_ETIQUETA = 'block text-xs font-bold uppercase tracking-wider text-piedra-texto'
 
 // Convierte destinos, restaurantes y alojamientos a un mismo formato de "punto".
 function aPuntos({ destinos, restaurantes, alojamientos }) {
@@ -143,14 +143,14 @@ function Mapa() {
       <main className="contenedor max-w-7xl py-6">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3 px-2">
           <div>
-            <p className="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Mapa turístico</p>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Bolivia en el mapa</h1>
+            <p className="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Mapa turístico</p>
+            <h1 className="text-3xl font-bold tracking-tight text-noche sm:text-4xl">Bolivia en el mapa</h1>
           </div>
           <button
             type="button"
             onClick={() => setPanelAbierto(!panelAbierto)}
             aria-expanded={panelAbierto}
-            className="rounded-xl bg-white/70 px-4 py-2 text-sm font-semibold text-brand-800 ring-1 ring-white/80 transition hover:bg-white lg:hidden"
+            className="rounded-xl bg-white/70 px-4 py-2 text-sm font-semibold text-cielo-700 ring-1 ring-white/80 transition hover:bg-white lg:hidden"
           >
             {panelAbierto ? 'Ocultar filtros' : 'Mostrar filtros'}
           </button>
@@ -179,7 +179,7 @@ function Mapa() {
                         type="button"
                         aria-pressed={activa}
                         onClick={() => alternar(capasActivas, setCapasActivas, capa.id)}
-                        className={`rounded-full px-3 py-1.5 text-sm font-semibold transition ${activa ? 'bg-brand-700 text-white' : 'bg-white/70 text-slate-700 ring-1 ring-white/80 hover:bg-white'}`}
+                        className={`rounded-full px-3 py-1.5 text-sm font-semibold transition ${activa ? 'bg-noche text-white' : 'bg-white/70 text-noche/80 ring-1 ring-white/80 hover:bg-white'}`}
                       >
                         <span aria-hidden="true">{capa.id === 'destino' ? '📍' : estilo.simbolo}</span> {capa.etiqueta}
                       </button>
@@ -202,14 +202,14 @@ function Mapa() {
                           aria-pressed={activa}
                           onClick={() => alternar(categoriasActivas, setCategoriasActivas, categoria)}
                           style={activa ? { backgroundColor: estilo.color } : undefined}
-                          className={`rounded-full px-3 py-1.5 text-sm font-semibold transition ${activa ? 'text-white' : 'bg-white/70 text-slate-700 ring-1 ring-white/80 hover:bg-white'}`}
+                          className={`rounded-full px-3 py-1.5 text-sm font-semibold transition ${activa ? 'text-white' : 'bg-white/70 text-noche/80 ring-1 ring-white/80 hover:bg-white'}`}
                         >
                           <span aria-hidden="true">{estilo.simbolo}</span> {categoria}
                         </button>
                       )
                     })}
                   </div>
-                  <p className="mt-1 text-xs text-slate-500">Sin ninguna marcada se muestran todas.</p>
+                  <p className="mt-1 text-xs text-piedra-texto">Sin ninguna marcada se muestran todas.</p>
                 </fieldset>
               )}
 
@@ -229,7 +229,7 @@ function Mapa() {
                   type="button"
                   onClick={usarMiUbicacion}
                   disabled={cargandoUbicacion}
-                  className="mt-1 w-full rounded-xl border border-brand-200 bg-brand-50 px-3 py-2 text-left text-sm font-semibold text-brand-800 transition hover:bg-brand-100 disabled:opacity-60"
+                  className="mt-1 w-full rounded-xl border border-borde bg-cielo/50 px-3 py-2 text-left text-sm font-semibold text-cielo-700 transition hover:bg-cielo disabled:opacity-60"
                 >
                   {cargandoUbicacion ? 'Buscando ubicación...' : ubicacionUsuario ? 'Actualizar mi ubicación' : 'Usar mi ubicación'}
                 </button>
@@ -243,16 +243,16 @@ function Mapa() {
               </div>
 
               <div className="flex items-center justify-between gap-3 border-t border-white/80 pt-3">
-                <p className="text-sm font-semibold text-slate-700" aria-live="polite">
+                <p className="text-sm font-semibold text-noche/80" aria-live="polite">
                   {visibles.length} {visibles.length === 1 ? 'lugar' : 'lugares'}
                 </p>
-                <button type="button" onClick={limpiarFiltros} disabled={!hayFiltros} className="text-sm font-semibold text-brand-700 underline disabled:cursor-not-allowed disabled:text-slate-400 disabled:no-underline">
+                <button type="button" onClick={limpiarFiltros} disabled={!hayFiltros} className="text-sm font-semibold text-cielo-700 underline disabled:cursor-not-allowed disabled:text-piedra disabled:no-underline">
                   Limpiar filtros
                 </button>
               </div>
 
               {!cargando && visibles.length === 0 ? (
-                <p className="rounded-xl bg-white/60 px-4 py-3 text-sm text-slate-600">Ningún lugar coincide con estos filtros.</p>
+                <p className="rounded-xl bg-white/60 px-4 py-3 text-sm text-piedra-texto">Ningún lugar coincide con estos filtros.</p>
               ) : (
                 <ul className="space-y-2">
                   {visibles.slice(0, MAXIMO_EN_LISTA).map((item) => {
@@ -266,8 +266,8 @@ function Mapa() {
                         >
                           <span aria-hidden="true" style={{ backgroundColor: estilo.color }} className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm">{estilo.simbolo}</span>
                           <span className="min-w-0">
-                            <span className="block truncate text-sm font-bold text-slate-900">{item.nombre}</span>
-                            <span className="block truncate text-xs text-gray-500">
+                            <span className="block truncate text-sm font-bold text-noche">{item.nombre}</span>
+                            <span className="block truncate text-xs text-piedra-texto">
                               {estilo.etiqueta}{item.ubicacion ? ` · ${item.ubicacion}` : ''}
                               {item.distancia !== null && ` · ${item.distancia.toFixed(0)} km`}
                             </span>
@@ -302,12 +302,12 @@ function Mapa() {
                   return (
                     <Marker key={item.clave} position={[item.latitud, item.longitud]} icon={iconoDeMarcador(item.estilo)} title={item.nombre}>
                       <Popup>
-                        <p className="m-0! text-xs font-bold uppercase tracking-wider text-slate-500">{estiloDeMarcador(item.estilo).etiqueta}</p>
-                        <p className="m-0! text-base font-bold text-slate-900">{item.nombre}</p>
-                        {item.ubicacion && <p className="m-0! text-xs text-slate-600">{item.ubicacion}</p>}
+                        <p className="m-0! text-xs font-bold uppercase tracking-wider text-piedra-texto">{estiloDeMarcador(item.estilo).etiqueta}</p>
+                        <p className="m-0! text-base font-bold text-noche">{item.nombre}</p>
+                        {item.ubicacion && <p className="m-0! text-xs text-piedra-texto">{item.ubicacion}</p>}
                         <ResumenCalificacion promedio={calificacion?.promedio} total={calificacion?.total} className="mt-1" />
                         {item.enlace && (
-                          <Link to={item.enlace} className="mt-1 block font-semibold text-brand-700 underline">
+                          <Link to={item.enlace} className="mt-1 block font-semibold text-cielo-700 underline">
                             Ver más
                           </Link>
                         )}

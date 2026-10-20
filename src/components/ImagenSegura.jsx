@@ -11,7 +11,7 @@ function ImagenSegura({ src, alt, className = '', ...resto }) {
       <div
         role="img"
         aria-label={alt}
-        className={`flex items-center justify-center bg-gradient-to-br from-sky-500 to-brand-800 p-4 text-center text-sm font-semibold text-white/90 ${className}`}
+        className={`flex items-center justify-center bg-gradient-to-br from-cielo-600 to-noche p-4 text-center text-sm font-semibold text-white/90 ${className}`}
       >
         {alt}
       </div>

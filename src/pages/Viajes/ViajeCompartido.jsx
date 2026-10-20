@@ -75,20 +75,20 @@ function ViajeCompartido() {
         ) : !viaje ? (
           <div className="mx-auto max-w-xl rounded-[2rem] p-8 text-center cristal">
             <p className="text-4xl" aria-hidden="true">🔒</p>
-            <p className="mt-3 text-lg font-bold text-slate-900">{error}</p>
+            <p className="mt-3 text-lg font-bold text-noche">{error}</p>
             <Link to="/destinos" className="mt-4 inline-block rounded-xl boton-principal px-5 py-2.5 font-bold">Explorar destinos</Link>
           </div>
         ) : (
           <>
             <header className="mb-6 flex flex-wrap items-start justify-between gap-4 rounded-[2rem] p-6 cristal sm:p-8">
               <div className="min-w-0">
-                <p className="text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Viaje compartido · {textoDeFechas(viaje)}</p>
-                <h1 className="mt-1 break-words text-3xl font-extrabold text-slate-900 sm:text-4xl">{viaje.nombre}</h1>
-                <p className="mt-1 text-sm text-slate-600">Armado por {viaje.nombre_autor || 'un viajero'} · {items.length} {items.length === 1 ? 'destino' : 'destinos'} · Solo lectura</p>
-                {viaje.notas && <p className="mt-3 max-w-2xl whitespace-pre-line text-slate-700">{viaje.notas}</p>}
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Viaje compartido · {textoDeFechas(viaje)}</p>
+                <h1 className="mt-1 break-words text-3xl font-extrabold text-noche sm:text-4xl">{viaje.nombre}</h1>
+                <p className="mt-1 text-sm text-piedra-texto">Armado por {viaje.nombre_autor || 'un viajero'} · {items.length} {items.length === 1 ? 'destino' : 'destinos'} · Solo lectura</p>
+                {viaje.notas && <p className="mt-3 max-w-2xl whitespace-pre-line text-noche/80">{viaje.notas}</p>}
               </div>
               {esMio ? (
-                <Link to={`/viajes/${viaje.id_viaje}`} className="rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-brand-800 ring-1 ring-sky-100">Es tu viaje: editarlo</Link>
+                <Link to={`/viajes/${viaje.id_viaje}`} className="rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-cielo-700 ring-1 ring-borde">Es tu viaje: editarlo</Link>
               ) : (
                 <button type="button" onClick={copiarAMiCuenta} disabled={copiando} className="rounded-xl boton-principal px-4 py-2.5 text-sm font-bold disabled:opacity-60">
                   {copiando ? 'Copiando...' : usuario ? 'Copiar este viaje a mi cuenta' : 'Inicia sesión para copiarlo'}
@@ -97,7 +97,7 @@ function ViajeCompartido() {
             </header>
             {error && <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
             {items.length === 0 ? (
-              <p className="rounded-2xl p-6 text-slate-600 cristal">Este viaje todavía no tiene destinos.</p>
+              <p className="rounded-2xl p-6 text-piedra-texto cristal">Este viaje todavía no tiene destinos.</p>
             ) : (
               <Itinerario items={items} />
             )}

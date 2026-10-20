@@ -7,8 +7,8 @@ import { departamentosDeEjemplo, getDepartamentos } from '../../services/departa
 import { coincideConBusqueda } from '../../utils/texto.js'
 import { ESTABLECIMIENTOS } from './configuracion.js'
 
-const CLASE_CAMPO = 'mt-1 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 text-sm font-normal normal-case tracking-normal text-slate-800 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30'
-const CLASE_ETIQUETA = 'block text-xs font-bold uppercase tracking-wider text-slate-500'
+const CLASE_CAMPO = 'mt-1 w-full rounded-xl border border-borde bg-white/70 px-4 py-2.5 text-sm font-normal normal-case tracking-normal text-noche outline-none focus:border-cielo-600 focus:ring-2 focus:ring-cielo-600/30'
+const CLASE_ETIQUETA = 'block text-xs font-bold uppercase tracking-wider text-piedra-texto'
 
 // Listado de restaurantes o de alojamientos (según "tipo"), con búsqueda y
 // filtros guardados en la URL: ?buscar=, ?departamento= y, en alojamientos, ?precio=.
@@ -68,9 +68,9 @@ function ListaEstablecimientos({ tipo }) {
       <Navbar />
       <main className="contenedor max-w-6xl py-12">
         <div className="mb-8 max-w-3xl">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">{configuracion.rotulo}</p>
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">{configuracion.titulo}</h1>
-          <p className="mt-4 text-lg text-slate-600">{configuracion.bajada}</p>
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">{configuracion.rotulo}</p>
+          <h1 className="text-4xl font-bold tracking-tight text-noche sm:text-5xl">{configuracion.titulo}</h1>
+          <p className="mt-4 text-lg text-piedra-texto">{configuracion.bajada}</p>
         </div>
 
         <div className="mb-8 grid gap-4 rounded-2xl cristal p-5 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_auto] lg:items-end">
@@ -97,7 +97,7 @@ function ListaEstablecimientos({ tipo }) {
             type="button"
             onClick={() => setParametros({}, { replace: true })}
             disabled={!hayFiltros}
-            className="rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-xl border border-borde bg-white/70 px-4 py-2.5 text-sm font-bold text-noche/80 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             Limpiar
           </button>
@@ -109,10 +109,10 @@ function ListaEstablecimientos({ tipo }) {
           <GrillaEsqueleto cantidad={6} />
         ) : visibles.length === 0 ? (
           !error && (
-            <div className="rounded-2xl bg-white/60 px-5 py-6 text-slate-600 ring-1 ring-white/80">
+            <div className="rounded-2xl bg-white/60 px-5 py-6 text-piedra-texto ring-1 ring-white/80">
               <p>{hayFiltros ? `No hay ${configuracion.plural} que coincidan con tu búsqueda.` : `Aún no hay ${configuracion.plural} registrados.`}</p>
               {hayFiltros && (
-                <button type="button" onClick={() => setParametros({}, { replace: true })} className="mt-3 font-semibold text-brand-700 underline">
+                <button type="button" onClick={() => setParametros({}, { replace: true })} className="mt-3 font-semibold text-cielo-700 underline">
                   Quitar los filtros y ver todos
                 </button>
               )}
@@ -120,7 +120,7 @@ function ListaEstablecimientos({ tipo }) {
           )
         ) : (
           <>
-            <p className="mb-4 text-sm text-slate-500">{visibles.length} {visibles.length === 1 ? configuracion.singular : configuracion.plural}</p>
+            <p className="mb-4 text-sm text-piedra-texto">{visibles.length} {visibles.length === 1 ? configuracion.singular : configuracion.plural}</p>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {visibles.map((elemento) => (
                 <TarjetaEstablecimiento key={elemento.id} tipo={tipo} establecimiento={elemento} />

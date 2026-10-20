@@ -24,8 +24,8 @@ const PARAMETRO_DE_FILTRO = {
   distanciaMaxima: 'distancia',
 }
 
-const CLASE_CAMPO = 'mt-1 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 text-sm font-normal normal-case tracking-normal text-slate-800 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 disabled:cursor-not-allowed disabled:bg-slate-100'
-const CLASE_ETIQUETA = 'block text-xs font-bold uppercase tracking-wider text-slate-500'
+const CLASE_CAMPO = 'mt-1 w-full rounded-xl border border-borde bg-white/70 px-4 py-2.5 text-sm font-normal normal-case tracking-normal text-noche outline-none focus:border-cielo-600 focus:ring-2 focus:ring-cielo-600/30 disabled:cursor-not-allowed disabled:bg-sal-2'
+const CLASE_ETIQUETA = 'block text-xs font-bold uppercase tracking-wider text-piedra-texto'
 
 async function leerCatalogo() {
   const [destinos, categorias, departamentos, municipios, regiones] = await Promise.all([
@@ -213,9 +213,9 @@ function Destinos() {
       <Navbar />
       <main className="contenedor max-w-6xl py-12">
         <div className="mb-10 max-w-2xl">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Catálogo de experiencias</p>
-          <h1 className="text-5xl font-bold tracking-tight text-slate-900">Encuentra tu próximo paisaje</h1>
-          <p className="mt-4 text-lg text-slate-600">Desde el altiplano hasta la Amazonía, Bolivia te espera.</p>
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Catálogo de experiencias</p>
+          <h1 className="text-5xl font-bold tracking-tight text-noche">Encuentra tu próximo paisaje</h1>
+          <p className="mt-4 text-lg text-piedra-texto">Desde el altiplano hasta la Amazonía, Bolivia te espera.</p>
         </div>
 
         {aviso && <p className="mb-8 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{aviso}</p>}
@@ -223,10 +223,10 @@ function Destinos() {
 
         {textoBuscado && (
           <div className="mb-6 flex flex-wrap items-center gap-3">
-            <p className="text-lg text-slate-700">
-              Resultados para <span className="font-bold text-slate-900">"{textoBuscado}"</span>
+            <p className="text-lg text-noche/80">
+              Resultados para <span className="font-bold text-noche">"{textoBuscado}"</span>
             </p>
-            <button type="button" onClick={quitarBusqueda} className="text-sm font-semibold text-brand-700 underline">
+            <button type="button" onClick={quitarBusqueda} className="text-sm font-semibold text-cielo-700 underline">
               Quitar búsqueda
             </button>
           </div>
@@ -236,7 +236,7 @@ function Destinos() {
           type="button"
           onClick={() => setPanelAbierto(!panelAbierto)}
           aria-expanded={panelAbierto}
-          className="mb-5 rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-800 ring-1 ring-white/80 transition hover:bg-brand-100 lg:hidden"
+          className="mb-5 rounded-full bg-white px-4 py-2 text-sm font-semibold text-cielo-700 ring-1 ring-white/80 transition hover:bg-cielo lg:hidden"
         >
           {panelAbierto ? 'Ocultar filtros' : 'Mostrar filtros'}
           {cantidadFiltrosActivos > 0 && ` (${cantidadFiltrosActivos})`}
@@ -245,7 +245,7 @@ function Destinos() {
         <div className="lg:grid lg:grid-cols-[16rem_1fr] lg:gap-8">
           <aside className={`${panelAbierto ? 'block' : 'hidden'} mb-8 lg:mb-0 lg:block`}>
             <div className="space-y-4 rounded-2xl p-5 cristal lg:sticky lg:top-24">
-              <h2 className="text-lg font-bold text-slate-900">Filtros</h2>
+              <h2 className="text-lg font-bold text-noche">Filtros</h2>
 
               <label className={CLASE_ETIQUETA}>
                 Categoría
@@ -298,7 +298,7 @@ function Destinos() {
                   type="button"
                   onClick={obtenerUbicacion}
                   disabled={cargandoUbicacion}
-                  className="mt-1 w-full rounded-xl border border-brand-800/15 bg-brand-50 px-3 py-2 text-left text-sm font-semibold text-brand-800 transition hover:bg-brand-100 disabled:opacity-60"
+                  className="mt-1 w-full rounded-xl border border-borde bg-cielo/50 px-3 py-2 text-left text-sm font-semibold text-cielo-700 transition hover:bg-cielo disabled:opacity-60"
                 >
                   {cargandoUbicacion ? 'Buscando ubicación...' : ubicacionUsuario ? 'Actualizar mi ubicación' : 'Usar mi ubicación'}
                 </button>
@@ -315,7 +315,7 @@ function Destinos() {
                     <option key={distancia} value={distancia}>A {distancia} km o menos</option>
                   ))}
                 </select>
-                {!ubicacionUsuario && <p className="mt-2 text-xs leading-5 text-slate-500">Permite el acceso a tu ubicación para filtrar destinos cercanos.</p>}
+                {!ubicacionUsuario && <p className="mt-2 text-xs leading-5 text-piedra-texto">Permite el acceso a tu ubicación para filtrar destinos cercanos.</p>}
                 {errorUbicacion && <p className="mt-2 text-xs font-semibold text-red-700" role="alert">{errorUbicacion}</p>}
               </div>
 
@@ -336,7 +336,7 @@ function Destinos() {
                 type="button"
                 onClick={limpiarFiltros}
                 disabled={cantidadFiltrosActivos === 0}
-                className="w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full rounded-xl border border-borde bg-white/70 px-4 py-2.5 text-sm font-bold text-noche/80 transition hover:bg-sal-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Limpiar filtros
               </button>
@@ -348,10 +348,10 @@ function Destinos() {
               <GrillaEsqueleto />
             ) : destinosFiltrados.length === 0 ? (
               !error && (
-                <div className="rounded-2xl px-5 py-6 text-slate-600 cristal">
+                <div className="rounded-2xl px-5 py-6 text-piedra-texto cristal">
                   <p>{mensajeVacio}</p>
                   {cantidadFiltrosActivos > 0 && (
-                    <button type="button" onClick={limpiarFiltros} className="mt-3 font-semibold text-brand-700 underline">
+                    <button type="button" onClick={limpiarFiltros} className="mt-3 font-semibold text-cielo-700 underline">
                       Quitar los filtros y ver todos los destinos
                     </button>
                   )}
@@ -359,7 +359,7 @@ function Destinos() {
               )
             ) : (
               <>
-                <p className="mb-4 text-sm text-slate-500">
+                <p className="mb-4 text-sm text-piedra-texto">
                   {destinosFiltrados.length} {destinosFiltrados.length === 1 ? 'destino encontrado' : 'destinos encontrados'}
                 </p>
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">

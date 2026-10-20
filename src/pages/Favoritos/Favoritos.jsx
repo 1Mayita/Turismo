@@ -8,11 +8,11 @@ function Favoritos() {
       <Navbar />
       <main className="contenedor max-w-6xl py-12">
         <div className="mb-10 max-w-2xl">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Mi cuenta</p>
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">Mis favoritos</h1>
-          <p className="mt-4 text-lg text-slate-600">
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Mi cuenta</p>
+          <h1 className="text-4xl font-bold tracking-tight text-noche sm:text-5xl">Mis favoritos</h1>
+          <p className="mt-4 text-lg text-piedra-texto">
             Tus destinos, actividades, restaurantes y alojamientos guardados. También los encuentras en{' '}
-            <Link to="/perfil#favoritos" className="font-semibold text-brand-700 underline">tu perfil</Link>.
+            <Link to="/perfil#favoritos" className="font-semibold text-cielo-700 underline">tu perfil</Link>.
           </p>
         </div>
 

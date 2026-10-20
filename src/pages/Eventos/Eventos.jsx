@@ -16,8 +16,8 @@ function rangoDeFechas(evento) {
 function FechaDestacada({ fechaISO }) {
   return (
     <div className="flex h-16 w-16 flex-col items-center justify-center rounded-2xl bg-white/95 text-center shadow-md">
-      <span className="text-2xl font-extrabold leading-none text-brand-800">{formatearFechaEvento(fechaISO, { day: 'numeric' })}</span>
-      <span className="text-xs font-bold uppercase text-accent-600">{formatearFechaEvento(fechaISO, { month: 'short' }).replace('.', '')}</span>
+      <span className="text-2xl font-extrabold leading-none text-cielo-700">{formatearFechaEvento(fechaISO, { day: 'numeric' })}</span>
+      <span className="text-xs font-bold uppercase text-cobre-texto">{formatearFechaEvento(fechaISO, { month: 'short' }).replace('.', '')}</span>
     </div>
   )
 }
@@ -64,9 +64,9 @@ function Eventos() {
       <Navbar />
       <main className="contenedor max-w-6xl py-12">
         <div className="mb-10 max-w-2xl">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Agenda cultural</p>
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">Próximos eventos</h1>
-          <p className="mt-4 text-lg text-slate-600">Festivales, ferias y celebraciones para sumar a tu viaje.</p>
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Agenda cultural</p>
+          <h1 className="text-4xl font-bold tracking-tight text-noche sm:text-5xl">Próximos eventos</h1>
+          <p className="mt-4 text-lg text-piedra-texto">Festivales, ferias y celebraciones para sumar a tu viaje.</p>
         </div>
 
         {error && <p className="mb-8 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
@@ -78,7 +78,7 @@ function Eventos() {
             ))}
           </div>
         ) : eventos.length === 0 ? (
-          !error && <p className="rounded-2xl bg-white/60 px-5 py-6 text-slate-600 ring-1 ring-white/80">No hay eventos próximos por ahora. Vuelve pronto.</p>
+          !error && <p className="rounded-2xl bg-white/60 px-5 py-6 text-piedra-texto ring-1 ring-white/80">No hay eventos próximos por ahora. Vuelve pronto.</p>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {eventos.map((evento) => {
@@ -88,15 +88,15 @@ function Eventos() {
                   <div className="relative m-2 h-44 overflow-hidden rounded-2xl">
                     <ImagenSegura src={evento.imagen} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
                     <div className="absolute left-3 top-3"><FechaDestacada fechaISO={evento.fecha_inicio} /></div>
-                    <span className={`absolute right-3 top-3 rounded-full px-3 py-1 text-xs font-bold shadow-sm ${enCurso ? 'bg-emerald-500 text-white' : 'bg-white/90 text-brand-800'}`}>
+                    <span className={`absolute right-3 top-3 rounded-full px-3 py-1 text-xs font-bold shadow-sm ${enCurso ? 'bg-emerald-500 text-white' : 'bg-white/90 text-cielo-700'}`}>
                       {enCurso ? 'En curso' : 'Próximo'}
                     </span>
                   </div>
                   <div className="flex flex-1 flex-col px-5 pb-5 pt-3">
-                    <p className="text-sm font-bold text-accent-600">{rangoDeFechas(evento)}</p>
-                    <h2 className="mt-1 text-xl font-bold text-slate-900">{evento.nombre}</h2>
-                    <p className="mt-1 text-sm text-gray-500">{lugarDe(evento)}</p>
-                    {evento.descripcion && <p className="mt-3 line-clamp-2 text-sm leading-6 text-gray-600">{evento.descripcion}</p>}
+                    <p className="text-sm font-bold text-cobre-texto">{rangoDeFechas(evento)}</p>
+                    <h2 className="mt-1 text-xl font-bold text-noche">{evento.nombre}</h2>
+                    <p className="mt-1 text-sm text-piedra-texto">{lugarDe(evento)}</p>
+                    {evento.descripcion && <p className="mt-3 line-clamp-2 text-sm leading-6 text-piedra-texto">{evento.descripcion}</p>}
                     <div className="mt-auto pt-4">
                       <button type="button" onClick={() => setEventoAbierto(evento)} className="rounded-xl boton-principal px-4 py-2 text-sm font-bold">
                         Ver más
@@ -115,32 +115,32 @@ function Eventos() {
           <ImagenSegura src={eventoAbierto.imagen} alt="" className="h-56 w-full object-cover sm:rounded-t-3xl" />
           <div className="space-y-5 p-6 sm:p-8">
             <div>
-              <p className="text-sm font-bold text-accent-600">{rangoDeFechas(eventoAbierto)}</p>
-              <h2 className="mt-1 text-2xl font-bold text-slate-900">{eventoAbierto.nombre}</h2>
-              <p className="mt-1 text-sm text-gray-500">{lugarDe(eventoAbierto)}</p>
+              <p className="text-sm font-bold text-cobre-texto">{rangoDeFechas(eventoAbierto)}</p>
+              <h2 className="mt-1 text-2xl font-bold text-noche">{eventoAbierto.nombre}</h2>
+              <p className="mt-1 text-sm text-piedra-texto">{lugarDe(eventoAbierto)}</p>
             </div>
-            {eventoAbierto.descripcion && <p className="leading-7 text-slate-700">{eventoAbierto.descripcion}</p>}
+            {eventoAbierto.descripcion && <p className="leading-7 text-noche/80">{eventoAbierto.descripcion}</p>}
 
             <div>
-              <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-slate-500">Cronograma</h3>
+              <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-piedra-texto">Cronograma</h3>
               {cronograma.length > 0 ? (
                 <ol className="space-y-2">
                   {cronograma.map((actividad, indice) => (
-                    <li key={actividad + indice} className="flex gap-3 rounded-xl bg-brand-50 px-4 py-2.5 text-sm text-slate-700">
-                      <span className="font-bold text-brand-700">{indice + 1}.</span>
+                    <li key={actividad + indice} className="flex gap-3 rounded-xl bg-cielo/50 px-4 py-2.5 text-sm text-noche/80">
+                      <span className="font-bold text-cielo-700">{indice + 1}.</span>
                       {actividad}
                     </li>
                   ))}
                 </ol>
               ) : (
-                <p className="text-sm text-slate-600">Los organizadores todavía no publicaron el cronograma.</p>
+                <p className="text-sm text-piedra-texto">Los organizadores todavía no publicaron el cronograma.</p>
               )}
             </div>
 
             {eventoAbierto.recomendaciones && (
-              <div className="rounded-2xl bg-accent-50 p-4">
-                <h3 className="mb-1 text-sm font-bold uppercase tracking-wider text-accent-700">Recomendaciones</h3>
-                <p className="text-sm leading-6 text-slate-700">{eventoAbierto.recomendaciones}</p>
+              <div className="rounded-2xl bg-sal-2 p-4">
+                <h3 className="mb-1 text-sm font-bold uppercase tracking-wider text-cobre-texto">Recomendaciones</h3>
+                <p className="text-sm leading-6 text-noche/80">{eventoAbierto.recomendaciones}</p>
               </div>
             )}
             <BotonReportar tipo="evento" elemento={eventoAbierto} enlace="/eventos" />

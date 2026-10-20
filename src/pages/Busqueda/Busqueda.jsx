@@ -117,14 +117,14 @@ function Busqueda() {
       <Navbar />
       <main className="contenedor max-w-6xl py-12">
         <div className="mb-8 max-w-3xl">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Explora Bolivia</p>
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">Resultados de búsqueda</h1>
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Explora Bolivia</p>
+          <h1 className="text-4xl font-bold tracking-tight text-noche sm:text-5xl">Resultados de búsqueda</h1>
           {consulta ? (
-            <p className="mt-4 text-lg text-slate-600">
-              Coincidencias para <span className="font-semibold text-slate-900">“{consulta}”</span> en destinos, actividades, restaurantes y alojamientos.
+            <p className="mt-4 text-lg text-piedra-texto">
+              Coincidencias para <span className="font-semibold text-noche">“{consulta}”</span> en destinos, actividades, restaurantes y alojamientos.
             </p>
           ) : (
-            <p className="mt-4 text-lg text-slate-600">Busca destinos, actividades, restaurantes y alojamientos desde el buscador superior.</p>
+            <p className="mt-4 text-lg text-piedra-texto">Busca destinos, actividades, restaurantes y alojamientos desde el buscador superior.</p>
           )}
         </div>
 
@@ -140,11 +140,11 @@ function Busqueda() {
                 onClick={() => setTipoActivo(tipo.id)}
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                   tipoActivo === tipo.id
-                    ? 'bg-brand-700 text-white shadow-md shadow-brand-900/15'
-                    : 'bg-white text-brand-800 ring-1 ring-white/80 hover:bg-brand-100'
+                    ? 'bg-noche text-white shadow-md shadow-brand-900/15'
+                    : 'bg-white text-cielo-700 ring-1 ring-white/80 hover:bg-cielo'
                 }`}
               >
-                {tipo.etiqueta} <span className={tipoActivo === tipo.id ? 'text-white/70' : 'text-slate-500'}>({cantidades[tipo.id]})</span>
+                {tipo.etiqueta} <span className={tipoActivo === tipo.id ? 'text-white/70' : 'text-piedra-texto'}>({cantidades[tipo.id]})</span>
               </button>
             ))}
           </div>
@@ -156,32 +156,32 @@ function Busqueda() {
           </div>
         ) : !consulta ? (
           <div className="rounded-2xl p-7 cristal">
-            <p className="text-slate-600">Prueba con el nombre de un lugar, una actividad o un servicio turístico.</p>
+            <p className="text-piedra-texto">Prueba con el nombre de un lugar, una actividad o un servicio turístico.</p>
           </div>
         ) : resultados.length === 0 ? (
           <div className="rounded-2xl p-7 cristal">
-            <p className="font-semibold text-slate-900">
+            <p className="font-semibold text-noche">
               {coincidencias.length === 0 ? `No encontramos nada para “${consulta}”.` : 'No hay resultados de este tipo.'}
             </p>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-piedra-texto">
               {coincidencias.length === 0 ? 'Revisa la ortografía o prueba con una palabra más general, como el nombre de un departamento.' : 'Cambia el filtro de arriba para ver los demás resultados.'}
             </p>
           </div>
         ) : (
           <>
-            <p className="mb-4 text-sm font-medium text-slate-500">{resultados.length} {resultados.length === 1 ? 'resultado' : 'resultados'}</p>
+            <p className="mb-4 text-sm font-medium text-piedra-texto">{resultados.length} {resultados.length === 1 ? 'resultado' : 'resultados'}</p>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {resultados.map((resultado) => (
                 <article key={resultado.id} className="flex flex-col rounded-2xl p-6 cristal transition hover:-translate-y-0.5 hover:shadow-md">
-                  <span className="mb-4 w-fit rounded-full bg-brand-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-brand-800">
+                  <span className="mb-4 w-fit rounded-full bg-cielo px-3 py-1 text-xs font-bold uppercase tracking-wider text-cielo-700">
                     {TIPOS.find((tipo) => tipo.id === resultado.tipo)?.etiqueta}
                   </span>
-                  <h2 className="text-xl font-bold text-slate-900">{resultado.titulo}</h2>
-                  {resultado.ubicacion && <p className="mt-2 text-sm font-medium text-brand-700">📍 {resultado.ubicacion}</p>}
-                  {resultado.descripcion && <p className="mt-3 flex-1 text-sm leading-6 text-slate-600">{resultado.descripcion}</p>}
+                  <h2 className="text-xl font-bold text-noche">{resultado.titulo}</h2>
+                  {resultado.ubicacion && <p className="mt-2 text-sm font-medium text-cielo-700">📍 {resultado.ubicacion}</p>}
+                  {resultado.descripcion && <p className="mt-3 flex-1 text-sm leading-6 text-piedra-texto">{resultado.descripcion}</p>}
                   <Link
                     to={resultado.enlace}
-                    className="mt-5 inline-flex w-fit items-center gap-2 rounded-full bg-brand-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-800"
+                    className="mt-5 inline-flex w-fit items-center gap-2 rounded-full bg-noche px-4 py-2 text-sm font-semibold text-white transition hover:bg-noche/90"
                   >
                     {resultado.accion}<span aria-hidden="true">→</span>
                   </Link>

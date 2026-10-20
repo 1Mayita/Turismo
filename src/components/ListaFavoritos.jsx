@@ -87,12 +87,12 @@ function ListaFavoritos() {
 
     return (
       <article key={`actividad-${elemento.id}`} className="relative rounded-3xl p-6 cristal">
-        <span className="mb-4 inline-flex rounded-full bg-brand-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-brand-800">Actividad</span>
+        <span className="mb-4 inline-flex rounded-full bg-cielo px-3 py-1 text-xs font-bold uppercase tracking-wider text-cielo-700">Actividad</span>
         <BotonFavorito idElemento={idElementoDeFavorito(favorito)} tipo="actividad" className="absolute right-4 top-4" />
-        <h3 className="pr-10 text-lg font-bold text-slate-900">{elemento.nombre}</h3>
-        {elemento.descripcion && <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{elemento.descripcion}</p>}
+        <h3 className="pr-10 text-lg font-bold text-noche">{elemento.nombre}</h3>
+        {elemento.descripcion && <p className="mt-2 line-clamp-3 text-sm leading-6 text-piedra-texto">{elemento.descripcion}</p>}
         {elemento.id_destino && (
-          <Link to={`/destinos/${elemento.id_destino}`} className="mt-4 inline-flex text-sm font-semibold text-brand-700 underline">
+          <Link to={`/destinos/${elemento.id_destino}`} className="mt-4 inline-flex text-sm font-semibold text-cielo-700 underline">
             Ver el destino de esta actividad
           </Link>
         )}
@@ -105,9 +105,9 @@ function ListaFavoritos() {
 
   if (guardados.length === 0) {
     return (
-      <p className="rounded-2xl px-5 py-6 text-slate-600 cristal">
+      <p className="rounded-2xl px-5 py-6 text-piedra-texto cristal">
         Todavía no guardaste nada. Toca el corazón en un destino, actividad, restaurante o alojamiento para agregarlo.{' '}
-        <Link to="/destinos" className="font-semibold text-brand-700 underline">Explorar destinos</Link>
+        <Link to="/destinos" className="font-semibold text-cielo-700 underline">Explorar destinos</Link>
       </p>
     )
   }
@@ -122,16 +122,16 @@ function ListaFavoritos() {
             aria-pressed={filtro === item.id}
             onClick={() => setFiltro(item.id)}
             className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-              filtro === item.id ? 'bg-brand-700 text-white' : 'bg-white/70 text-brand-800 ring-1 ring-white/80 hover:bg-white'
+              filtro === item.id ? 'bg-noche text-white' : 'bg-white/70 text-cielo-700 ring-1 ring-white/80 hover:bg-white'
             }`}
           >
-            {item.etiqueta} <span className={filtro === item.id ? 'text-white/75' : 'text-slate-500'}>({cantidadDe(item.id)})</span>
+            {item.etiqueta} <span className={filtro === item.id ? 'text-white/75' : 'text-piedra-texto'}>({cantidadDe(item.id)})</span>
           </button>
         ))}
       </div>
 
       {visibles.length === 0 ? (
-        <p className="rounded-2xl px-5 py-6 text-slate-600 cristal">Ya no tienes favoritos de este tipo.</p>
+        <p className="rounded-2xl px-5 py-6 text-piedra-texto cristal">Ya no tienes favoritos de este tipo.</p>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {visibles.map(renderElemento)}

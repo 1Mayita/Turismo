@@ -28,7 +28,7 @@ function ListaNotificaciones({ maximo, onElegir }) {
   }
 
   if (visibles.length === 0) {
-    return <p className="px-4 py-6 text-center text-sm text-slate-600">No tienes notificaciones por ahora. Te avisaremos cuando haya eventos o destinos nuevos.</p>
+    return <p className="px-4 py-6 text-center text-sm text-piedra-texto">No tienes notificaciones por ahora. Te avisaremos cuando haya eventos o destinos nuevos.</p>
   }
 
   return (
@@ -38,18 +38,18 @@ function ListaNotificaciones({ maximo, onElegir }) {
           <button
             type="button"
             onClick={() => abrir(notificacion)}
-            className={`flex w-full gap-3 px-4 py-3 text-left transition hover:bg-brand-50 ${notificacion.leida ? '' : 'bg-sky-50/80'}`}
+            className={`flex w-full gap-3 px-4 py-3 text-left transition hover:bg-cielo/50 ${notificacion.leida ? '' : 'bg-cielo/50'}`}
           >
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-xl shadow-sm" aria-hidden="true">
               {ICONO_POR_TIPO[notificacion.tipoMostrado] || '🔔'}
             </span>
             <span className="min-w-0 flex-1">
-              <span className={`block text-sm ${notificacion.leida ? 'font-semibold text-slate-700' : 'font-bold text-slate-900'}`}>
+              <span className={`block text-sm ${notificacion.leida ? 'font-semibold text-noche/80' : 'font-bold text-noche'}`}>
                 {!notificacion.leida && <span className="sr-only">No leída: </span>}
                 {notificacion.titulo}
               </span>
-              {notificacion.mensaje && <span className="mt-0.5 line-clamp-2 block text-xs text-slate-600">{notificacion.mensaje}</span>}
-              <span className="mt-1 block text-[11px] font-semibold text-slate-400">{tiempoRelativo(notificacion.fecha)}</span>
+              {notificacion.mensaje && <span className="mt-0.5 line-clamp-2 block text-xs text-piedra-texto">{notificacion.mensaje}</span>}
+              <span className="mt-1 block text-[11px] font-semibold text-piedra">{tiempoRelativo(notificacion.fecha)}</span>
             </span>
             {!notificacion.leida && <span className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-blue-600" aria-hidden="true" />}
           </button>

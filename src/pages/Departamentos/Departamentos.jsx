@@ -46,9 +46,9 @@ function Departamentos() {
       <Navbar />
       <main className="contenedor max-w-6xl py-12">
         <div className="mb-10 max-w-2xl">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Los nueve departamentos</p>
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">Explora por departamento</h1>
-          <p className="mt-4 text-lg text-slate-600">Del altiplano a la Amazonía: elige un departamento y descubre sus municipios, destinos y sabores.</p>
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Los nueve departamentos</p>
+          <h1 className="text-4xl font-bold tracking-tight text-noche sm:text-5xl">Explora por departamento</h1>
+          <p className="mt-4 text-lg text-piedra-texto">Del altiplano a la Amazonía: elige un departamento y descubre sus municipios, destinos y sabores.</p>
         </div>
 
         {error && <p className="mb-8 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{error}</p>}
@@ -78,12 +78,12 @@ function Departamentos() {
                     className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
                   />
                   {/* Velo oscuro abajo para que el texto se lea sobre cualquier foto. */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-950/90 via-brand-950/35 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-noche/90 via-noche/35 to-transparent" />
                   <div className="relative p-6 text-white">
                     <h2 className="text-3xl font-extrabold">{departamento.nombre}</h2>
-                    {departamento.eslogan && <p className="mt-1 text-base font-semibold text-brand-200">“{departamento.eslogan}”</p>}
+                    {departamento.eslogan && <p className="mt-1 text-base font-semibold text-cielo">“{departamento.eslogan}”</p>}
                     {departamento.descripcion && <p className="mt-2 line-clamp-2 text-sm text-white/85">{departamento.descripcion}</p>}
-                    <span className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-brand-800 transition group-hover:gap-3">
+                    <span className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-cielo-700 transition group-hover:gap-3">
                       Ver más <span aria-hidden="true">→</span>
                     </span>
                   </div>

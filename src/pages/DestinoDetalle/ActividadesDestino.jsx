@@ -24,7 +24,7 @@ function ActividadesDestino({ idDestino }) {
 
   return (
     <section className="mb-10">
-      <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Actividades disponibles</p>
+      <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Actividades disponibles</p>
       {cargando ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="h-20 animate-pulse rounded-2xl bg-sal-2" />
@@ -33,13 +33,13 @@ function ActividadesDestino({ idDestino }) {
       ) : error ? (
         <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
       ) : actividades.length === 0 ? (
-        <p className="text-slate-600">Todavía no hay actividades registradas para este destino.</p>
+        <p className="text-piedra-texto">Todavía no hay actividades registradas para este destino.</p>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {actividades.map((actividad) => (
             <div key={actividad.id} className="relative rounded-2xl p-5 pr-16 cristal">
-              <p className="font-bold text-slate-900">{actividad.nombre}</p>
-              {actividad.descripcion && <p className="mt-1 text-sm text-slate-600">{actividad.descripcion}</p>}
+              <p className="font-bold text-noche">{actividad.nombre}</p>
+              {actividad.descripcion && <p className="mt-1 text-sm text-piedra-texto">{actividad.descripcion}</p>}
               <BotonFavorito idElemento={actividad.id} tipo="actividad" className="absolute right-3 top-3" />
             </div>
           ))}

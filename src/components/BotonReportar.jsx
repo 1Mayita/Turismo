@@ -51,14 +51,14 @@ function BotonReportar({ tipo, elemento, enlace, className = '' }) {
 
   return (
     <>
-      <button type="button" onClick={abrir} className={`inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 underline-offset-2 transition hover:text-red-700 hover:underline ${className}`}>
+      <button type="button" onClick={abrir} className={`inline-flex items-center gap-1.5 text-sm font-semibold text-piedra-texto underline-offset-2 transition hover:text-red-700 hover:underline ${className}`}>
         <span aria-hidden="true">⚑</span> Reportar un problema
       </button>
       {abierto && (
         <Modal titulo="Reportar un problema" onCerrar={() => setAbierto(false)}>
           <div className="p-6 sm:p-8">
-            <h2 className="pr-10 text-2xl font-bold text-slate-900">Reportar un problema</h2>
-            <p className="mt-1 text-sm text-slate-600">{elemento.nombre}</p>
+            <h2 className="pr-10 text-2xl font-bold text-noche">Reportar un problema</h2>
+            <p className="mt-1 text-sm text-piedra-texto">{elemento.nombre}</p>
 
             {enviado ? (
               <div className="mt-6 rounded-2xl bg-emerald-50 p-5 text-emerald-900" role="status">
@@ -70,17 +70,17 @@ function BotonReportar({ tipo, elemento, enlace, className = '' }) {
               <form onSubmit={enviar} className="mt-6 space-y-5">
                 {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
                 <fieldset>
-                  <legend className="mb-2 text-sm font-semibold text-slate-700">¿Qué problema encontraste?</legend>
+                  <legend className="mb-2 text-sm font-semibold text-noche/80">¿Qué problema encontraste?</legend>
                   <div className="space-y-2">
                     {MOTIVOS.map((item) => (
-                      <label key={item.id} className="flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 ring-1 ring-sky-100 transition hover:bg-brand-50 has-[:checked]:bg-brand-50 has-[:checked]:ring-brand-400">
-                        <input type="radio" name="motivo" value={item.id} checked={motivo === item.id} onChange={() => setMotivo(item.id)} className="h-4 w-4 accent-brand-700" />
-                        <span className="text-sm text-slate-800">{item.etiqueta}</span>
+                      <label key={item.id} className="flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 ring-1 ring-borde transition hover:bg-cielo/50 has-[:checked]:bg-cielo/50 has-[:checked]:ring-cielo-600">
+                        <input type="radio" name="motivo" value={item.id} checked={motivo === item.id} onChange={() => setMotivo(item.id)} className="h-4 w-4 accent-atardecer-700" />
+                        <span className="text-sm text-noche">{item.etiqueta}</span>
                       </label>
                     ))}
                   </div>
                 </fieldset>
-                <label className="block text-sm font-semibold text-slate-700">
+                <label className="block text-sm font-semibold text-noche/80">
                   Cuéntanos más (opcional)
                   <textarea
                     value={descripcion}
@@ -88,9 +88,9 @@ function BotonReportar({ tipo, elemento, enlace, className = '' }) {
                     rows={3}
                     maxLength={LARGO_MAXIMO_DESCRIPCION}
                     placeholder="Ej.: el horario cambió, ahora abren a las 9:00."
-                    className="mt-2 w-full rounded-xl border border-sky-200 px-4 py-2.5 font-normal outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+                    className="mt-2 w-full rounded-xl border border-borde px-4 py-2.5 font-normal outline-none focus:border-cielo-600 focus:ring-2 focus:ring-cielo-600/30"
                   />
-                  <span className="mt-1 block text-right text-xs font-normal text-slate-400">{descripcion.length}/{LARGO_MAXIMO_DESCRIPCION}</span>
+                  <span className="mt-1 block text-right text-xs font-normal text-piedra">{descripcion.length}/{LARGO_MAXIMO_DESCRIPCION}</span>
                 </label>
                 <button disabled={enviando} className="w-full rounded-xl boton-principal px-4 py-3 font-bold disabled:opacity-60">
                   {enviando ? 'Enviando...' : 'Enviar reporte'}
