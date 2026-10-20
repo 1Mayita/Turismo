@@ -1,7 +1,8 @@
 import { useState } from 'react'
+import { claseBoton, claseControl, claseEtiqueta } from '../../components/ui/estilos.js'
 import { LARGO_MAXIMO_NOMBRE, LARGO_MAXIMO_NOTAS, validarDatosDeViaje } from '../../services/viajesService.js'
 
-const CLASE_CAMPO = 'mt-2 w-full rounded-xl border border-borde bg-white px-4 py-2.5 font-normal outline-none focus:border-cielo-600 focus:ring-2 focus:ring-cielo-600/30'
+const CLASE_CAMPO = `${claseControl} mt-1.5 font-normal`
 
 // Nombre, fechas y notas de un viaje. Se usa para crear y para editar.
 // onGuardar(datos) debe lanzar un Error con un mensaje amable si algo falla.
@@ -39,31 +40,31 @@ function FormularioViaje({ inicial = {}, textoBoton, onGuardar, onCancelar }) {
 
   return (
     <form onSubmit={enviar} className="space-y-4">
-      {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
-      <label className="block text-sm font-semibold text-noche/80">
+      {error && <p className="rounded-control bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
+      <label className={claseEtiqueta}>
         Nombre del viaje
         <input name="nombre" value={datos.nombre} onChange={cambiar} maxLength={LARGO_MAXIMO_NOMBRE} placeholder="Ej.: Ruta del salar y las lagunas" className={CLASE_CAMPO} />
       </label>
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="block text-sm font-semibold text-noche/80">
+        <label className={claseEtiqueta}>
           Fecha de salida (opcional)
           <input name="fecha_inicio" type="date" value={datos.fecha_inicio} onChange={cambiar} className={CLASE_CAMPO} />
         </label>
-        <label className="block text-sm font-semibold text-noche/80">
+        <label className={claseEtiqueta}>
           Fecha de regreso (opcional)
           <input name="fecha_fin" type="date" min={datos.fecha_inicio || undefined} value={datos.fecha_fin} onChange={cambiar} className={CLASE_CAMPO} />
         </label>
       </div>
-      <label className="block text-sm font-semibold text-noche/80">
+      <label className={claseEtiqueta}>
         Notas (opcional)
         <textarea name="notas" value={datos.notas} onChange={cambiar} rows={3} maxLength={LARGO_MAXIMO_NOTAS} placeholder="Presupuesto, con quién vas, qué no te puedes olvidar..." className={CLASE_CAMPO} />
       </label>
       <div className="flex flex-wrap gap-3">
-        <button disabled={guardando} className="flex-1 rounded-xl boton-principal px-5 py-3 font-bold disabled:cursor-not-allowed disabled:opacity-60">
+        <button disabled={guardando} className={claseBoton('primario', 'normal', 'flex-1')}>
           {guardando ? 'Guardando...' : textoBoton}
         </button>
         {onCancelar && (
-          <button type="button" onClick={onCancelar} className="rounded-xl border border-borde bg-white px-5 py-3 font-bold text-noche/80 transition hover:bg-sal">
+          <button type="button" onClick={onCancelar} className={claseBoton('secundario')}>
             Cancelar
           </button>
         )}
