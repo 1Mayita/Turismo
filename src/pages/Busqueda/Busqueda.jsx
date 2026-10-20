@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { ArrowRight, BedDouble, Compass, LayoutGrid, MapPin, Mountain, Search, SearchX, UtensilsCrossed } from 'lucide-react'
 import Navbar from '../../components/Navbar.jsx'
+import { Chip, EstadoVacio, claseBoton } from '../../components/ui'
 import { getAlojamientos } from '../../services/alojamientosService.js'
 import { getActividades } from '../../services/actividadesService.js'
 import { getDestinos } from '../../services/destinosService.js'
@@ -8,11 +10,11 @@ import { getRestaurantes } from '../../services/restaurantesService.js'
 import { coincideConBusqueda } from '../../utils/texto.js'
 
 const TIPOS = [
-  { id: 'todos', etiqueta: 'Todos' },
-  { id: 'destino', etiqueta: 'Destinos' },
-  { id: 'actividad', etiqueta: 'Actividades' },
-  { id: 'restaurante', etiqueta: 'Restaurantes' },
-  { id: 'alojamiento', etiqueta: 'Alojamientos' },
+  { id: 'todos', etiqueta: 'Todos', icono: LayoutGrid },
+  { id: 'destino', etiqueta: 'Destinos', icono: Compass },
+  { id: 'actividad', etiqueta: 'Actividades', icono: Mountain },
+  { id: 'restaurante', etiqueta: 'Restaurantes', icono: UtensilsCrossed },
+  { id: 'alojamiento', etiqueta: 'Alojamientos', icono: BedDouble },
 ]
 
 function crearResultados({ destinos, actividades, restaurantes, alojamientos }) {
@@ -117,73 +119,64 @@ function Busqueda() {
       <Navbar />
       <main className="contenedor max-w-6xl py-12">
         <div className="mb-8 max-w-3xl">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Explora Bolivia</p>
-          <h1 className="text-4xl font-bold tracking-tight text-noche sm:text-5xl">Resultados de búsqueda</h1>
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Explora Bolivia</p>
+          <h1 className="titulo-display text-[44px] sm:text-[56px]">Resultados de búsqueda</h1>
           {consulta ? (
-            <p className="mt-4 text-lg text-piedra-texto">
-              Coincidencias para <span className="font-semibold text-noche">“{consulta}”</span> en destinos, actividades, restaurantes y alojamientos.
+            <p className="texto-lectura mt-3 text-lg text-piedra-texto">
+              Coincidencias para <span className="font-bold text-noche">“{consulta}”</span> en destinos, actividades, restaurantes y alojamientos.
             </p>
           ) : (
-            <p className="mt-4 text-lg text-piedra-texto">Busca destinos, actividades, restaurantes y alojamientos desde el buscador superior.</p>
+            <p className="texto-lectura mt-3 text-lg text-piedra-texto">Busca destinos, actividades, restaurantes y alojamientos desde el buscador superior.</p>
           )}
         </div>
 
-        {error && <p className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
+        {error && <p className="mb-6 rounded-control border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
 
         {consulta && (
-          <div className="mb-7 flex flex-wrap gap-2" aria-label="Filtrar resultados por categoría">
+          <div className="mb-7 flex flex-wrap gap-2" role="group" aria-label="Filtrar resultados por categoría">
             {TIPOS.map((tipo) => (
-              <button
-                key={tipo.id}
-                type="button"
-                aria-pressed={tipoActivo === tipo.id}
-                onClick={() => setTipoActivo(tipo.id)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  tipoActivo === tipo.id
-                    ? 'bg-noche text-white shadow-md shadow-brand-900/15'
-                    : 'bg-white text-cielo-700 ring-1 ring-white/80 hover:bg-cielo'
-                }`}
-              >
-                {tipo.etiqueta} <span className={tipoActivo === tipo.id ? 'text-white/70' : 'text-piedra-texto'}>({cantidades[tipo.id]})</span>
-              </button>
+              <Chip key={tipo.id} icono={tipo.icono} activo={tipoActivo === tipo.id} onClick={() => setTipoActivo(tipo.id)}>
+                {tipo.etiqueta} <span className="font-medium opacity-70">{cantidades[tipo.id]}</span>
+              </Chip>
             ))}
           </div>
         )}
 
         {cargando ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, indice) => <div key={indice} className="h-48 animate-pulse rounded-2xl bg-sal-2 shadow-sm" />)}
+            {Array.from({ length: 6 }).map((_, indice) => <div key={indice} className="h-48 animate-pulse rounded-tarjeta bg-sal-2" />)}
           </div>
         ) : !consulta ? (
-          <div className="rounded-2xl p-7 cristal">
-            <p className="text-piedra-texto">Prueba con el nombre de un lugar, una actividad o un servicio turístico.</p>
-          </div>
+          <EstadoVacio icono={Search} titulo="¿Qué estás buscando?" mensaje="Prueba con el nombre de un lugar, una actividad o un servicio turístico." />
         ) : resultados.length === 0 ? (
-          <div className="rounded-2xl p-7 cristal">
-            <p className="font-semibold text-noche">
-              {coincidencias.length === 0 ? `No encontramos nada para “${consulta}”.` : 'No hay resultados de este tipo.'}
-            </p>
-            <p className="mt-1 text-sm text-piedra-texto">
-              {coincidencias.length === 0 ? 'Revisa la ortografía o prueba con una palabra más general, como el nombre de un departamento.' : 'Cambia el filtro de arriba para ver los demás resultados.'}
-            </p>
-          </div>
+          <EstadoVacio
+            icono={SearchX}
+            titulo={coincidencias.length === 0 ? `No encontramos nada para “${consulta}”.` : 'No hay resultados de este tipo.'}
+            mensaje={coincidencias.length === 0 ? 'Revisa la ortografía o prueba con una palabra más general, como el nombre de un departamento.' : 'Cambia el filtro de arriba para ver los demás resultados.'}
+          />
         ) : (
           <>
             <p className="mb-4 text-sm font-medium text-piedra-texto">{resultados.length} {resultados.length === 1 ? 'resultado' : 'resultados'}</p>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {resultados.map((resultado) => (
-                <article key={resultado.id} className="flex flex-col rounded-2xl p-6 cristal transition hover:-translate-y-0.5 hover:shadow-md">
-                  <span className="mb-4 w-fit rounded-full bg-cielo px-3 py-1 text-xs font-bold uppercase tracking-wider text-cielo-700">
-                    {TIPOS.find((tipo) => tipo.id === resultado.tipo)?.etiqueta}
+                <article key={resultado.id} className="flex flex-col rounded-tarjeta border border-borde bg-white p-5 shadow-suave transition duration-200 ease-salida hover:-translate-y-0.5 hover:shadow-elevada">
+                  <span className="mb-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-cielo px-2.5 py-1 text-xs font-bold text-noche">
+                    {(() => {
+                      const tipo = TIPOS.find((item) => item.id === resultado.tipo)
+                      const Icono = tipo?.icono || Compass
+                      return <><Icono aria-hidden="true" size={14} className="text-cielo-700" />{tipo?.etiqueta}</>
+                    })()}
                   </span>
-                  <h2 className="text-xl font-bold text-noche">{resultado.titulo}</h2>
-                  {resultado.ubicacion && <p className="mt-2 text-sm font-medium text-cielo-700">📍 {resultado.ubicacion}</p>}
-                  {resultado.descripcion && <p className="mt-3 flex-1 text-sm leading-6 text-piedra-texto">{resultado.descripcion}</p>}
-                  <Link
-                    to={resultado.enlace}
-                    className="mt-5 inline-flex w-fit items-center gap-2 rounded-full bg-noche px-4 py-2 text-sm font-semibold text-white transition hover:bg-noche/90"
-                  >
-                    {resultado.accion}<span aria-hidden="true">→</span>
+                  <h2 className="text-lg font-bold text-noche">{resultado.titulo}</h2>
+                  {resultado.ubicacion && (
+                    <p className="mt-1.5 flex items-center gap-1.5 text-sm text-piedra-texto">
+                      <MapPin aria-hidden="true" size={16} className="shrink-0 text-piedra" /> {resultado.ubicacion}
+                    </p>
+                  )}
+                  {resultado.descripcion && <p className="mt-3 line-clamp-3 flex-1 text-sm leading-6 text-piedra-texto">{resultado.descripcion}</p>}
+                  <Link to={resultado.enlace} className={claseBoton('secundario', 'pequeno', 'mt-5 w-fit')}>
+                    {resultado.accion}
+                    <ArrowRight aria-hidden="true" size={16} />
                   </Link>
                 </article>
               ))}
