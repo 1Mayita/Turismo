@@ -87,12 +87,12 @@ function DepartamentoDetalle() {
       <Navbar />
 
       {cargando ? (
-        <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
-          <div className="mb-8 h-72 animate-pulse rounded-3xl bg-white/50" />
+        <main className="contenedor max-w-6xl py-12">
+          <div className="mb-8 h-72 animate-pulse rounded-3xl bg-sal-2" />
           <GrillaEsqueleto cantidad={3} />
         </main>
       ) : error ? (
-        <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+        <main className="contenedor max-w-6xl py-12">
           <Migas pasos={migas} />
           <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
         </main>
@@ -102,14 +102,14 @@ function DepartamentoDetalle() {
           <header className="relative mx-3 mt-3 flex h-72 items-end overflow-hidden rounded-[2rem] shadow-[0_30px_60px_-30px_rgba(8,51,68,0.7)] sm:mx-5 sm:h-96">
             <ImagenSegura src={departamento.imagen_portada} alt="" className="absolute inset-0 h-full w-full object-cover object-[50%_30%]" />
             <div className="absolute inset-0 bg-gradient-to-t from-brand-950/90 via-brand-950/30 to-transparent" />
-            <div className="relative mx-auto w-full max-w-6xl px-5 pb-8 text-white lg:px-8">
+            <div className="relative contenedor max-w-6xl pb-8 text-white">
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-brand-200">Departamento</p>
               <h1 className="mt-1 text-4xl font-extrabold sm:text-6xl">{departamento.nombre}</h1>
               {departamento.eslogan && <p className="mt-2 text-lg font-semibold text-brand-100 sm:text-xl">“{departamento.eslogan}”</p>}
             </div>
           </header>
 
-          <main className="mx-auto max-w-6xl px-5 py-10 lg:px-8">
+          <main className="contenedor max-w-6xl py-10">
             <Migas pasos={migas} />
 
             {departamento.descripcion && <p className="mb-10 max-w-3xl text-lg leading-8 text-slate-700">{departamento.descripcion}</p>}

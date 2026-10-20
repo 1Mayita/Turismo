@@ -211,7 +211,7 @@ function Destinos() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+      <main className="contenedor max-w-6xl py-12">
         <div className="mb-10 max-w-2xl">
           <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Catálogo de experiencias</p>
           <h1 className="text-5xl font-bold tracking-tight text-slate-900">Encuentra tu próximo paisaje</h1>

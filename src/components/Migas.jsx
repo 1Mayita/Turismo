@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { ArrowLeft, ChevronRight } from 'lucide-react'
 
 // Migas de pan + botón "Volver". pasos: [{ etiqueta, to }]; el último es la
 // página actual y no lleva enlace. "Volver" regresa a la página anterior real
@@ -17,20 +18,25 @@ function Migas({ pasos }) {
 
   return (
     <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2">
-      <button type="button" onClick={volver} className="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-brand-800 ring-1 ring-white/80 transition hover:bg-brand-100">
-        ← Volver
+      <button
+        type="button"
+        onClick={volver}
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-borde bg-white px-4 text-sm font-bold text-noche transition hover:bg-cielo"
+      >
+        <ArrowLeft aria-hidden="true" size={18} />
+        Volver
       </button>
       <nav aria-label="Ruta de navegación">
-        <ol className="flex flex-wrap items-center gap-2 text-sm text-slate-600">
+        <ol className="flex flex-wrap items-center gap-1.5 text-sm text-piedra-texto">
           {pasos.map((paso, indice) => {
             const esUltimo = indice === pasos.length - 1
             return (
-              <li key={paso.etiqueta + indice} className="flex items-center gap-2">
-                {indice > 0 && <span aria-hidden="true" className="text-slate-400">›</span>}
+              <li key={paso.etiqueta + indice} className="flex items-center gap-1.5">
+                {indice > 0 && <ChevronRight aria-hidden="true" size={16} className="text-piedra" />}
                 {paso.to && !esUltimo ? (
-                  <Link to={paso.to} className="font-semibold text-brand-700 hover:underline">{paso.etiqueta}</Link>
+                  <Link to={paso.to} className="font-semibold text-cielo-700 hover:underline">{paso.etiqueta}</Link>
                 ) : (
-                  <span aria-current={esUltimo ? 'page' : undefined} className={esUltimo ? 'font-semibold text-slate-900' : ''}>{paso.etiqueta}</span>
+                  <span aria-current={esUltimo ? 'page' : undefined} className={esUltimo ? 'font-semibold text-noche' : ''}>{paso.etiqueta}</span>
                 )}
               </li>
             )

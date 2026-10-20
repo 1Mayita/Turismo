@@ -273,7 +273,7 @@ function AdminDestinos() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+      <main className="contenedor max-w-6xl py-12">
         <h1 className="mb-6 text-3xl font-bold text-slate-900">Administración de destinos</h1>
         <AdminNav />
 
@@ -369,7 +369,7 @@ function AdminDestinos() {
                 </label>
               </div>
             </div>
-            <Suspense fallback={<div className="h-80 animate-pulse rounded-2xl bg-white/50" />}>
+            <Suspense fallback={<div className="h-80 animate-pulse rounded-2xl bg-sal-2" />}>
               <SelectorUbicacion
                 latitud={formulario.latitud}
                 longitud={formulario.longitud}
@@ -450,7 +450,7 @@ function AdminDestinos() {
         )}
 
         {cargando ? (
-          <div className="h-64 animate-pulse rounded-2xl bg-white/50 cristal" />
+          <div className="h-64 animate-pulse rounded-2xl bg-sal-2 cristal" />
         ) : (
           <div className="overflow-x-auto rounded-2xl cristal">
             <table className="w-full text-left text-sm">

@@ -9,7 +9,7 @@ function Notificaciones() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-3xl px-5 py-12 lg:px-8">
+      <main className="contenedor max-w-3xl py-12">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Mi cuenta</p>

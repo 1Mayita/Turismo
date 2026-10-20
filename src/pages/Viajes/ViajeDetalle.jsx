@@ -118,13 +118,13 @@ function ViajeDetalle() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-10 lg:px-8">
+      <main className="contenedor max-w-6xl py-10">
         <Migas pasos={migas} />
 
         {cargando ? (
           <div className="space-y-4">
-            <div className="h-28 animate-pulse rounded-3xl bg-white/50" />
-            <div className="h-80 animate-pulse rounded-3xl bg-white/50" />
+            <div className="h-28 animate-pulse rounded-3xl bg-sal-2" />
+            <div className="h-80 animate-pulse rounded-3xl bg-sal-2" />
           </div>
         ) : !viaje ? (
           <div className="rounded-2xl p-6 cristal">

@@ -103,7 +103,7 @@ function AdminResenas() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+      <main className="contenedor max-w-6xl py-12">
         <h1 className="mb-6 text-3xl font-bold text-slate-900">Moderación de reseñas</h1>
         <AdminNav />
 
@@ -120,7 +120,7 @@ function AdminResenas() {
         </label>
 
         {cargando ? (
-          <div className="h-48 animate-pulse rounded-2xl bg-white/50 cristal" />
+          <div className="h-48 animate-pulse rounded-2xl bg-sal-2 cristal" />
         ) : resenasVisibles.length === 0 ? (
           <p className="rounded-2xl px-5 py-6 text-slate-600 cristal">No hay reseñas para mostrar.</p>
         ) : (

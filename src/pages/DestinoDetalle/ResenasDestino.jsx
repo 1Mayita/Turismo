@@ -109,7 +109,7 @@ function ResenasDestino({ idDestino, tipo = 'destino', idElemento = idDestino, o
       )}
 
       {cargando ? (
-        <div className="h-24 animate-pulse rounded-2xl bg-white/50" />
+        <div className="h-24 animate-pulse rounded-2xl bg-sal-2" />
       ) : error ? (
         <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
       ) : resenas.length === 0 ? (

@@ -82,9 +82,9 @@ function EstablecimientosCercanos({ idDepartamento, idMunicipio, nombreDepartame
       <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Dónde comer y dónde dormir</p>
       {cargando ? (
         <div className="mb-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="h-64 animate-pulse rounded-3xl bg-white/50" />
-          <div className="h-64 animate-pulse rounded-3xl bg-white/50" />
-          <div className="hidden h-64 animate-pulse rounded-3xl bg-white/50 lg:block" />
+          <div className="h-64 animate-pulse rounded-3xl bg-sal-2" />
+          <div className="h-64 animate-pulse rounded-3xl bg-sal-2" />
+          <div className="hidden h-64 animate-pulse rounded-3xl bg-sal-2 lg:block" />
         </div>
       ) : error ? (
         <p className="mb-10 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>

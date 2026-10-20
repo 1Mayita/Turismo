@@ -40,7 +40,7 @@ function ClimaActual({ latitud, longitud }) {
   }, [latitud, longitud])
 
   if (error) return <p className="text-sm text-slate-500">No pudimos consultar el clima en este momento.</p>
-  if (!clima) return <div className="h-20 animate-pulse rounded-xl bg-white/60" aria-label="Cargando el clima" />
+  if (!clima) return <div className="h-20 animate-pulse rounded-xl bg-sal-2" aria-label="Cargando el clima" />
 
   const ahora = describir(clima.current?.weather_code)
   const dias = (clima.daily?.time || []).map((fecha, indice) => ({

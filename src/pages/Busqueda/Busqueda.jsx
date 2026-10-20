@@ -115,7 +115,7 @@ function Busqueda() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+      <main className="contenedor max-w-6xl py-12">
         <div className="mb-8 max-w-3xl">
           <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Explora Bolivia</p>
           <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">Resultados de búsqueda</h1>
@@ -152,7 +152,7 @@ function Busqueda() {
 
         {cargando ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, indice) => <div key={indice} className="h-48 animate-pulse rounded-2xl bg-white/50 shadow-sm" />)}
+            {Array.from({ length: 6 }).map((_, indice) => <div key={indice} className="h-48 animate-pulse rounded-2xl bg-sal-2 shadow-sm" />)}
           </div>
         ) : !consulta ? (
           <div className="rounded-2xl p-7 cristal">

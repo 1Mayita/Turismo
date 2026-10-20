@@ -77,7 +77,7 @@ function AdminReportes() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+      <main className="contenedor max-w-6xl py-12">
         <h1 className="mb-6 text-3xl font-bold text-slate-900">Reportes de información</h1>
         <AdminNav />
 
@@ -99,7 +99,7 @@ function AdminReportes() {
         </div>
 
         {cargando ? (
-          <div className="space-y-3">{Array.from({ length: 3 }).map((_, indice) => <div key={indice} className="h-32 animate-pulse rounded-2xl bg-white/50" />)}</div>
+          <div className="space-y-3">{Array.from({ length: 3 }).map((_, indice) => <div key={indice} className="h-32 animate-pulse rounded-2xl bg-sal-2" />)}</div>
         ) : visibles.length === 0 ? (
           !error && <p className="rounded-2xl px-5 py-6 text-slate-600 cristal">{filtro === 'pendiente' ? '¡Todo al día! No hay reportes pendientes.' : 'No hay reportes con este estado.'}</p>
         ) : (

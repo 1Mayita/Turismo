@@ -187,7 +187,7 @@ function Perfil() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-10 lg:px-8">
+      <main className="contenedor max-w-6xl py-10">
         {esBienvenida && (
           <div className="mb-6 rounded-2xl p-5 cristal">
             <p className="text-lg font-bold text-slate-900">¡Tu cuenta está lista!</p>

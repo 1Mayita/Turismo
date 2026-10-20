@@ -5,7 +5,7 @@ function NoEncontrada() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-2xl px-5 py-24 text-center lg:px-8">
+      <main className="contenedor max-w-2xl py-24 text-center">
         <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Error 404</p>
         <h1 className="text-4xl font-bold text-slate-900 sm:text-5xl">No encontramos esta página</h1>
         <p className="mt-4 text-lg text-slate-600">

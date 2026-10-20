@@ -1,10 +1,14 @@
+import Logo from './Logo.jsx'
+
 // Pantalla completa mientras se comprueba la sesión o se descarga una página.
 function PantallaCarga() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4" role="status" aria-live="polite">
-      <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-200 border-t-brand-700" aria-hidden="true" />
-      <p className="text-lg font-bold text-slate-900">Rutas de Bolivia</p>
-      <p className="text-sm text-slate-600">Cargando...</p>
+    <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-sal" role="status" aria-live="polite">
+      <Logo className="animate-pulse" />
+      <div className="h-1 w-28 overflow-hidden rounded-full bg-sal-2" aria-hidden="true">
+        <div className="h-full w-1/2 animate-[cargando_1.1s_ease-in-out_infinite] rounded-full bg-atardecer" />
+      </div>
+      <p className="text-sm text-piedra-texto">Cargando...</p>
     </div>
   )
 }

@@ -102,7 +102,7 @@ function DestinoDetalle() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-5xl px-5 py-12 lg:px-8">
+      <main className="contenedor max-w-5xl py-12">
         <Migas pasos={migas} />
 
         {cargando ? (
@@ -171,7 +171,7 @@ function DestinoDetalle() {
             {coordenadasValidas(destino.latitud, destino.longitud) && (
               <section className="mb-10">
                 <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Ubicación</p>
-                <Suspense fallback={<div className="h-72 animate-pulse rounded-2xl bg-white/50" />}>
+                <Suspense fallback={<div className="h-72 animate-pulse rounded-2xl bg-sal-2" />}>
                   <MapaUbicacion latitud={destino.latitud} longitud={destino.longitud} titulo={destino.nombre} clave={destino.categoria} />
                 </Suspense>
               </section>

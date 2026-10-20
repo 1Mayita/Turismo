@@ -134,7 +134,7 @@ function Itinerario({ items, editable = false, onReordenar, onQuitar }) {
             Los destinos de este viaje todavía no tienen ubicación en el mapa.
           </div>
         ) : (
-          <Suspense fallback={<div className="h-80 animate-pulse rounded-3xl bg-white/50 lg:h-full" />}>
+          <Suspense fallback={<div className="h-80 animate-pulse rounded-3xl bg-sal-2 lg:h-full" />}>
             <MapaRuta puntos={puntos} />
           </Suspense>
         )}

@@ -140,7 +140,7 @@ function Mapa() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-7xl px-3 py-6 sm:px-5 lg:px-8">
+      <main className="contenedor max-w-7xl py-6">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3 px-2">
           <div>
             <p className="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Mapa turístico</p>
@@ -284,7 +284,7 @@ function Mapa() {
           {/* "relative z-0" encierra los z-index de Leaflet para que no tapen la Navbar. */}
           <div className="relative z-0 h-[70vh] min-h-96 overflow-hidden rounded-3xl shadow-xl shadow-brand-950/10 ring-1 ring-white/80 lg:h-[78vh]">
             {cargando ? (
-              <div className="h-full w-full animate-pulse bg-white/50" />
+              <div className="h-full w-full animate-pulse bg-sal-2" />
             ) : (
               <MapContainer center={CENTRO_BOLIVIA} zoom={ZOOM_INICIAL} scrollWheelZoom className="h-full w-full">
                 <TileLayer

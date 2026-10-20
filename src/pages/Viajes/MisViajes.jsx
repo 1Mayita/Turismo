@@ -47,7 +47,7 @@ function MisViajes() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+      <main className="contenedor max-w-6xl py-12">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-2xl">
             <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Planificador</p>
@@ -61,7 +61,7 @@ function MisViajes() {
 
         {cargando ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, indice) => <div key={indice} className="h-64 animate-pulse rounded-3xl bg-white/50" />)}
+            {Array.from({ length: 3 }).map((_, indice) => <div key={indice} className="h-64 animate-pulse rounded-3xl bg-sal-2" />)}
           </div>
         ) : viajes.length === 0 ? (
           !error && (

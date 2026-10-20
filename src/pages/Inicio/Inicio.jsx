@@ -87,7 +87,7 @@ function Inicio() {
           backgroundPosition: 'center',
         }}
       >
-        <div className="mx-auto max-w-6xl px-5 py-24 sm:py-28 lg:px-8">
+        <div className="contenedor max-w-6xl py-24 sm:py-28">
           <p className="mb-4 inline-flex rounded-full bg-white/15 px-4 py-1.5 text-sm font-semibold backdrop-blur">Turismo en Bolivia</p>
           <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.1] sm:text-6xl">Descubre Bolivia, de sus salares a su Amazonía</h1>
           <p className="mt-5 max-w-xl text-lg text-white/85">
@@ -128,7 +128,7 @@ function Inicio() {
         </div>
       </section>
 
-      <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+      <main className="contenedor max-w-6xl py-12">
         {error && <p className="mb-8 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{error}</p>}
 
         <RecomendadoParaTi className="mb-14" />
