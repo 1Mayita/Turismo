@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom'
+import { Bell, CalendarDays, MapPin, Megaphone, Sparkles, Wrench } from 'lucide-react'
 import { useNotificaciones } from '../context/useNotificaciones.js'
 
-const ICONO_POR_TIPO = { eventos: '🎉', destinos: '📍', recomendaciones: '✨', reportes: '🛠️', avisos: '📢' }
+const ICONO_POR_TIPO = { eventos: CalendarDays, destinos: MapPin, recomendaciones: Sparkles, reportes: Wrench, avisos: Megaphone }
 
 function tiempoRelativo(fecha) {
   if (typeof fecha?.toDate !== 'function') return ''
@@ -32,16 +33,19 @@ function ListaNotificaciones({ maximo, onElegir }) {
   }
 
   return (
-    <ul className="divide-y divide-slate-100">
+    <ul className="divide-y divide-borde">
       {visibles.map((notificacion) => (
         <li key={notificacion.id}>
           <button
             type="button"
             onClick={() => abrir(notificacion)}
-            className={`flex w-full gap-3 px-4 py-3 text-left transition hover:bg-cielo/50 ${notificacion.leida ? '' : 'bg-cielo/50'}`}
+            className={`flex w-full gap-3 px-4 py-3 text-left transition hover:bg-sal-2 ${notificacion.leida ? '' : 'bg-cielo/40'}`}
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-xl shadow-sm" aria-hidden="true">
-              {ICONO_POR_TIPO[notificacion.tipoMostrado] || '🔔'}
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-cielo-700 shadow-suave" aria-hidden="true">
+              {(() => {
+                const Icono = ICONO_POR_TIPO[notificacion.tipoMostrado] || Bell
+                return <Icono size={18} />
+              })()}
             </span>
             <span className="min-w-0 flex-1">
               <span className={`block text-sm ${notificacion.leida ? 'font-semibold text-noche/80' : 'font-bold text-noche'}`}>
@@ -49,9 +53,9 @@ function ListaNotificaciones({ maximo, onElegir }) {
                 {notificacion.titulo}
               </span>
               {notificacion.mensaje && <span className="mt-0.5 line-clamp-2 block text-xs text-piedra-texto">{notificacion.mensaje}</span>}
-              <span className="mt-1 block text-[11px] font-semibold text-piedra">{tiempoRelativo(notificacion.fecha)}</span>
+              <span className="mt-1 block text-[11px] font-semibold text-piedra-texto">{tiempoRelativo(notificacion.fecha)}</span>
             </span>
-            {!notificacion.leida && <span className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-blue-600" aria-hidden="true" />}
+            {!notificacion.leida && <span className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-atardecer-700" aria-hidden="true" />}
           </button>
         </li>
       ))}

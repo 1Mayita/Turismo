@@ -11,7 +11,7 @@ function MapaUbicacion({ latitud, longitud, titulo, clave }) {
   return (
     <div>
       {/* "relative z-0" encierra los z-index de Leaflet para que no tapen la Navbar. */}
-      <div className="relative z-0 h-72 overflow-hidden rounded-2xl ring-1 ring-white/80">
+      <div className="relative z-0 h-72 overflow-hidden">
         <MapContainer center={posicion} zoom={13} scrollWheelZoom={false} className="h-full w-full">
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
