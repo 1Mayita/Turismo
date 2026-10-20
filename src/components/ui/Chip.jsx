@@ -1,7 +1,13 @@
 import { X } from 'lucide-react'
 import { iconoDeCategoria } from './iconosCategoria.js'
 
-const BASE = 'inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 font-ui text-sm font-bold transition duration-150'
+const BASE = 'inline-flex items-center rounded-full font-ui font-bold transition duration-150'
+// "normal" mide 44px de alto (área táctil); "pequeno" es solo para etiquetas
+// que no se tocan (ej. la categoría dentro de una tarjeta).
+const TAMANOS = {
+  normal: 'min-h-11 gap-2 px-4 py-2 text-sm',
+  pequeno: 'min-h-7 gap-1.5 px-2.5 py-0.5 text-xs',
+}
 const INACTIVO = 'bg-cielo text-noche'
 const ACTIVO = 'bg-noche text-white'
 
@@ -9,9 +15,9 @@ const ACTIVO = 'bg-noche text-white'
 //  - Con onClick es un botón que se activa/desactiva (aria-pressed).
 //  - Con onQuitar muestra una ✕ para quitarla (filtros activos).
 //  - Sin ninguno de los dos es solo una etiqueta.
-function Chip({ activo = false, icono: Icono, onClick, onQuitar, etiquetaQuitar, className = '', children }) {
-  const colores = activo ? ACTIVO : INACTIVO
-  const icono = Icono && <Icono aria-hidden="true" size={18} className="shrink-0" />
+function Chip({ activo = false, icono: Icono, onClick, onQuitar, etiquetaQuitar, tamano = 'normal', className = '', children }) {
+  const colores = `${activo ? ACTIVO : INACTIVO} ${TAMANOS[tamano] || TAMANOS.normal}`
+  const icono = Icono && <Icono aria-hidden="true" size={tamano === 'pequeno' ? 14 : 18} className="shrink-0" />
 
   if (onQuitar) {
     return (

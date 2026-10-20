@@ -1,16 +1,12 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Luggage } from 'lucide-react'
 import Modal from './Modal.jsx'
 import { useAuth } from '../context/useAuth.js'
 import { MAXIMO_PARADAS, agregarDestinoAViaje, crearViaje, getViajesDeUsuario, validarDatosDeViaje } from '../services/viajesService.js'
 
 function IconoMaleta() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden="true">
-      <rect x="3.5" y="7" width="17" height="13" rx="2.5" stroke="currentColor" strokeWidth="2" />
-      <path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M12 11v5M9.5 13.5h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  )
+  return <Luggage aria-hidden="true" className="shrink-0" />
 }
 
 // "Agregar a mi viaje": elige uno de tus viajes o crea uno nuevo en el mismo paso.
@@ -95,7 +91,7 @@ function BotonAgregarAViaje({ destino, variante = 'boton', className = '' }) {
           onClick={abrir}
           aria-label={`Agregar ${destino.nombre} a un viaje`}
           title="Agregar a un viaje"
-          className={`flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-brand-700 shadow-md backdrop-blur transition hover:scale-110 active:scale-95 ${className}`}
+          className={`flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-cielo-700 shadow-suave backdrop-blur transition duration-150 hover:scale-105 hover:text-noche active:scale-95 ${className}`}
         >
           <IconoMaleta />
         </button>

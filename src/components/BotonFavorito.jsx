@@ -1,20 +1,11 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { Heart } from 'lucide-react'
 import { useAuth } from '../context/useAuth.js'
 import { useFavoritos } from '../context/useFavoritos.js'
 
 function IconoCorazon({ relleno }) {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-      <path
-        d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2Z"
-        fill={relleno ? 'currentColor' : 'none'}
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
+  return <Heart aria-hidden="true" fill={relleno ? 'currentColor' : 'none'} />
 }
 
 // Corazón para marcar/desmarcar un elemento como favorito. A quien no inició
@@ -55,8 +46,8 @@ function BotonFavorito({ idDestino, idElemento = idDestino, tipo = 'destino', cl
         aria-pressed={activo}
         aria-label={`${activo ? 'Quitar de' : 'Agregar a'} favoritos`}
         title={`${activo ? 'Quitar de' : 'Agregar a'} favoritos`}
-        className={`flex h-10 w-10 items-center justify-center rounded-full bg-white/95 shadow-md backdrop-blur transition hover:scale-110 active:scale-95 disabled:opacity-60 ${
-          activo ? 'text-rose-500' : 'text-slate-500 hover:text-rose-500'
+        className={`flex h-11 w-11 items-center justify-center rounded-full bg-white/95 shadow-suave backdrop-blur transition duration-150 hover:scale-105 active:scale-95 disabled:opacity-60 ${
+          activo ? 'text-atardecer' : 'text-piedra-texto hover:text-atardecer'
         }`}
       >
         <IconoCorazon relleno={activo} />

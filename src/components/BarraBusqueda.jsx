@@ -15,7 +15,7 @@ function BarraBusqueda({ onBuscar, valorInicial = '', placeholder = 'Buscar dest
 
   return (
     <form onSubmit={enviar} role="search" className={`relative ${className}`}>
-      <span className={`pointer-events-none absolute top-1/2 z-10 -translate-y-1/2 text-piedra ${grande ? 'left-5' : 'left-4'}`}>
+      <span className={`pointer-events-none absolute top-1/2 z-10 -translate-y-1/2 text-piedra ${grande ? 'left-4 sm:left-5' : 'left-4'}`}>
         <Search aria-hidden="true" size={grande ? 20 : 18} />
       </span>
       <input
@@ -26,12 +26,12 @@ function BarraBusqueda({ onBuscar, valorInicial = '', placeholder = 'Buscar dest
         aria-label={placeholder}
         className={`w-full rounded-full border text-noche outline-none transition placeholder:text-piedra-texto focus:border-cielo-600 focus:ring-3 focus:ring-cielo-600/30 ${
           grande
-            ? 'min-h-14 border-borde bg-white py-3 pl-14 pr-32 text-base shadow-elevada'
+            ? 'min-h-14 border-borde bg-white py-3 pl-12 pr-28 text-base shadow-elevada sm:pl-14 sm:pr-32'
             : 'min-h-11 border-transparent bg-sal-2 py-2 pl-11 pr-4 text-sm hover:border-borde focus:bg-white'
         }`}
       />
       {grande && (
-        <button type="submit" className="absolute right-2 top-1/2 flex min-h-11 -translate-y-1/2 items-center rounded-full boton-principal px-6 text-sm font-bold">
+        <button type="submit" className="absolute right-2 top-1/2 flex min-h-11 -translate-y-1/2 items-center rounded-full boton-principal px-4 text-sm font-bold sm:px-6">
           Buscar
         </button>
       )}

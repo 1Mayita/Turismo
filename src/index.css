@@ -91,6 +91,8 @@
   font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.01em;
+  /* Números de altura pareja (Cormorant trae por defecto los "antiguos"). */
+  font-variant-numeric: lining-nums;
   color: var(--color-noche);
 }
 

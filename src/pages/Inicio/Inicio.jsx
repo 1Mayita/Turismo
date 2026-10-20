@@ -1,34 +1,99 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { ArrowRight, CalendarDays, Heart, Map as IconoMapa, MapPin, MapPinned, Route, Share2 } from 'lucide-react'
 import Navbar from '../../components/Navbar.jsx'
 import BarraBusqueda from '../../components/BarraBusqueda.jsx'
 import RecomendadoParaTi from '../../components/RecomendadoParaTi.jsx'
 import TarjetaDestino from '../../components/TarjetaDestino.jsx'
-import { GrillaEsqueleto } from '../../components/EsqueletoTarjeta.jsx'
+import ImagenSegura from '../../components/ImagenSegura.jsx'
+import MapaBolivia2D from '../../components/mapa/MapaBolivia2D.jsx'
+import { CREDITO_MAPA } from '../../components/mapa/boliviaSvg.js'
+import { Aparecer, Carrusel, Chip, EncabezadoSeccion, EstadoVacio, EsqueletoTarjetaBase, claseBoton, iconoDeCategoria } from '../../components/ui'
+import { useAuth } from '../../context/useAuth.js'
 import { destinosDeEjemplo, getDestinos } from '../../services/destinosService.js'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
 import { categoriasDeEjemplo, getCategorias } from '../../services/categoriasService.js'
+import { formatearFechaEvento, getEventosProximos } from '../../services/eventosService.js'
+import { getPlatos, platosDeEjemplo } from '../../services/platosService.js'
 import { FOTOS } from '../../services/fotosDeEjemplo.js'
 
 const MAXIMO_DESTACADOS = 6
-// El reflejo del cielo en el Salar de Uyuni, en tamaño grande para la portada.
-const FOTO_PORTADA = FOTOS['salar-de-uyuni'].imagenes[1].replace('width=960', 'width=1600')
+const MAXIMO_EVENTOS = 3
+const MAXIMO_PLATOS = 5
+// El reflejo del cielo en el Salar de Uyuni, en tamaño grande.
+const FOTO_SALAR = FOTOS['salar-de-uyuni'].imagenes[1].replace('width=960', 'width=1600')
+const CREDITO_FOTO_SALAR = 'Foto: Christopher Crouzet (CC BY-SA 4.0) — Wikimedia Commons'
 const TODOS = ''
+// Departamento por defecto del sistema (DESIGN.md §6.1). Si todavía no tiene
+// destinos publicados, se muestran los destacados de todo el país.
+const DEPARTAMENTO_POR_DEFECTO = 'cochabamba'
+// Lugares marcados con un pin en el mapa del inicio.
+const PINES_DEL_MAPA = ['salar-de-uyuni', 'isla-del-sol', 'cristo-de-la-concordia']
 
-function claseChip(activo) {
-  return `rounded-full px-4 py-2 text-sm font-semibold transition ${
-    activo ? 'bg-brand-700 text-white' : 'bg-white text-brand-800 ring-1 ring-white/80 hover:bg-brand-100'
-  }`
+const PASOS_DEL_VIAJE = [
+  { icono: Heart, texto: 'Guarda los lugares que te gustan mientras exploras.' },
+  { icono: Route, texto: 'Ordénalos en tu itinerario y mira la ruta en el mapa.' },
+  { icono: Share2, texto: 'Compártelo con quienes viajan contigo.' },
+]
+
+// "oct." → "oct", para el recuadro de fecha de los eventos.
+function mesCorto(fechaISO) {
+  return formatearFechaEvento(fechaISO, { month: 'short' }).replace('.', '')
+}
+
+function rangoDeFechas(evento) {
+  const opciones = { day: 'numeric', month: 'long' }
+  const inicio = formatearFechaEvento(evento.fecha_inicio, opciones)
+  return evento.fecha_fin && evento.fecha_fin !== evento.fecha_inicio
+    ? `${inicio} al ${formatearFechaEvento(evento.fecha_fin, opciones)}`
+    : inicio
+}
+
+function TarjetaEvento({ evento, indice }) {
+  const dia = Number(evento.fecha_inicio?.split('-')[2]) || ''
+  return (
+    <Aparecer como="li" indice={indice}>
+      <Link
+        to="/eventos"
+        className="group flex h-full flex-col rounded-tarjeta border border-borde bg-white p-3 shadow-suave transition duration-200 ease-salida hover:-translate-y-1 hover:shadow-elevada"
+      >
+        <div className="relative aspect-[16/10] overflow-hidden rounded-imagen bg-sal-2">
+          <ImagenSegura src={evento.imagen} alt={evento.nombre} loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-500 ease-salida group-hover:scale-[1.04]" />
+          <div className="absolute left-3 top-3 flex min-w-16 flex-col items-center rounded-control bg-white px-3 pb-1.5 pt-1 text-center shadow-suave">
+            <span className="titulo-display text-[32px] leading-none">{dia}</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-atardecer-700">{mesCorto(evento.fecha_inicio)}</span>
+          </div>
+        </div>
+        <div className="flex flex-1 flex-col px-2 pb-1 pt-4">
+          <h3 className="text-lg font-bold leading-snug text-noche">{evento.nombre}</h3>
+          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-piedra-texto">
+            <CalendarDays aria-hidden="true" size={16} className="shrink-0 text-piedra" />
+            {rangoDeFechas(evento)}
+          </p>
+          {evento.ubicacion && (
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-piedra-texto">
+              <MapPin aria-hidden="true" size={16} className="shrink-0 text-piedra" />
+              {evento.ubicacion}
+            </p>
+          )}
+        </div>
+      </Link>
+    </Aparecer>
+  )
 }
 
 function Inicio() {
   const navegar = useNavigate()
+  const { usuario } = useAuth()
   const [destinos, setDestinos] = useState([])
   const [departamentos, setDepartamentos] = useState([])
   const [categorias, setCategorias] = useState([])
+  const [eventos, setEventos] = useState([])
+  const [platos, setPlatos] = useState([])
   const [cargando, setCargando] = useState(true)
+  const [cargandoExtras, setCargandoExtras] = useState(true)
   const [error, setError] = useState('')
-  const [idDepartamentoActivo, setIdDepartamentoActivo] = useState(TODOS)
+  const [idDepartamentoElegido, setIdDepartamentoElegido] = useState(DEPARTAMENTO_POR_DEFECTO)
 
   useEffect(() => {
     async function cargarInicio() {
@@ -48,15 +113,34 @@ function Inicio() {
       }
     }
 
+    // Eventos y platos se cargan aparte: si fallan, el resto del inicio sigue.
+    async function cargarExtras() {
+      const [listaEventos, listaPlatos] = await Promise.all([
+        getEventosProximos().catch((errorLectura) => {
+          console.error('Error al cargar los eventos del inicio:', errorLectura)
+          return []
+        }),
+        getPlatos().catch((errorLectura) => {
+          console.error('Error al cargar los platos del inicio:', errorLectura)
+          return platosDeEjemplo
+        }),
+      ])
+      setEventos(listaEventos.slice(0, MAXIMO_EVENTOS))
+      setPlatos((listaPlatos.length > 0 ? listaPlatos : platosDeEjemplo).filter((plato) => plato.imagen).slice(0, MAXIMO_PLATOS))
+      setCargandoExtras(false)
+    }
+
     cargarInicio()
+    cargarExtras()
   }, [])
 
   // Solo se ofrecen como filtro los departamentos que ya tienen destinos.
   const cantidadPorDepartamento = (id) => destinos.filter((destino) => destino.id_departamento === id).length
+  const cantidades = Object.fromEntries(departamentos.map((departamento) => [departamento.id, cantidadPorDepartamento(departamento.id)]))
   const departamentosConDestinos = departamentos
     .filter((departamento) => cantidadPorDepartamento(departamento.id) > 0)
     .sort((a, b) => cantidadPorDepartamento(b.id) - cantidadPorDepartamento(a.id))
-  const departamentoActivo = departamentos.find((departamento) => departamento.id === idDepartamentoActivo)
+  const departamentoActivo = departamentosConDestinos.find((departamento) => departamento.id === idDepartamentoElegido)
 
   // Primero los marcados como destacados; el resto completa la lista.
   const ordenados = [...destinos].sort((a, b) => Number(Boolean(b.destacado)) - Number(Boolean(a.destacado)))
@@ -69,147 +153,300 @@ function Inicio() {
     .map((categoria) => ({ ...categoria, cantidad: destinos.filter((destino) => destino.categoria === categoria.nombre).length }))
     .filter((categoria) => categoria.cantidad > 0)
 
+  const pines = destinos.filter((destino) => PINES_DEL_MAPA.includes(destino.id) && Number.isFinite(Number(destino.latitud)) && Number.isFinite(Number(destino.longitud)))
+    .map((destino) => ({ id: destino.id, latitud: Number(destino.latitud), longitud: Number(destino.longitud) }))
+
   function buscar(texto) {
     navegar(texto ? `/buscar?buscar=${encodeURIComponent(texto)}` : '/buscar')
   }
+
+  // Elegir un departamento (en el mapa o en la lista) muestra sus destacados;
+  // si todavía no tiene destinos, lleva a la página del departamento.
+  function elegirDepartamento(id, desplazar = false) {
+    if (id && !cantidades[id]) {
+      navegar(`/departamentos/${id}`)
+      return
+    }
+    setIdDepartamentoElegido(id)
+    if (desplazar) {
+      const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      document.getElementById('destacados')?.scrollIntoView({ behavior: reducir ? 'auto' : 'smooth', block: 'start' })
+    }
+  }
+
+  const claseSecundarioHero = claseBoton('secundario', 'normal', 'bg-white/70')
 
   return (
     <div className="min-h-screen">
       <Navbar />
 
-      <section
-        className="relative mx-3 mt-3 overflow-hidden rounded-[2rem] text-white shadow-[0_30px_60px_-30px_rgba(8,51,68,0.7)] sm:mx-5"
-        style={{
-          // Oscuro a la izquierda (donde va el texto) y casi transparente a la
-          // derecha, para que la foto del salar se vea.
-          backgroundImage: `linear-gradient(90deg, rgba(8,51,68,0.94) 0%, rgba(12,74,110,0.78) 50%, rgba(14,116,144,0.2) 100%), url(${FOTO_PORTADA})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
-        <div className="contenedor max-w-6xl py-24 sm:py-28">
-          <p className="mb-4 inline-flex rounded-full bg-white/15 px-4 py-1.5 text-sm font-semibold backdrop-blur">Turismo en Bolivia</p>
-          <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.1] sm:text-6xl">Descubre Bolivia, de sus salares a su Amazonía</h1>
-          <p className="mt-5 max-w-xl text-lg text-white/85">
-            Destinos, eventos, dónde comer y dónde dormir en los nueve departamentos, en un solo lugar.
-          </p>
+      {/* ---------- Hero ---------- */}
+      <section className="relative overflow-hidden border-b border-borde bg-[radial-gradient(60rem_40rem_at_85%_30%,#e6eef4,transparent_70%)]">
+        <div className="contenedor grid max-w-6xl items-center gap-10 py-12 sm:py-16 lg:grid-cols-[1fr_1.05fr] lg:gap-6 lg:py-20">
+          <div className="max-w-xl">
+            <p className="mb-5 text-xs font-bold uppercase tracking-[0.2em] text-cobre-texto">Turismo en Bolivia</p>
+            <h1 className="titulo-display text-[40px] sm:text-[56px]">
+              Descubre Bolivia
+              <span className="mt-1 block text-[28px] font-medium italic text-cobre-texto sm:text-[36px]">de sus salares a su Amazonía</span>
+            </h1>
+            <p className="texto-lectura mt-5 text-lg text-piedra-texto">
+              Destinos, eventos, dónde comer y dónde dormir en los nueve departamentos, en un solo lugar.
+            </p>
 
-          <BarraBusqueda tamano="grande" onBuscar={buscar} placeholder="¿A dónde quieres ir? Ej.: Uyuni, Sucre..." className="mt-8 max-w-2xl" />
+            <BarraBusqueda tamano="grande" onBuscar={buscar} placeholder="¿A dónde vamos hoy?" className="mt-8" />
 
-          <div className="mt-5 flex flex-wrap gap-3">
-            <Link to="/destinos" className="rounded-xl boton-principal px-5 py-3 font-bold shadow-lg shadow-black/20 transition">
-              Explorar destinos
-            </Link>
-            <Link to="/departamentos" className="rounded-xl border border-white/40 bg-white/10 px-5 py-3 font-bold backdrop-blur-sm transition hover:bg-white hover:text-brand-800">
-              Ver departamentos
-            </Link>
-            <Link to="/mapa" className="rounded-xl border border-white/40 bg-white/10 px-5 py-3 font-bold backdrop-blur-sm transition hover:bg-white hover:text-brand-800">
-              Abrir el mapa
-            </Link>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link to="/destinos" className={claseSecundarioHero}>Explorar destinos</Link>
+              <Link to="/departamentos" className={claseSecundarioHero}>Ver departamentos</Link>
+              <Link to="/mapa" className={claseSecundarioHero}>
+                <IconoMapa aria-hidden="true" size={18} />
+                Abrir el mapa
+              </Link>
+            </div>
+
+            {!cargando && (
+              <dl className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-borde pt-6">
+                {[
+                  [departamentos.length, 'Departamentos'],
+                  [categorias.length, 'Categorías turísticas'],
+                  [destinos.length, 'Destinos por descubrir'],
+                ].map(([valor, etiqueta]) => (
+                  <div key={etiqueta}>
+                    <dt className="sr-only">{etiqueta}</dt>
+                    <dd className="titulo-display text-[36px] leading-none">{valor}</dd>
+                    <dd aria-hidden="true" className="mt-1.5 text-sm text-piedra-texto">{etiqueta}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
           </div>
 
-          {!cargando && (
-            <div className="mt-12 grid max-w-2xl grid-cols-3 gap-4 border-t border-white/20 pt-6 text-center sm:text-left">
-              <div>
-                <p className="text-3xl font-extrabold text-white">{departamentos.length}</p>
-                <p className="text-sm text-white/75">Departamentos</p>
-              </div>
-              <div>
-                <p className="text-3xl font-extrabold text-white">{categorias.length}</p>
-                <p className="text-sm text-white/75">Categorías turísticas</p>
-              </div>
-              <div>
-                <p className="text-3xl font-extrabold text-white">{destinos.length}</p>
-                <p className="text-sm text-white/75">Destinos por descubrir</p>
-              </div>
-            </div>
-          )}
-          <p className="mt-6 text-xs text-white/50">Foto: Christopher Crouzet (CC BY-SA 4.0) — Wikimedia Commons</p>
+          <figure className="mx-auto w-full max-w-md lg:max-w-none">
+            <MapaBolivia2D cantidades={cantidades} idActivo={departamentoActivo?.id || ''} alElegir={(id) => elegirDepartamento(id, true)} pines={pines} />
+            <figcaption className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-piedra-texto">
+              <span className="inline-flex items-center gap-1.5">
+                <MapPinned aria-hidden="true" size={16} className="text-atardecer-700" />
+                Toca un departamento para ver sus destinos
+              </span>
+              <span className="text-xs">{CREDITO_MAPA}</span>
+            </figcaption>
+          </figure>
         </div>
       </section>
 
-      <main className="contenedor max-w-6xl py-12">
-        {error && <p className="mb-8 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{error}</p>}
+      <main>
+        {error && (
+          <div className="contenedor max-w-6xl pt-8">
+            <p className="rounded-control border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{error}</p>
+          </div>
+        )}
 
-        <RecomendadoParaTi className="mb-14" />
-
+        {/* ---------- 1. Categorías ---------- */}
         {categoriasConDestinos.length > 0 && (
-          <section className="mb-14">
-            <p className="mb-2 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">¿Qué te gustaría hacer?</p>
-            <h2 className="mb-5 text-3xl font-bold text-slate-900">Explora por categoría</h2>
-            <div className="flex flex-wrap gap-3">
-              {categoriasConDestinos.map((categoria) => (
-                <Link
-                  key={categoria.id || categoria.nombre}
-                  to={`/destinos?categoria=${encodeURIComponent(categoria.nombre)}`}
-                  className="rounded-2xl cristal px-5 py-3 font-bold text-slate-900 transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md"
-                >
-                  {categoria.nombre}
-                  <span className="ml-2 text-sm font-normal text-slate-500">{categoria.cantidad} {categoria.cantidad === 1 ? 'destino' : 'destinos'}</span>
-                </Link>
+          <section aria-labelledby="titulo-categorias" className="contenedor max-w-6xl pt-12 lg:pt-16">
+            <h2 id="titulo-categorias" className="mb-4 text-sm font-bold text-piedra-texto">¿Qué te gustaría hacer?</h2>
+            <ul className="flex flex-wrap gap-2.5">
+              {categoriasConDestinos.map((categoria) => {
+                const Icono = iconoDeCategoria(categoria.nombre)
+                return (
+                  <li key={categoria.id || categoria.nombre}>
+                    <Link
+                      to={`/destinos?categoria=${encodeURIComponent(categoria.nombre)}`}
+                      className="inline-flex min-h-11 items-center gap-2 rounded-full bg-cielo px-4 py-2 text-sm font-bold text-noche transition duration-150 hover:bg-noche hover:text-white"
+                    >
+                      <Icono aria-hidden="true" size={18} className="shrink-0" />
+                      {categoria.nombre}
+                      <span className="font-medium opacity-70">{categoria.cantidad}</span>
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </section>
+        )}
+
+        {/* ---------- 2. Destacados del departamento ---------- */}
+        <section id="destacados" aria-labelledby="titulo-destacados" className="contenedor max-w-6xl scroll-mt-24 py-14 lg:py-24">
+          <EncabezadoSeccion
+            id="titulo-destacados"
+            antetitulo="Destacados"
+            titulo={departamentoActivo ? `Destacados en ${departamentoActivo.nombre}` : 'Destinos que no te puedes perder'}
+            className="mb-5"
+          />
+
+          {departamentosConDestinos.length > 1 && (
+            <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Elegir departamento">
+              <Chip activo={!departamentoActivo} onClick={() => elegirDepartamento(TODOS)}>Todos</Chip>
+              {departamentosConDestinos.map((departamento) => (
+                <Chip key={departamento.id} activo={departamentoActivo?.id === departamento.id} onClick={() => elegirDepartamento(departamento.id)}>
+                  {departamento.nombre}
+                </Chip>
               ))}
+            </div>
+          )}
+
+          {cargando ? (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <EsqueletoTarjetaBase />
+              <EsqueletoTarjetaBase className="hidden sm:block" />
+              <EsqueletoTarjetaBase className="hidden lg:block" />
+            </div>
+          ) : visibles.length === 0 ? (
+            <EstadoVacio
+              titulo="Todavía no hay destinos publicados"
+              mensaje="Mientras tanto, conoce los nueve departamentos de Bolivia."
+              accion={<Link to="/departamentos" className={claseBoton('secundario')}>Conoce los departamentos</Link>}
+            />
+          ) : (
+            <Carrusel etiqueta={departamentoActivo ? `Destacados en ${departamentoActivo.nombre}` : 'Destinos destacados'}>
+              {visibles.map((destino) => (
+                <div key={destino.id || destino.nombre} className="w-[82%] shrink-0 snap-start sm:w-[340px] lg:w-[358px]">
+                  <TarjetaDestino destino={destino} nivelTitulo="h3" />
+                </div>
+              ))}
+              {departamentoActivo && (
+                <Link
+                  to={`/departamentos/${departamentoActivo.id}`}
+                  className="flex w-[82%] shrink-0 snap-start flex-col justify-center rounded-tarjeta border-2 border-dashed border-borde bg-sal-2/70 p-8 transition hover:border-cobre sm:w-[300px]"
+                >
+                  <p className="titulo-display text-[32px]">Más sobre {departamentoActivo.nombre}</p>
+                  <p className="mt-3 text-sm leading-6 text-piedra-texto">Municipios, dónde comer y dónde dormir en este departamento.</p>
+                  <span className="mt-5 inline-flex items-center gap-1.5 font-bold text-cielo-700">
+                    Ver todos los destinos de {departamentoActivo.nombre}
+                    <ArrowRight aria-hidden="true" size={18} />
+                  </span>
+                </Link>
+              )}
+            </Carrusel>
+          )}
+
+          <div className="mt-6">
+            <Link to="/destinos" className={claseBoton('secundario')}>
+              Ver todos los destinos
+              <ArrowRight aria-hidden="true" size={18} />
+            </Link>
+          </div>
+        </section>
+
+        {/* ---------- Recomendado para ti (solo con sesión) ---------- */}
+        {usuario && (
+          <div className="bg-sal-2 py-14 lg:py-24">
+            <RecomendadoParaTi className="contenedor max-w-6xl" />
+          </div>
+        )}
+
+        {/* ---------- 3. Próximos eventos ---------- */}
+        {/* Sin "Recomendado para ti" en medio, esta sección sigue a Destacados
+            sobre el mismo fondo: no repite el espacio de arriba. */}
+        <section aria-labelledby="titulo-eventos" className={`contenedor max-w-6xl pb-14 lg:pb-24 ${usuario ? 'pt-14 lg:pt-24' : ''}`}>
+          <EncabezadoSeccion
+            id="titulo-eventos"
+            antetitulo="Agenda"
+            titulo="Próximos eventos y festividades"
+            accion={
+              <Link to="/eventos" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-cielo-700 hover:underline">
+                Ver todos los eventos
+                <ArrowRight aria-hidden="true" size={16} />
+              </Link>
+            }
+          />
+          {cargandoExtras ? (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <EsqueletoTarjetaBase />
+              <EsqueletoTarjetaBase className="hidden sm:block" />
+              <EsqueletoTarjetaBase className="hidden lg:block" />
+            </div>
+          ) : eventos.length === 0 ? (
+            <EstadoVacio
+              icono={CalendarDays}
+              titulo="No hay eventos próximos por ahora"
+              mensaje="Pronto publicaremos nuevas fiestas y festivales. Revisa la agenda completa."
+              accion={<Link to="/eventos" className={claseBoton('secundario')}>Ver la agenda</Link>}
+            />
+          ) : (
+            <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {eventos.map((evento, indice) => <TarjetaEvento key={evento.id || evento.nombre} evento={evento} indice={indice} />)}
+            </ul>
+          )}
+        </section>
+
+        {/* ---------- 4. Gastronomía ---------- */}
+        {(cargandoExtras || platos.length > 0) && (
+          <section aria-labelledby="titulo-gastronomia" className="bg-sal-2 py-14 lg:py-24">
+            <div className="contenedor max-w-6xl">
+              <EncabezadoSeccion
+                id="titulo-gastronomia"
+                antetitulo="Sabores de Bolivia"
+                titulo="Gastronomía típica"
+                descripcion="Cada región tiene su plato: del silpancho cochabambino al majadito de los llanos."
+                accion={
+                  <Link to="/gastronomia" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-cielo-700 hover:underline">
+                    Ver todos los platos
+                    <ArrowRight aria-hidden="true" size={16} />
+                  </Link>
+                }
+              />
+              {cargandoExtras ? (
+                <div className="grid grid-cols-2 gap-4 lg:h-[520px] lg:grid-cols-4 lg:grid-rows-2">
+                  <div className="col-span-2 aspect-[4/3] animate-pulse rounded-tarjeta bg-white lg:row-span-2 lg:aspect-auto" />
+                  {Array.from({ length: 4 }).map((_, indice) => <div key={indice} className="aspect-square animate-pulse rounded-tarjeta bg-white lg:aspect-auto" />)}
+                </div>
+              ) : (
+                <ul className="grid grid-cols-2 gap-4 lg:h-[520px] lg:grid-cols-4 lg:grid-rows-2">
+                  {platos.map((plato, indice) => (
+                    <Aparecer
+                      key={plato.id || plato.nombre}
+                      como="li"
+                      indice={indice}
+                      className={indice === 0 ? 'col-span-2 aspect-[4/3] lg:row-span-2 lg:aspect-auto' : 'aspect-square lg:aspect-auto'}
+                    >
+                      <Link to="/gastronomia" title={plato.credito_imagen || undefined} className="group relative block h-full overflow-hidden rounded-tarjeta bg-noche shadow-suave">
+                        <ImagenSegura src={plato.imagen} alt={plato.nombre} loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-500 ease-salida group-hover:scale-[1.04]" />
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-noche/85 via-noche/40 to-transparent px-4 pb-4 pt-12 text-white">
+                          <h3 className={`font-bold leading-tight ${indice === 0 ? 'titulo-display text-[32px] text-white sm:text-[40px]' : 'text-base sm:text-lg'}`}>{plato.nombre}</h3>
+                          {plato.origen && <p className="mt-0.5 text-sm text-white/85">{plato.origen}</p>}
+                        </div>
+                      </Link>
+                    </Aparecer>
+                  ))}
+                </ul>
+              )}
             </div>
           </section>
         )}
 
-        <section>
-          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        {/* ---------- 5. Arma tu viaje ---------- */}
+        <section aria-labelledby="titulo-viaje" className="contenedor max-w-6xl pt-14 lg:pt-24">
+          <div className="grid items-center gap-8 overflow-hidden rounded-tarjeta border border-borde bg-white p-5 shadow-suave sm:p-8 lg:grid-cols-2 lg:gap-12 lg:p-12">
             <div>
-              <p className="mb-2 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Destacados</p>
-              <h2 className="text-3xl font-bold text-slate-900">
-                {departamentoActivo ? `Lo mejor de ${departamentoActivo.nombre}` : 'Destinos que no te puedes perder'}
-              </h2>
-            </div>
-            {departamentosConDestinos.length > 1 && (
-              <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar destacados por departamento">
-                <button type="button" aria-pressed={!departamentoActivo} onClick={() => setIdDepartamentoActivo(TODOS)} className={claseChip(!departamentoActivo)}>
-                  Todos
-                </button>
-                {departamentosConDestinos.map((departamento) => (
-                  <button
-                    key={departamento.id}
-                    type="button"
-                    aria-pressed={departamentoActivo?.id === departamento.id}
-                    onClick={() => setIdDepartamentoActivo(departamento.id)}
-                    className={claseChip(departamentoActivo?.id === departamento.id)}
-                  >
-                    {departamento.nombre}
-                  </button>
+              <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Mis viajes</p>
+              <h2 id="titulo-viaje" className="titulo-display text-[36px] sm:text-[48px]">Arma tu viaje</h2>
+              <p className="texto-lectura mt-3 text-lg text-piedra-texto">Junta en un solo lugar todo lo que quieres conocer y llega con el recorrido listo.</p>
+              <ol className="mt-7 space-y-4">
+                {PASOS_DEL_VIAJE.map(({ icono: Icono, texto }, indice) => (
+                  <li key={texto} className="flex items-start gap-4">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-cielo text-cielo-700" aria-hidden="true">
+                      <Icono />
+                    </span>
+                    <p className="pt-2.5 text-base text-noche">
+                      <span className="sr-only">Paso {indice + 1}: </span>
+                      {texto}
+                    </p>
+                  </li>
                 ))}
-              </div>
-            )}
-          </div>
-
-          {cargando ? (
-            <GrillaEsqueleto cantidad={3} />
-          ) : visibles.length === 0 ? (
-            <p className="rounded-2xl px-5 py-6 text-slate-600 cristal">
-              Todavía no hay destinos publicados.{' '}
-              <Link to="/departamentos" className="font-semibold text-brand-700 underline">Conoce los departamentos</Link>
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {visibles.map((destino) => (
-                <TarjetaDestino key={destino.id || destino.nombre} destino={destino} />
-              ))}
-              {/* Con pocos destinos, esta tarjeta completa la fila e invita a seguir. */}
-              {departamentoActivo && visibles.length % 3 !== 0 && (
-                <Link
-                  to={`/departamentos/${departamentoActivo.id}`}
-                  className="flex min-h-64 flex-col justify-center rounded-2xl border-2 border-dashed border-brand-300 bg-white/40 p-7 backdrop-blur transition hover:bg-white/60"
-                >
-                  <p className="text-xl font-bold text-slate-900">Más sobre {departamentoActivo.nombre}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">Municipios, dónde comer y dónde dormir en este departamento.</p>
-                  <span className="mt-4 font-semibold text-brand-700">Ver el departamento →</span>
+              </ol>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link to={usuario ? '/viajes' : '/registro'} className={claseBoton('primario')}>
+                  {usuario ? 'Ir a mis viajes' : 'Crear mi cuenta gratis'}
+                  <ArrowRight aria-hidden="true" size={18} />
                 </Link>
-              )}
+                <Link to="/destinos" className={claseBoton('fantasma')}>Explorar destinos</Link>
+              </div>
             </div>
-          )}
-
-          <div className="mt-8 text-center">
-            <Link to="/destinos" className="inline-block rounded-xl bg-brand-700 px-6 py-3 font-bold text-white transition hover:bg-brand-800">
-              Ver todos los destinos
-            </Link>
+            <figure className="relative">
+              <img src={FOTO_SALAR} alt="El cielo reflejado en el Salar de Uyuni" loading="lazy" decoding="async" className="aspect-[4/3] w-full rounded-imagen object-cover" />
+              <figcaption className="mt-2 text-xs text-piedra-texto">{CREDITO_FOTO_SALAR}</figcaption>
+            </figure>
           </div>
         </section>
       </main>

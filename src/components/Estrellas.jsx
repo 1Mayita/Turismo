@@ -44,12 +44,12 @@ export function SelectorEstrellas({ valor, onCambiar }) {
 export function ResumenCalificacion({ promedio = 0, total = 0, compacto = false, className = '' }) {
   if (compacto) {
     return total ? (
-      <span className={`inline-flex items-center gap-1 text-sm font-semibold text-slate-800 ${className}`} aria-label={`${promedio.toFixed(1)} de 5, ${total} ${total === 1 ? 'reseña' : 'reseñas'}`}>
-        <span className="text-amber-400" aria-hidden="true">★</span>
+      <span className={`inline-flex items-center gap-1 text-sm font-bold text-noche ${className}`} aria-label={`${promedio.toFixed(1)} de 5, ${total} ${total === 1 ? 'reseña' : 'reseñas'}`}>
+        <span className="text-atardecer" aria-hidden="true">★</span>
         {promedio.toFixed(1)}
       </span>
     ) : (
-      <span className={`rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium text-gray-500 ${className}`}>Nuevo</span>
+      <span className={`rounded-full bg-sal-2 px-2 py-0.5 text-xs font-bold text-piedra-texto ${className}`}>Nuevo</span>
     )
   }
 

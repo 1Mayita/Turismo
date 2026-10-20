@@ -92,7 +92,7 @@ function TarjetaDeMuestra({ destino, indice }) {
             {destino.ubicacion}
           </p>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-            <ChipCategoria nombre={destino.categoria} className="min-h-8 py-1 text-xs" />
+            <ChipCategoria nombre={destino.categoria} tamano="pequeno" />
             <span className="flex items-center gap-1 text-sm font-bold text-noche">
               <Star aria-hidden="true" size={16} className="fill-atardecer text-atardecer" />
               4.8
