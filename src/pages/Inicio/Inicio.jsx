@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowRight, CalendarDays, Heart, Map as IconoMapa, MapPin, MapPinned, Route, Share2 } from 'lucide-react'
+import { ArrowRight, CalendarDays, Heart, Map as IconoMapa, MapPin, Route, Share2 } from 'lucide-react'
 import Navbar from '../../components/Navbar.jsx'
 import BarraBusqueda from '../../components/BarraBusqueda.jsx'
 import RecomendadoParaTi from '../../components/RecomendadoParaTi.jsx'
 import TarjetaDestino from '../../components/TarjetaDestino.jsx'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
-import MapaBolivia2D from '../../components/mapa/MapaBolivia2D.jsx'
-import { CREDITO_MAPA } from '../../components/mapa/boliviaSvg.js'
+import HeroMapa from '../../components/mapa/HeroMapa.jsx'
 import { Aparecer, Carrusel, Chip, EncabezadoSeccion, EstadoVacio, EsqueletoTarjetaBase, claseBoton, iconoDeCategoria } from '../../components/ui'
 import { useAuth } from '../../context/useAuth.js'
 import { destinosDeEjemplo, getDestinos } from '../../services/destinosService.js'
@@ -154,24 +153,16 @@ function Inicio() {
     .filter((categoria) => categoria.cantidad > 0)
 
   const pines = destinos.filter((destino) => PINES_DEL_MAPA.includes(destino.id) && Number.isFinite(Number(destino.latitud)) && Number.isFinite(Number(destino.longitud)))
-    .map((destino) => ({ id: destino.id, latitud: Number(destino.latitud), longitud: Number(destino.longitud) }))
+    .map((destino) => ({ id: destino.id, departamento: destino.id_departamento, latitud: Number(destino.latitud), longitud: Number(destino.longitud) }))
 
   function buscar(texto) {
     navegar(texto ? `/buscar?buscar=${encodeURIComponent(texto)}` : '/buscar')
   }
 
-  // Elegir un departamento (en el mapa o en la lista) muestra sus destacados;
-  // si todavía no tiene destinos, lleva a la página del departamento.
-  function elegirDepartamento(id, desplazar = false) {
-    if (id && !cantidades[id]) {
-      navegar(`/departamentos/${id}`)
-      return
-    }
+  // Elegir un departamento (en el mapa, su lista o los chips) cambia los
+  // destacados. El mapa además abre su panel con los destinos del lugar.
+  function elegirDepartamento(id) {
     setIdDepartamentoElegido(id)
-    if (desplazar) {
-      const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      document.getElementById('destacados')?.scrollIntoView({ behavior: reducir ? 'auto' : 'smooth', block: 'start' })
-    }
   }
 
   const claseSecundarioHero = claseBoton('secundario', 'normal', 'bg-white/70')
@@ -221,16 +212,13 @@ function Inicio() {
             )}
           </div>
 
-          <figure className="mx-auto w-full max-w-md lg:max-w-none">
-            <MapaBolivia2D cantidades={cantidades} idActivo={departamentoActivo?.id || ''} alElegir={(id) => elegirDepartamento(id, true)} pines={pines} />
-            <figcaption className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-piedra-texto">
-              <span className="inline-flex items-center gap-1.5">
-                <MapPinned aria-hidden="true" size={16} className="text-atardecer-700" />
-                Toca un departamento para ver sus destinos
-              </span>
-              <span className="text-xs">{CREDITO_MAPA}</span>
-            </figcaption>
-          </figure>
+          <HeroMapa
+            destinos={destinos}
+            cantidades={cantidades}
+            idActivo={departamentoActivo?.id || (cantidades[idDepartamentoElegido] === 0 ? idDepartamentoElegido : '')}
+            alElegir={elegirDepartamento}
+            pines={pines}
+          />
         </div>
       </section>
 
