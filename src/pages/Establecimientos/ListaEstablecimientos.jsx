@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { Search, SearchX } from 'lucide-react'
 import Navbar from '../../components/Navbar.jsx'
+import { EstadoVacio, EsqueletoTarjetaBase, claseBoton, claseControl, claseEtiqueta } from '../../components/ui'
 import TarjetaEstablecimiento from '../../components/TarjetaEstablecimiento.jsx'
-import { GrillaEsqueleto } from '../../components/EsqueletoTarjeta.jsx'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
 import { coincideConBusqueda } from '../../utils/texto.js'
 import { ESTABLECIMIENTOS } from './configuracion.js'
 
-const CLASE_CAMPO = 'mt-1 w-full rounded-xl border border-borde bg-white/70 px-4 py-2.5 text-sm font-normal normal-case tracking-normal text-noche outline-none focus:border-cielo-600 focus:ring-2 focus:ring-cielo-600/30'
-const CLASE_ETIQUETA = 'block text-xs font-bold uppercase tracking-wider text-piedra-texto'
+const CLASE_CAMPO = `${claseControl} mt-1.5 text-sm font-normal`
+const CLASE_ETIQUETA = claseEtiqueta
 
 // Listado de restaurantes o de alojamientos (según "tipo"), con búsqueda y
 // filtros guardados en la URL: ?buscar=, ?departamento= y, en alojamientos, ?precio=.
@@ -68,15 +69,18 @@ function ListaEstablecimientos({ tipo }) {
       <Navbar />
       <main className="contenedor max-w-6xl py-12">
         <div className="mb-8 max-w-3xl">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">{configuracion.rotulo}</p>
-          <h1 className="text-4xl font-bold tracking-tight text-noche sm:text-5xl">{configuracion.titulo}</h1>
-          <p className="mt-4 text-lg text-piedra-texto">{configuracion.bajada}</p>
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">{configuracion.rotulo}</p>
+          <h1 className="titulo-display text-[44px] sm:text-[56px]">{configuracion.titulo}</h1>
+          <p className="texto-lectura mt-3 text-lg text-piedra-texto">{configuracion.bajada}</p>
         </div>
 
-        <div className="mb-8 grid gap-4 rounded-2xl cristal p-5 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_auto] lg:items-end">
+        <div className="mb-8 grid gap-4 rounded-tarjeta border border-borde bg-white p-5 shadow-suave sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_auto] lg:items-end">
           <label className={CLASE_ETIQUETA}>
             {configuracion.etiquetaBusqueda}
-            <input value={busqueda} onChange={(evento) => cambiarFiltro('buscar', evento.target.value)} placeholder={configuracion.ejemploBusqueda} className={CLASE_CAMPO} />
+            <span className="relative mt-1.5 block">
+              <Search aria-hidden="true" size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-piedra" />
+              <input value={busqueda} onChange={(evento) => cambiarFiltro('buscar', evento.target.value)} placeholder={configuracion.ejemploBusqueda} className={`${CLASE_CAMPO} mt-0 pl-10`} />
+            </span>
           </label>
           <label className={CLASE_ETIQUETA}>
             Departamento
@@ -97,26 +101,30 @@ function ListaEstablecimientos({ tipo }) {
             type="button"
             onClick={() => setParametros({}, { replace: true })}
             disabled={!hayFiltros}
-            className="rounded-xl border border-borde bg-white/70 px-4 py-2.5 text-sm font-bold text-noche/80 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+            className={claseBoton('fantasma', 'pequeno')}
           >
             Limpiar
           </button>
         </div>
 
-        {error && <p className="mb-8 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
+        {error && <p className="mb-8 rounded-control border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
 
         {cargando ? (
-          <GrillaEsqueleto cantidad={6} />
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, indice) => <EsqueletoTarjetaBase key={indice} className={indice > 1 ? 'hidden sm:block' : ''} />)}
+          </div>
         ) : visibles.length === 0 ? (
           !error && (
-            <div className="rounded-2xl bg-white/60 px-5 py-6 text-piedra-texto ring-1 ring-white/80">
-              <p>{hayFiltros ? `No hay ${configuracion.plural} que coincidan con tu búsqueda.` : `Aún no hay ${configuracion.plural} registrados.`}</p>
-              {hayFiltros && (
-                <button type="button" onClick={() => setParametros({}, { replace: true })} className="mt-3 font-semibold text-cielo-700 underline">
+            <EstadoVacio
+              icono={SearchX}
+              titulo={hayFiltros ? `No hay ${configuracion.plural} que coincidan con tu búsqueda.` : `Aún no hay ${configuracion.plural} registrados.`}
+              mensaje={hayFiltros ? 'Prueba con otro nombre o con otro departamento.' : 'Pronto sumaremos más lugares.'}
+              accion={hayFiltros && (
+                <button type="button" onClick={() => setParametros({}, { replace: true })} className={claseBoton('secundario', 'normal', 'bg-white')}>
                   Quitar los filtros y ver todos
                 </button>
               )}
-            </div>
+            />
           )
         ) : (
           <>
