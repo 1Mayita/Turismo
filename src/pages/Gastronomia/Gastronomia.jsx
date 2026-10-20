@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ArrowRight, MapPin, Search, SearchX, Soup } from 'lucide-react'
 import Navbar from '../../components/Navbar.jsx'
+import { Aparecer, EstadoVacio, claseBoton, claseControl, claseEtiqueta } from '../../components/ui'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
 import Modal from '../../components/Modal.jsx'
 import { GrillaEsqueleto } from '../../components/EsqueletoTarjeta.jsx'
@@ -9,8 +11,8 @@ import { getRestaurantes } from '../../services/restaurantesService.js'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
 import { coincideConBusqueda, normalizar } from '../../utils/texto.js'
 
-const CLASE_CAMPO = 'mt-1 w-full rounded-xl border border-borde bg-white/70 px-4 py-2.5 text-sm font-normal normal-case tracking-normal text-noche outline-none focus:border-cielo-600 focus:ring-2 focus:ring-cielo-600/30'
-const CLASE_ETIQUETA = 'block text-xs font-bold uppercase tracking-wider text-piedra-texto'
+const CLASE_CAMPO = `${claseControl} mt-1.5 text-sm font-normal`
+const CLASE_ETIQUETA = claseEtiqueta
 
 function Gastronomia() {
   const [platos, setPlatos] = useState([])
@@ -73,15 +75,18 @@ function Gastronomia() {
       <Navbar />
       <main className="contenedor max-w-6xl py-12">
         <div className="mb-8 max-w-3xl">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Sabores de Bolivia</p>
-          <h1 className="text-4xl font-bold tracking-tight text-noche sm:text-5xl">Gastronomía típica</h1>
-          <p className="mt-4 text-lg text-piedra-texto">Los platos que hay que probar en cada región y dónde encontrarlos.</p>
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Sabores de Bolivia</p>
+          <h1 className="titulo-display text-[44px] sm:text-[56px]">Gastronomía típica</h1>
+          <p className="texto-lectura mt-3 text-lg text-piedra-texto">Los platos que hay que probar en cada región y dónde encontrarlos.</p>
         </div>
 
-        <div className="mb-8 grid gap-4 rounded-2xl cristal p-5 sm:grid-cols-[2fr_1fr]">
+        <div className="mb-8 grid gap-4 rounded-tarjeta border border-borde bg-white p-5 shadow-suave sm:grid-cols-[2fr_1fr]">
           <label className={CLASE_ETIQUETA}>
             Buscar un plato o ingrediente
-            <input value={busqueda} onChange={(evento) => setBusqueda(evento.target.value)} placeholder="Ej.: silpancho, maní, trucha..." className={CLASE_CAMPO} />
+            <span className="relative mt-1.5 block">
+              <Search aria-hidden="true" size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-piedra" />
+              <input value={busqueda} onChange={(evento) => setBusqueda(evento.target.value)} placeholder="Ej.: silpancho, maní, trucha..." className={`${CLASE_CAMPO} mt-0 pl-10`} />
+            </span>
           </label>
           <label className={CLASE_ETIQUETA}>
             Origen
@@ -94,37 +99,43 @@ function Gastronomia() {
           </label>
         </div>
 
-        {aviso && <p className="mb-8 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{aviso}</p>}
+        {aviso && <p className="mb-8 rounded-control border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{aviso}</p>}
 
         {cargando ? (
           <GrillaEsqueleto cantidad={6} />
         ) : visibles.length === 0 ? (
-          <div className="rounded-2xl bg-white/60 px-5 py-6 text-piedra-texto ring-1 ring-white/80">
-            <p>No encontramos platos que coincidan con tu búsqueda.</p>
-            <button type="button" onClick={() => { setBusqueda(''); setIdDepartamento('') }} className="mt-3 font-semibold text-cielo-700 underline">
-              Ver todos los platos
-            </button>
-          </div>
+          <EstadoVacio
+            icono={SearchX}
+            titulo="No encontramos platos que coincidan con tu búsqueda"
+            mensaje="Prueba con otro ingrediente o elige otro origen."
+            accion={
+              <button type="button" onClick={() => { setBusqueda(''); setIdDepartamento('') }} className={claseBoton('secundario', 'normal', 'bg-white')}>
+                Ver todos los platos
+              </button>
+            }
+          />
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {visibles.map((plato) => (
-              <article key={plato.id || plato.nombre} className="group flex flex-col overflow-hidden rounded-3xl cristal">
-                <div className="relative m-2 aspect-[4/3] overflow-hidden rounded-2xl bg-white/50">
-                  <ImagenSegura src={plato.imagen} alt={plato.nombre} loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-                  <span className="absolute left-3 top-3 rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-800 shadow-sm">
+            {visibles.map((plato, indice) => (
+              <Aparecer key={plato.id || plato.nombre} indice={indice % 3} como="article" className="group flex flex-col rounded-tarjeta border border-borde bg-white p-3 shadow-suave">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-imagen bg-sal-2">
+                  <ImagenSegura src={plato.imagen} alt={plato.nombre} loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-500 ease-salida group-hover:scale-[1.04]" />
+                  <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-2.5 py-1 text-xs font-bold text-noche shadow-suave">
+                    <MapPin aria-hidden="true" size={13} className="text-atardecer-700" />
                     {plato.origen || nombreDepartamento(plato.id_departamento) || 'Bolivia'}
                   </span>
                 </div>
-                <div className="flex flex-1 flex-col px-5 pb-5 pt-3">
-                  <h2 className="text-xl font-bold text-noche">{plato.nombre}</h2>
+                <div className="flex flex-1 flex-col px-2 pb-1 pt-4">
+                  <h2 className="titulo-display text-[32px] leading-tight">{plato.nombre}</h2>
                   {plato.descripcion && <p className="mt-2 line-clamp-3 text-sm leading-6 text-piedra-texto">{plato.descripcion}</p>}
                   <div className="mt-auto pt-4">
-                    <button type="button" onClick={() => setPlatoAbierto(plato)} className="rounded-xl boton-principal px-4 py-2 text-sm font-bold">
+                    <button type="button" onClick={() => setPlatoAbierto(plato)} className={claseBoton('secundario', 'pequeno')}>
                       Ver más
+                      <ArrowRight aria-hidden="true" size={16} />
                     </button>
                   </div>
                 </div>
-              </article>
+              </Aparecer>
             ))}
           </div>
         )}
@@ -132,38 +143,40 @@ function Gastronomia() {
 
       {platoAbierto && (
         <Modal titulo={platoAbierto.nombre} onCerrar={() => setPlatoAbierto(null)}>
-          <ImagenSegura src={platoAbierto.imagen} alt={platoAbierto.nombre} className="h-64 w-full object-cover sm:rounded-t-3xl" />
+          <ImagenSegura src={platoAbierto.imagen} alt={platoAbierto.nombre} className="h-64 w-full object-cover sm:h-72" />
           <div className="space-y-5 p-6 sm:p-8">
             <div>
-              <p className="text-sm font-bold text-cobre-texto">Origen: {platoAbierto.origen || nombreDepartamento(platoAbierto.id_departamento) || 'Bolivia'}</p>
-              <h2 className="mt-1 text-2xl font-bold text-noche">{platoAbierto.nombre}</h2>
+              <p className="flex items-center gap-1.5 text-sm font-bold text-cobre-texto">
+                <MapPin aria-hidden="true" size={16} /> Origen: {platoAbierto.origen || nombreDepartamento(platoAbierto.id_departamento) || 'Bolivia'}
+              </p>
+              <h2 className="titulo-display mt-1 text-[40px]">{platoAbierto.nombre}</h2>
             </div>
             {platoAbierto.descripcion && <p className="leading-7 text-noche/80">{platoAbierto.descripcion}</p>}
 
             {ingredientes.length > 0 && (
               <div>
-                <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-piedra-texto">Ingredientes principales</h3>
+                <h3 className="mb-2 text-sm font-bold text-noche">Ingredientes principales</h3>
                 <ul className="flex flex-wrap gap-2">
                   {ingredientes.map((ingrediente) => (
-                    <li key={ingrediente} className="rounded-full bg-orange-100 px-3 py-1 text-sm font-semibold text-orange-800">{ingrediente}</li>
+                    <li key={ingrediente} className="rounded-full bg-cielo px-3 py-1 text-sm font-bold text-noche">{ingrediente}</li>
                   ))}
                 </ul>
               </div>
             )}
 
             <div>
-              <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-piedra-texto">Dónde probarlo</h3>
+              <h3 className="mb-2 flex items-center gap-1.5 text-sm font-bold text-noche"><Soup aria-hidden="true" size={16} className="text-cielo-700" /> Dónde probarlo</h3>
               {platoAbierto.lugares_tradicionales && <p className="mb-3 text-sm leading-6 text-noche/80">{platoAbierto.lugares_tradicionales}</p>}
               {lugaresDelPlatoAbierto.length > 0 ? (
                 <ul className="space-y-2">
                   {lugaresDelPlatoAbierto.map((restaurante) => (
                     <li key={restaurante.id}>
-                      <Link to={`/restaurantes/${restaurante.id}`} className="flex items-center justify-between gap-3 rounded-xl bg-cielo/50 px-4 py-3 transition hover:bg-cielo">
+                      <Link to={`/restaurantes/${restaurante.id}`} className="flex min-h-11 items-center justify-between gap-3 rounded-control border border-borde px-4 py-3 transition hover:bg-sal-2">
                         <span>
                           <span className="block font-bold text-noche">{restaurante.nombre}</span>
                           <span className="block text-sm text-piedra-texto">{restaurante.ubicacion}</span>
                         </span>
-                        <span className="shrink-0 text-sm font-semibold text-cielo-700">Ver restaurante →</span>
+                        <span className="inline-flex shrink-0 items-center gap-1 text-sm font-bold text-cielo-700">Ver restaurante <ArrowRight aria-hidden="true" size={16} /></span>
                       </Link>
                     </li>
                   ))}

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
+import { ArrowRight, CalendarDays, Lightbulb, MapPin } from 'lucide-react'
 import Navbar from '../../components/Navbar.jsx'
+import { Aparecer, EstadoVacio, claseBoton } from '../../components/ui'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
 import BotonReportar from '../../components/BotonReportar.jsx'
 import Modal from '../../components/Modal.jsx'
@@ -15,9 +17,9 @@ function rangoDeFechas(evento) {
 // Recuadro de calendario con el día y el mes de inicio.
 function FechaDestacada({ fechaISO }) {
   return (
-    <div className="flex h-16 w-16 flex-col items-center justify-center rounded-2xl bg-white/95 text-center shadow-md">
-      <span className="text-2xl font-extrabold leading-none text-cielo-700">{formatearFechaEvento(fechaISO, { day: 'numeric' })}</span>
-      <span className="text-xs font-bold uppercase text-cobre-texto">{formatearFechaEvento(fechaISO, { month: 'short' }).replace('.', '')}</span>
+    <div className="flex min-w-16 flex-col items-center rounded-control bg-white px-3 pb-1.5 pt-1 text-center shadow-suave">
+      <span className="titulo-display text-[32px] leading-none">{formatearFechaEvento(fechaISO, { day: 'numeric' })}</span>
+      <span className="text-xs font-bold uppercase tracking-wider text-atardecer-700">{formatearFechaEvento(fechaISO, { month: 'short' }).replace('.', '')}</span>
     </div>
   )
 }
@@ -64,46 +66,51 @@ function Eventos() {
       <Navbar />
       <main className="contenedor max-w-6xl py-12">
         <div className="mb-10 max-w-2xl">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Agenda cultural</p>
-          <h1 className="text-4xl font-bold tracking-tight text-noche sm:text-5xl">Próximos eventos</h1>
-          <p className="mt-4 text-lg text-piedra-texto">Festivales, ferias y celebraciones para sumar a tu viaje.</p>
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Agenda cultural</p>
+          <h1 className="titulo-display text-[44px] sm:text-[56px]">Próximos eventos</h1>
+          <p className="texto-lectura mt-3 text-lg text-piedra-texto">Festivales, ferias y celebraciones para sumar a tu viaje.</p>
         </div>
 
-        {error && <p className="mb-8 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
+        {error && <p className="mb-8 rounded-control border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
 
         {cargando ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 3 }).map((_, indice) => (
-              <div key={indice} className="h-80 animate-pulse rounded-3xl bg-sal-2" />
+              <div key={indice} className="h-80 animate-pulse rounded-tarjeta bg-sal-2" />
             ))}
           </div>
         ) : eventos.length === 0 ? (
-          !error && <p className="rounded-2xl bg-white/60 px-5 py-6 text-piedra-texto ring-1 ring-white/80">No hay eventos próximos por ahora. Vuelve pronto.</p>
+          !error && <EstadoVacio icono={CalendarDays} titulo="No hay eventos próximos por ahora" mensaje="Pronto publicaremos nuevas fiestas y festivales. Vuelve pronto." />
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {eventos.map((evento) => {
+            {eventos.map((evento, indice) => {
               const enCurso = evento.fecha_inicio <= hoy
               return (
-                <article key={evento.id} className="flex flex-col overflow-hidden rounded-3xl cristal">
-                  <div className="relative m-2 h-44 overflow-hidden rounded-2xl">
+                <Aparecer key={evento.id} indice={indice % 3} como="article" className="flex flex-col rounded-tarjeta border border-borde bg-white p-3 shadow-suave">
+                  <div className="relative aspect-[16/10] overflow-hidden rounded-imagen bg-sal-2">
                     <ImagenSegura src={evento.imagen} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
                     <div className="absolute left-3 top-3"><FechaDestacada fechaISO={evento.fecha_inicio} /></div>
-                    <span className={`absolute right-3 top-3 rounded-full px-3 py-1 text-xs font-bold shadow-sm ${enCurso ? 'bg-emerald-500 text-white' : 'bg-white/90 text-cielo-700'}`}>
+                    <span className={`absolute right-3 top-3 rounded-full px-3 py-1 text-xs font-bold shadow-suave ${enCurso ? 'bg-emerald-700 text-white' : 'bg-white/95 text-noche'}`}>
                       {enCurso ? 'En curso' : 'Próximo'}
                     </span>
                   </div>
-                  <div className="flex flex-1 flex-col px-5 pb-5 pt-3">
-                    <p className="text-sm font-bold text-cobre-texto">{rangoDeFechas(evento)}</p>
-                    <h2 className="mt-1 text-xl font-bold text-noche">{evento.nombre}</h2>
-                    <p className="mt-1 text-sm text-piedra-texto">{lugarDe(evento)}</p>
+                  <div className="flex flex-1 flex-col px-2 pb-1 pt-4">
+                    <p className="flex items-center gap-1.5 text-sm font-bold text-cobre-texto">
+                      <CalendarDays aria-hidden="true" size={16} /> {rangoDeFechas(evento)}
+                    </p>
+                    <h2 className="mt-1.5 text-lg font-bold leading-snug text-noche">{evento.nombre}</h2>
+                    <p className="mt-1 flex items-start gap-1.5 text-sm text-piedra-texto">
+                      <MapPin aria-hidden="true" size={16} className="mt-0.5 shrink-0 text-piedra" /> {lugarDe(evento)}
+                    </p>
                     {evento.descripcion && <p className="mt-3 line-clamp-2 text-sm leading-6 text-piedra-texto">{evento.descripcion}</p>}
                     <div className="mt-auto pt-4">
-                      <button type="button" onClick={() => setEventoAbierto(evento)} className="rounded-xl boton-principal px-4 py-2 text-sm font-bold">
+                      <button type="button" onClick={() => setEventoAbierto(evento)} className={claseBoton('secundario', 'pequeno')}>
                         Ver más
+                        <ArrowRight aria-hidden="true" size={16} />
                       </button>
                     </div>
                   </div>
-                </article>
+                </Aparecer>
               )
             })}
           </div>
@@ -112,22 +119,26 @@ function Eventos() {
 
       {eventoAbierto && (
         <Modal titulo={eventoAbierto.nombre} onCerrar={() => setEventoAbierto(null)}>
-          <ImagenSegura src={eventoAbierto.imagen} alt="" className="h-56 w-full object-cover sm:rounded-t-3xl" />
+          <ImagenSegura src={eventoAbierto.imagen} alt="" className="h-56 w-full object-cover sm:h-64" />
           <div className="space-y-5 p-6 sm:p-8">
             <div>
-              <p className="text-sm font-bold text-cobre-texto">{rangoDeFechas(eventoAbierto)}</p>
-              <h2 className="mt-1 text-2xl font-bold text-noche">{eventoAbierto.nombre}</h2>
-              <p className="mt-1 text-sm text-piedra-texto">{lugarDe(eventoAbierto)}</p>
+              <p className="flex items-center gap-1.5 text-sm font-bold text-cobre-texto">
+                <CalendarDays aria-hidden="true" size={16} /> {rangoDeFechas(eventoAbierto)}
+              </p>
+              <h2 className="titulo-display mt-1 text-[34px]">{eventoAbierto.nombre}</h2>
+              <p className="mt-1 flex items-center gap-1.5 text-sm text-piedra-texto">
+                <MapPin aria-hidden="true" size={16} className="text-piedra" /> {lugarDe(eventoAbierto)}
+              </p>
             </div>
             {eventoAbierto.descripcion && <p className="leading-7 text-noche/80">{eventoAbierto.descripcion}</p>}
 
             <div>
-              <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-piedra-texto">Cronograma</h3>
+              <h3 className="mb-3 text-sm font-bold text-noche">Cronograma</h3>
               {cronograma.length > 0 ? (
-                <ol className="space-y-2">
+                <ol className="relative space-y-3 border-l-2 border-cielo pl-5">
                   {cronograma.map((actividad, indice) => (
-                    <li key={actividad + indice} className="flex gap-3 rounded-xl bg-cielo/50 px-4 py-2.5 text-sm text-noche/80">
-                      <span className="font-bold text-cielo-700">{indice + 1}.</span>
+                    <li key={actividad + indice} className="relative text-sm text-noche/85">
+                      <span className="absolute -left-[27px] top-1 h-3 w-3 rounded-full border-2 border-white bg-atardecer" aria-hidden="true" />
                       {actividad}
                     </li>
                   ))}
@@ -138,8 +149,10 @@ function Eventos() {
             </div>
 
             {eventoAbierto.recomendaciones && (
-              <div className="rounded-2xl bg-sal-2 p-4">
-                <h3 className="mb-1 text-sm font-bold uppercase tracking-wider text-cobre-texto">Recomendaciones</h3>
+              <div className="rounded-control bg-sal-2 p-4">
+                <h3 className="mb-1 flex items-center gap-1.5 text-sm font-bold text-noche">
+                  <Lightbulb aria-hidden="true" size={16} className="text-cielo-700" /> Recomendaciones
+                </h3>
                 <p className="text-sm leading-6 text-noche/80">{eventoAbierto.recomendaciones}</p>
               </div>
             )}
