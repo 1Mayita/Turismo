@@ -1,0 +1,12 @@
+// Componentes base del rediseño "Salar cálido" (DESIGN.md).
+// Uso: import { Boton, Tarjeta, ChipCategoria } from '../components/ui'
+export { default as Boton } from './Boton.jsx'
+export { default as Tarjeta, ImagenTarjeta } from './Tarjeta.jsx'
+export { default as Chip, ChipCategoria } from './Chip.jsx'
+export { default as Campo } from './Campo.jsx'
+export { default as Buscador } from './Buscador.jsx'
+export { default as EstadoVacio } from './EstadoVacio.jsx'
+export { default as Esqueleto, EsqueletoTarjetaBase } from './Esqueleto.jsx'
+export { default as Aparecer } from './Aparecer.jsx'
+export { iconoDeCategoria } from './iconosCategoria.js'
+export { claseBoton, claseControl, claseEtiqueta, claseTarjeta } from './estilos.js'

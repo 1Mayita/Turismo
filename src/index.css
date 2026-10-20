@@ -33,6 +33,86 @@
   --color-accent-500: #a9703e;
   --color-accent-600: #8b5a2b;
   --color-accent-700: #6f4722;
+
+  /* ---------- Rediseño "Salar cálido" (DESIGN.md) ----------
+     Tokens nuevos. Conviven con brand/accent/cristal mientras cada página se
+     pasa al estilo nuevo en su fase; no reemplazan nada todavía. */
+
+  /* Tipografía: Cormorant solo para títulos grandes (>= 32px); Manrope para
+     toda la interfaz. */
+  --font-titulo: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-ui: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Sitio público (modo claro). Valores exactos de la guía. */
+  --color-sal: #fafaf7;
+  --color-sal-2: #f2f0ea;
+  --color-cielo: #dce6ee;
+  --color-cielo-600: #5e89ad;
+  --color-piedra: #7a8b99;
+  --color-noche: #0e2233;
+  --color-cobre: #b88a5a;
+  --color-atardecer: #e07a4f;
+  --color-atardecer-hover: #c9653b;
+  --color-borde: #e4e2dc;
+
+  /* Variantes para TEXTO con contraste AA (>= 4.5:1). Los tonos de la guía
+     piedra, cielo-600, cobre y atardecer quedan por debajo de 4.5:1 como
+     texto, así que se usan en iconos, bordes y fondos, y estas en letras:
+       piedra-texto  5.1:1 sobre sal   cielo-700  5.5:1 sobre sal
+       cobre-texto   5.1:1 sobre sal   atardecer-700 + texto blanco 5.0:1 */
+  --color-piedra-texto: #5d6d7a;
+  --color-cielo-700: #3f6a8f;
+  --color-cobre-texto: #8a6339;
+  --color-atardecer-700: #b4532a;
+  --color-atardecer-800: #9a4523;
+
+  /* Panel de administración (modo oscuro "glass"). */
+  --color-admin-bg: #0b1a27;
+  --color-admin-texto: #f4f1ec;
+  --color-admin-muted: #9aa8b4;
+  --color-cielo-claro: #9cc3e0;
+  --color-ok: #5bbf8a;
+  --color-alerta: #e8b44c;
+  --color-error: #e05a5a;
+
+  /* Forma y profundidad. */
+  --radius-tarjeta: 20px;
+  --radius-imagen: 16px;
+  --radius-control: 12px;
+  --shadow-suave: 0 8px 30px rgb(14 34 51 / 0.08);
+  --shadow-elevada: 0 14px 40px rgb(14 34 51 / 0.12);
+  --ease-salida: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Título grande del sitio público (hero y títulos de sección). */
+@utility titulo-display {
+  font-family: var(--font-titulo);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--color-noche);
+}
+
+/* Párrafo de lectura cómoda: interlineado 1.6 y ~70 caracteres por línea. */
+@utility texto-lectura {
+  line-height: 1.6;
+  max-width: 70ch;
+}
+
+/* Fondo del panel de administración: azul noche con un brillo cálido
+   difuminado en una esquina. */
+@utility fondo-admin {
+  background-color: var(--color-admin-bg);
+  background-image: radial-gradient(42rem 32rem at 100% 0%, rgb(224 122 79 / 0.18), transparent 65%);
+  color: var(--color-admin-texto);
+}
+
+/* Tarjeta de vidrio del panel de administración. */
+@utility vidrio {
+  background-color: rgb(255 255 255 / 0.06);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 /* Panel de cristal: blanco translúcido, desenfoque del fondo, borde luminoso
