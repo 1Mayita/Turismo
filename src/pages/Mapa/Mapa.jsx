@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CircleMarker, MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
+import { CircleMarker, MapContainer, Marker, Popup, TileLayer, ZoomControl, useMap } from 'react-leaflet'
+import { BedDouble, LocateFixed, MapPin, Search, SlidersHorizontal, UtensilsCrossed } from 'lucide-react'
 import 'leaflet/dist/leaflet.css'
 import Navbar from '../../components/Navbar.jsx'
 import BotonAgregarAViaje from '../../components/BotonAgregarAViaje.jsx'
 import { ResumenCalificacion } from '../../components/Estrellas.jsx'
-import { estiloDeMarcador, iconoDeMarcador } from '../../components/mapa/iconos.js'
+import { COLOR_POR_TIPO, estiloDeMarcador, iconoDeMarcador } from '../../components/mapa/iconos.js'
+import { Chip, ChipCategoria, claseControl, claseEtiqueta, iconoDeCategoria } from '../../components/ui'
 import { destinosDeEjemplo, getDestinos } from '../../services/destinosService.js'
 import { getRestaurantes } from '../../services/restaurantesService.js'
 import { getAlojamientos } from '../../services/alojamientosService.js'
@@ -15,6 +17,9 @@ import { coordenadasValidas, distanciaEnKm, obtenerUbicacionDelUsuario } from '.
 import { coincideConBusqueda } from '../../utils/texto.js'
 
 const CENTRO_BOLIVIA = [-16.5, -64.8]
+// En escritorio el panel tapa la izquierda: el centro se corre al este para
+// que Bolivia quede en la parte visible del mapa.
+const CENTRO_CON_PANEL = [-16.5, -61.9]
 const ZOOM_INICIAL = 6
 const MAXIMO_EN_LISTA = 40
 
@@ -24,8 +29,10 @@ const CAPAS = [
   { id: 'alojamiento', etiqueta: 'Alojamientos' },
 ]
 
-const CLASE_CAMPO = 'mt-1 w-full rounded-xl border border-borde bg-white/80 px-3 py-2 text-sm font-normal normal-case tracking-normal text-noche outline-none focus:border-cielo-600 focus:ring-2 focus:ring-cielo-600/30 disabled:cursor-not-allowed disabled:bg-sal-2'
-const CLASE_ETIQUETA = 'block text-xs font-bold uppercase tracking-wider text-piedra-texto'
+const ICONO_DE_CAPA = { destino: MapPin, restaurante: UtensilsCrossed, alojamiento: BedDouble }
+
+const CLASE_CAMPO = `${claseControl} mt-1.5 text-sm font-normal`
+const CLASE_ETIQUETA = claseEtiqueta
 
 // Convierte destinos, restaurantes y alojamientos a un mismo formato de "punto".
 function aPuntos({ destinos, restaurantes, alojamientos }) {
@@ -68,7 +75,7 @@ function Mapa() {
   const [cargandoUbicacion, setCargandoUbicacion] = useState(false)
   const [errorUbicacion, setErrorUbicacion] = useState('')
   const [objetivo, setObjetivo] = useState(null)
-  const [panelAbierto, setPanelAbierto] = useState(true)
+  const [panelAbierto, setPanelAbierto] = useState(false)
   const { resumen } = useResumenCalificaciones()
 
   useEffect(() => {
@@ -137,191 +144,210 @@ function Mapa() {
     }
   }
 
+  function enfocar(item) {
+    setObjetivo({ latitud: item.latitud, longitud: item.longitud })
+    // En celular la hoja se baja para que se vea el lugar en el mapa.
+    setPanelAbierto(false)
+  }
+
+  // Filtros y lista: el mismo contenido va en el panel de escritorio y en la
+  // hoja del celular.
+  const contenido = (
+    <div className="flex flex-col gap-5">
+      {aviso && <p className="rounded-control border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{aviso}</p>}
+
+      <label className={CLASE_ETIQUETA}>
+        Buscar en el mapa
+        <span className="relative mt-1.5 block">
+          <Search aria-hidden="true" size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-piedra" />
+          <input value={busqueda} onChange={(evento) => setBusqueda(evento.target.value)} placeholder="Ej.: Uyuni, hostal, trucha..." className={`${CLASE_CAMPO} mt-0 pl-10`} />
+        </span>
+      </label>
+
+      <fieldset>
+        <legend className={CLASE_ETIQUETA}>Mostrar</legend>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {CAPAS.map((capa) => (
+            <Chip
+              key={capa.id}
+              activo={capasActivas.includes(capa.id)}
+              onClick={() => alternar(capasActivas, setCapasActivas, capa.id)}
+              icono={ICONO_DE_CAPA[capa.id]}
+            >
+              <span className="h-2.5 w-2.5 rounded-full ring-2 ring-white" style={{ backgroundColor: COLOR_POR_TIPO[capa.id] }} aria-hidden="true" />
+              {capa.etiqueta}
+            </Chip>
+          ))}
+        </div>
+      </fieldset>
+
+      {capasActivas.includes('destino') && categorias.length > 0 && (
+        <fieldset>
+          <legend className={CLASE_ETIQUETA}>Categoría del destino</legend>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {categorias.map((categoria) => (
+              <ChipCategoria
+                key={categoria}
+                nombre={categoria}
+                activo={categoriasActivas.includes(categoria)}
+                onClick={() => alternar(categoriasActivas, setCategoriasActivas, categoria)}
+              />
+            ))}
+          </div>
+          <p className="mt-1.5 text-xs text-piedra-texto">Sin ninguna marcada se muestran todas.</p>
+        </fieldset>
+      )}
+
+      <label className={CLASE_ETIQUETA}>
+        Valoración mínima
+        <select value={valoracionMinima} onChange={(evento) => setValoracionMinima(evento.target.value)} className={CLASE_CAMPO}>
+          <option value="">Cualquiera</option>
+          {[1, 2, 3, 4, 5].map((estrellas) => (
+            <option key={estrellas} value={estrellas}>{'★'.repeat(estrellas)} {estrellas === 5 ? '(5)' : `(${estrellas} o más)`}</option>
+          ))}
+        </select>
+      </label>
+
+      <div>
+        <p className={CLASE_ETIQUETA}>Distancia desde mi ubicación</p>
+        <button
+          type="button"
+          onClick={usarMiUbicacion}
+          disabled={cargandoUbicacion}
+          className="mt-1.5 flex min-h-11 w-full items-center gap-2 rounded-control border border-borde bg-cielo/50 px-3 text-left text-sm font-bold text-cielo-700 transition hover:bg-cielo disabled:opacity-60"
+        >
+          <LocateFixed aria-hidden="true" size={18} />
+          {cargandoUbicacion ? 'Buscando ubicación...' : ubicacionUsuario ? 'Actualizar mi ubicación' : 'Usar mi ubicación'}
+        </button>
+        <select value={distanciaMaxima} onChange={(evento) => setDistanciaMaxima(evento.target.value)} disabled={!ubicacionUsuario} aria-label="Distancia máxima en kilómetros" className={`${CLASE_CAMPO} mt-2`}>
+          <option value="">Cualquier distancia</option>
+          {[10, 50, 100, 250, 500].map((distancia) => (
+            <option key={distancia} value={distancia}>A {distancia} km o menos</option>
+          ))}
+        </select>
+        {errorUbicacion && <p className="mt-2 text-xs font-semibold text-red-700" role="alert">{errorUbicacion}</p>}
+      </div>
+
+      <div className="flex items-center justify-between gap-3 border-t border-borde pt-4">
+        <p className="text-sm font-bold text-noche" aria-live="polite">
+          {visibles.length} {visibles.length === 1 ? 'lugar' : 'lugares'}
+        </p>
+        <button type="button" onClick={limpiarFiltros} disabled={!hayFiltros} className="min-h-11 px-1 text-sm font-bold text-cielo-700 hover:underline disabled:cursor-not-allowed disabled:text-piedra disabled:no-underline">
+          Limpiar filtros
+        </button>
+      </div>
+
+      {!cargando && visibles.length === 0 ? (
+        <p className="rounded-control bg-sal-2 px-4 py-3 text-sm text-piedra-texto">Ningún lugar coincide con estos filtros.</p>
+      ) : (
+        <ul className="-mx-2 space-y-1">
+          {visibles.slice(0, MAXIMO_EN_LISTA).map((item) => {
+            const estilo = estiloDeMarcador(item.estilo)
+            const Icono = item.tipo === 'destino' ? iconoDeCategoria(item.categoria) : ICONO_DE_CAPA[item.tipo]
+            return (
+              <li key={item.clave}>
+                <button
+                  type="button"
+                  onClick={() => enfocar(item)}
+                  className="flex min-h-11 w-full items-center gap-3 rounded-control px-2 py-2 text-left transition hover:bg-sal-2"
+                >
+                  <span aria-hidden="true" style={{ backgroundColor: estilo.color }} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white">
+                    <Icono size={17} />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-bold text-noche">{item.nombre}</span>
+                    <span className="block truncate text-xs text-piedra-texto">
+                      {estilo.etiqueta}{item.ubicacion ? ` · ${item.ubicacion}` : ''}
+                      {item.distancia !== null && ` · ${item.distancia.toFixed(0)} km`}
+                    </span>
+                  </span>
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
+  )
+
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="contenedor max-w-7xl py-6">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3 px-2">
-          <div>
-            <p className="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-cobre-texto">Mapa turístico</p>
-            <h1 className="text-3xl font-bold tracking-tight text-noche sm:text-4xl">Bolivia en el mapa</h1>
+      <main className="relative h-[calc(100dvh-72px)] min-h-[560px] overflow-hidden">
+        {/* El mapa ocupa toda la pantalla. "z-0" encierra los z-index de Leaflet. */}
+        <div className="absolute inset-0 z-0">
+          {cargando ? (
+            <div className="h-full w-full animate-pulse bg-sal-2" />
+          ) : (
+            <MapContainer center={window.matchMedia('(min-width: 1024px)').matches ? CENTRO_CON_PANEL : CENTRO_BOLIVIA} zoom={ZOOM_INICIAL} scrollWheelZoom zoomControl={false} className="h-full w-full">
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <ZoomControl position="topright" />
+              <Enfocar objetivo={objetivo} />
+              {ubicacionUsuario && (
+                <CircleMarker center={[ubicacionUsuario.latitud, ubicacionUsuario.longitud]} radius={9} pathOptions={{ color: '#fff', weight: 3, fillColor: '#3f6a8f', fillOpacity: 1 }}>
+                  <Popup>Estás aquí</Popup>
+                </CircleMarker>
+              )}
+              {visibles.map((item) => {
+                const calificacion = calificacionDe(item)
+                return (
+                  <Marker key={item.clave} position={[item.latitud, item.longitud]} icon={iconoDeMarcador(item.estilo)} title={item.nombre}>
+                    <Popup>
+                      <p className="m-0! text-xs font-bold uppercase tracking-wider text-cobre-texto">{estiloDeMarcador(item.estilo).etiqueta}</p>
+                      <p className="m-0! font-ui text-base font-bold text-noche">{item.nombre}</p>
+                      {item.ubicacion && <p className="m-0! text-xs text-piedra-texto">{item.ubicacion}</p>}
+                      <ResumenCalificacion promedio={calificacion?.promedio} total={calificacion?.total} className="mt-1" />
+                      {item.enlace && (
+                        <Link to={item.enlace} className="mt-1 block font-bold text-cielo-700 underline">
+                          Ver más
+                        </Link>
+                      )}
+                      {item.tipo === 'destino' && item.id && (
+                        <BotonAgregarAViaje destino={{ id: item.id, nombre: item.nombre }} className="mt-2 min-h-9! px-3! text-xs!" />
+                      )}
+                    </Popup>
+                  </Marker>
+                )
+              })}
+            </MapContainer>
+          )}
+        </div>
+
+        {/* Escritorio: panel flotante con filtros y resultados. */}
+        <aside aria-label="Filtros y lugares" className="absolute bottom-4 left-4 top-4 z-[500] hidden w-[22.5rem] flex-col overflow-hidden rounded-tarjeta border border-borde bg-white shadow-elevada lg:flex">
+          <div className="border-b border-borde px-5 pb-4 pt-5">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Mapa turístico</p>
+            <h1 className="titulo-display text-[34px]">Bolivia en el mapa</h1>
           </div>
+          <div className="flex-1 overflow-y-auto px-5 py-4">{contenido}</div>
+        </aside>
+
+        {/* Celular: hoja que sube desde abajo. Cerrada deja ver el mapa. */}
+        <section aria-label="Filtros y lugares" className="absolute inset-x-0 bottom-0 z-[500] flex max-h-[72dvh] flex-col rounded-t-tarjeta border-t border-borde bg-white shadow-elevada lg:hidden">
           <button
             type="button"
             onClick={() => setPanelAbierto(!panelAbierto)}
             aria-expanded={panelAbierto}
-            className="rounded-xl bg-white/70 px-4 py-2 text-sm font-semibold text-cielo-700 ring-1 ring-white/80 transition hover:bg-white lg:hidden"
+            aria-controls="hoja-mapa"
+            className="flex min-h-14 w-full shrink-0 flex-col items-center gap-1.5 px-5 pb-3 pt-2"
           >
-            {panelAbierto ? 'Ocultar filtros' : 'Mostrar filtros'}
+            <span className="h-1.5 w-10 rounded-full bg-borde" aria-hidden="true" />
+            <span className="flex w-full items-center justify-between gap-3">
+              <span className="text-left">
+                <span className="block font-ui text-base font-bold text-noche">Bolivia en el mapa</span>
+                <span className="block text-sm text-piedra-texto">{cargando ? 'Cargando lugares…' : `${visibles.length} ${visibles.length === 1 ? 'lugar' : 'lugares'}`}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-cielo px-3 py-1.5 text-sm font-bold text-noche">
+                <SlidersHorizontal aria-hidden="true" size={16} />
+                {panelAbierto ? 'Ver mapa' : 'Lista y filtros'}
+              </span>
+            </span>
           </button>
-        </div>
-
-        {aviso && <p className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{aviso}</p>}
-
-        <div className="lg:grid lg:grid-cols-[21rem_1fr] lg:gap-5">
-          {/* Panel de filtros y resultados, al estilo de Google Maps. */}
-          <aside className={`${panelAbierto ? 'block' : 'hidden'} mb-4 lg:mb-0 lg:block`}>
-            <div className="flex flex-col gap-4 rounded-3xl cristal p-5 lg:h-[78vh] lg:overflow-y-auto">
-              <label className={CLASE_ETIQUETA}>
-                Buscar en el mapa
-                <input value={busqueda} onChange={(evento) => setBusqueda(evento.target.value)} placeholder="Ej.: Uyuni, hostal, trucha..." className={CLASE_CAMPO} />
-              </label>
-
-              <fieldset>
-                <legend className={CLASE_ETIQUETA}>Mostrar</legend>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {CAPAS.map((capa) => {
-                    const activa = capasActivas.includes(capa.id)
-                    const estilo = estiloDeMarcador(capa.id === 'destino' ? 'Naturaleza' : capa.id)
-                    return (
-                      <button
-                        key={capa.id}
-                        type="button"
-                        aria-pressed={activa}
-                        onClick={() => alternar(capasActivas, setCapasActivas, capa.id)}
-                        className={`rounded-full px-3 py-1.5 text-sm font-semibold transition ${activa ? 'bg-noche text-white' : 'bg-white/70 text-noche/80 ring-1 ring-white/80 hover:bg-white'}`}
-                      >
-                        <span aria-hidden="true">{capa.id === 'destino' ? '📍' : estilo.simbolo}</span> {capa.etiqueta}
-                      </button>
-                    )
-                  })}
-                </div>
-              </fieldset>
-
-              {capasActivas.includes('destino') && categorias.length > 0 && (
-                <fieldset>
-                  <legend className={CLASE_ETIQUETA}>Categoría del destino</legend>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {categorias.map((categoria) => {
-                      const activa = categoriasActivas.includes(categoria)
-                      const estilo = estiloDeMarcador(categoria)
-                      return (
-                        <button
-                          key={categoria}
-                          type="button"
-                          aria-pressed={activa}
-                          onClick={() => alternar(categoriasActivas, setCategoriasActivas, categoria)}
-                          style={activa ? { backgroundColor: estilo.color } : undefined}
-                          className={`rounded-full px-3 py-1.5 text-sm font-semibold transition ${activa ? 'text-white' : 'bg-white/70 text-noche/80 ring-1 ring-white/80 hover:bg-white'}`}
-                        >
-                          <span aria-hidden="true">{estilo.simbolo}</span> {categoria}
-                        </button>
-                      )
-                    })}
-                  </div>
-                  <p className="mt-1 text-xs text-piedra-texto">Sin ninguna marcada se muestran todas.</p>
-                </fieldset>
-              )}
-
-              <label className={CLASE_ETIQUETA}>
-                Valoración mínima
-                <select value={valoracionMinima} onChange={(evento) => setValoracionMinima(evento.target.value)} className={CLASE_CAMPO}>
-                  <option value="">Cualquiera</option>
-                  {[1, 2, 3, 4, 5].map((estrellas) => (
-                    <option key={estrellas} value={estrellas}>{'★'.repeat(estrellas)} {estrellas === 5 ? '(5)' : `(${estrellas} o más)`}</option>
-                  ))}
-                </select>
-              </label>
-
-              <div>
-                <p className={CLASE_ETIQUETA}>Distancia desde mi ubicación</p>
-                <button
-                  type="button"
-                  onClick={usarMiUbicacion}
-                  disabled={cargandoUbicacion}
-                  className="mt-1 w-full rounded-xl border border-borde bg-cielo/50 px-3 py-2 text-left text-sm font-semibold text-cielo-700 transition hover:bg-cielo disabled:opacity-60"
-                >
-                  {cargandoUbicacion ? 'Buscando ubicación...' : ubicacionUsuario ? 'Actualizar mi ubicación' : 'Usar mi ubicación'}
-                </button>
-                <select value={distanciaMaxima} onChange={(evento) => setDistanciaMaxima(evento.target.value)} disabled={!ubicacionUsuario} aria-label="Distancia máxima en kilómetros" className={CLASE_CAMPO}>
-                  <option value="">Cualquier distancia</option>
-                  {[10, 50, 100, 250, 500].map((distancia) => (
-                    <option key={distancia} value={distancia}>A {distancia} km o menos</option>
-                  ))}
-                </select>
-                {errorUbicacion && <p className="mt-2 text-xs font-semibold text-red-700" role="alert">{errorUbicacion}</p>}
-              </div>
-
-              <div className="flex items-center justify-between gap-3 border-t border-white/80 pt-3">
-                <p className="text-sm font-semibold text-noche/80" aria-live="polite">
-                  {visibles.length} {visibles.length === 1 ? 'lugar' : 'lugares'}
-                </p>
-                <button type="button" onClick={limpiarFiltros} disabled={!hayFiltros} className="text-sm font-semibold text-cielo-700 underline disabled:cursor-not-allowed disabled:text-piedra disabled:no-underline">
-                  Limpiar filtros
-                </button>
-              </div>
-
-              {!cargando && visibles.length === 0 ? (
-                <p className="rounded-xl bg-white/60 px-4 py-3 text-sm text-piedra-texto">Ningún lugar coincide con estos filtros.</p>
-              ) : (
-                <ul className="space-y-2">
-                  {visibles.slice(0, MAXIMO_EN_LISTA).map((item) => {
-                    const estilo = estiloDeMarcador(item.estilo)
-                    return (
-                      <li key={item.clave}>
-                        <button
-                          type="button"
-                          onClick={() => setObjetivo({ latitud: item.latitud, longitud: item.longitud })}
-                          className="flex w-full items-start gap-3 rounded-xl bg-white/60 px-3 py-2.5 text-left transition hover:bg-white"
-                        >
-                          <span aria-hidden="true" style={{ backgroundColor: estilo.color }} className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm">{estilo.simbolo}</span>
-                          <span className="min-w-0">
-                            <span className="block truncate text-sm font-bold text-noche">{item.nombre}</span>
-                            <span className="block truncate text-xs text-piedra-texto">
-                              {estilo.etiqueta}{item.ubicacion ? ` · ${item.ubicacion}` : ''}
-                              {item.distancia !== null && ` · ${item.distancia.toFixed(0)} km`}
-                            </span>
-                          </span>
-                        </button>
-                      </li>
-                    )
-                  })}
-                </ul>
-              )}
-            </div>
-          </aside>
-
-          {/* "relative z-0" encierra los z-index de Leaflet para que no tapen la Navbar. */}
-          <div className="relative z-0 h-[70vh] min-h-96 overflow-hidden rounded-3xl shadow-xl shadow-brand-950/10 ring-1 ring-white/80 lg:h-[78vh]">
-            {cargando ? (
-              <div className="h-full w-full animate-pulse bg-sal-2" />
-            ) : (
-              <MapContainer center={CENTRO_BOLIVIA} zoom={ZOOM_INICIAL} scrollWheelZoom className="h-full w-full">
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Enfocar objetivo={objetivo} />
-                {ubicacionUsuario && (
-                  <CircleMarker center={[ubicacionUsuario.latitud, ubicacionUsuario.longitud]} radius={9} pathOptions={{ color: '#fff', weight: 3, fillColor: '#2563eb', fillOpacity: 1 }}>
-                    <Popup>Estás aquí</Popup>
-                  </CircleMarker>
-                )}
-                {visibles.map((item) => {
-                  const calificacion = calificacionDe(item)
-                  return (
-                    <Marker key={item.clave} position={[item.latitud, item.longitud]} icon={iconoDeMarcador(item.estilo)} title={item.nombre}>
-                      <Popup>
-                        <p className="m-0! text-xs font-bold uppercase tracking-wider text-piedra-texto">{estiloDeMarcador(item.estilo).etiqueta}</p>
-                        <p className="m-0! text-base font-bold text-noche">{item.nombre}</p>
-                        {item.ubicacion && <p className="m-0! text-xs text-piedra-texto">{item.ubicacion}</p>}
-                        <ResumenCalificacion promedio={calificacion?.promedio} total={calificacion?.total} className="mt-1" />
-                        {item.enlace && (
-                          <Link to={item.enlace} className="mt-1 block font-semibold text-cielo-700 underline">
-                            Ver más
-                          </Link>
-                        )}
-                        {item.tipo === 'destino' && item.id && (
-                          <BotonAgregarAViaje destino={{ id: item.id, nombre: item.nombre }} className="mt-2 px-3! py-1.5! text-xs!" />
-                        )}
-                      </Popup>
-                    </Marker>
-                  )
-                })}
-              </MapContainer>
-            )}
-          </div>
-        </div>
+          {panelAbierto && <div id="hoja-mapa" className="overflow-y-auto border-t border-borde px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-4">{contenido}</div>}
+        </section>
       </main>
     </div>
   )
