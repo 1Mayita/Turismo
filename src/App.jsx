@@ -34,6 +34,8 @@ const Notificaciones = lazy(() => import('./pages/Notificaciones/Notificaciones.
 const AdminReportes = lazy(() => import('./pages/Admin/AdminReportes.jsx'))
 const AdminEstadisticas = lazy(() => import('./pages/Admin/AdminEstadisticas.jsx'))
 const NoEncontrada = lazy(() => import('./pages/NoEncontrada/NoEncontrada.jsx'))
+// Muestrario del rediseño: solo en desarrollo, no entra en la versión publicada.
+const GuiaDeEstilo = import.meta.env.DEV ? lazy(() => import('./pages/GuiaDeEstilo/GuiaDeEstilo.jsx')) : null
 const AdminDestinos = lazy(() => import('./pages/Admin/AdminDestinos.jsx'))
 const AdminDepartamentos = lazy(() => import('./pages/Admin/AdminDepartamentos.jsx'))
 const AdminCategorias = lazy(() => import('./pages/Admin/AdminCategorias.jsx'))
@@ -123,6 +125,7 @@ function App() {
           <Route path="/admin/reportes" element={<RutaAdmin><AdminReportes /></RutaAdmin>} />
           <Route path="/admin/estadisticas" element={<RutaAdmin><AdminEstadisticas /></RutaAdmin>} />
 
+          {GuiaDeEstilo && <Route path="/guia-de-estilo" element={<GuiaDeEstilo />} />}
           <Route path="*" element={<NoEncontrada />} />
         </Routes>
         {!['/login', '/registro'].includes(pathname) && <PieDePagina />}

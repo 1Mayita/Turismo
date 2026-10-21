@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
+import { collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
 import { db } from './firebase.js'
 import { conLimiteDeTiempo } from './tiempoLimite.js'
 
@@ -61,6 +61,13 @@ export async function enviarReporte({ usuario, tipo, elemento, enlace, motivo, d
     fecha: serverTimestamp(),
     actualizado: serverTimestamp(),
   }))
+}
+
+// Reportes que envió la persona (para avisarle cuando cambian de estado).
+export async function getReportesDeUsuario(idUsuario) {
+  const consulta = query(collection(db, 'reportes'), where('id_usuario', '==', idUsuario))
+  const instantanea = await conLimiteDeTiempo(getDocs(consulta))
+  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
 }
 
 // ---------- Panel de administración ----------

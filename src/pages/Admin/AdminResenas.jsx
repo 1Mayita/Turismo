@@ -23,6 +23,7 @@ function AdminResenas() {
   // Nombres de los lugares reseñados: { 'destino:id': 'Nombre', 'restaurante:id': ... }
   const [nombres, setNombres] = useState({})
   const [filtro, setFiltro] = useState('todas')
+  const [busquedaUsuario, setBusquedaUsuario] = useState('')
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
   const [mensaje, setMensaje] = useState('')
@@ -68,7 +69,7 @@ function AdminResenas() {
     if (filtro === 'ocultas') return resena.estado === 'oculta'
     if (filtro === 'publicadas') return resena.estado !== 'oculta'
     return true
-  }), [filtro, resenas])
+  }).filter((resena) => (resena.nombre_usuario || 'Turista').toLocaleLowerCase('es').includes(busquedaUsuario.trim().toLocaleLowerCase('es'))), [busquedaUsuario, filtro, resenas])
 
   async function cambiarVisibilidad(resena) {
     const nuevoEstado = resena.estado === 'oculta' ? 'publicada' : 'oculta'
@@ -103,24 +104,36 @@ function AdminResenas() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+      <main className="admin-layout contenedor max-w-6xl py-12">
         <h1 className="mb-6 text-3xl font-bold text-slate-900">Moderación de reseñas</h1>
         <AdminNav />
 
         {error && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
         {mensaje && <p className="mb-5 rounded-lg bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-800" role="status">{mensaje}</p>}
 
-        <label className="mb-6 block max-w-xs text-sm font-semibold text-slate-700">
-          Mostrar
-          <select value={filtro} onChange={(evento) => setFiltro(evento.target.value)} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30">
-            <option value="todas">Todas las reseñas</option>
-            <option value="publicadas">Publicadas</option>
-            <option value="ocultas">Ocultas</option>
-          </select>
-        </label>
+        <div className="mb-6 grid max-w-2xl gap-4 sm:grid-cols-2">
+          <label className="block text-sm font-semibold text-slate-700">
+            Mostrar
+            <select value={filtro} onChange={(evento) => setFiltro(evento.target.value)} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30">
+              <option value="todas">Todas las reseñas</option>
+              <option value="publicadas">Publicadas</option>
+              <option value="ocultas">Ocultas</option>
+            </select>
+          </label>
+          <label className="block text-sm font-semibold text-slate-700">
+            Filtrar por usuario
+            <input
+              type="search"
+              value={busquedaUsuario}
+              onChange={(evento) => setBusquedaUsuario(evento.target.value)}
+              placeholder="Escribe el nombre del usuario"
+              className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+            />
+          </label>
+        </div>
 
         {cargando ? (
-          <div className="h-48 animate-pulse rounded-2xl bg-white/50 cristal" />
+          <div className="h-48 animate-pulse rounded-2xl bg-sal-2 cristal" />
         ) : resenasVisibles.length === 0 ? (
           <p className="rounded-2xl px-5 py-6 text-slate-600 cristal">No hay reseñas para mostrar.</p>
         ) : (

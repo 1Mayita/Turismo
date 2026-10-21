@@ -1,25 +1,18 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { Heart } from 'lucide-react'
 import { useAuth } from '../context/useAuth.js'
 import { useFavoritos } from '../context/useFavoritos.js'
 
 function IconoCorazon({ relleno }) {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-      <path
-        d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2Z"
-        fill={relleno ? 'currentColor' : 'none'}
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
+  return <Heart aria-hidden="true" fill={relleno ? 'currentColor' : 'none'} />
 }
 
 // Corazón para marcar/desmarcar un elemento como favorito. A quien no inició
 // sesión lo lleva al login y, al entrar, lo devuelve a la página donde estaba.
-function BotonFavorito({ idDestino, idElemento = idDestino, tipo = 'destino', className = '' }) {
+// conTexto: botón con la palabra "Guardar"/"Guardado" (barra de acciones del
+// detalle); sin él, solo el corazón redondo que flota sobre las fotos.
+function BotonFavorito({ idDestino, idElemento = idDestino, tipo = 'destino', conTexto = false, className = '' }) {
   const { usuario } = useAuth()
   const { esFavorito, alternarFavorito } = useFavoritos()
   const [guardando, setGuardando] = useState(false)
@@ -46,6 +39,26 @@ function BotonFavorito({ idDestino, idElemento = idDestino, tipo = 'destino', cl
     }
   }
 
+  if (conTexto) {
+    return (
+      <div className={className}>
+        <button
+          type="button"
+          onClick={alternar}
+          disabled={guardando}
+          aria-pressed={activo}
+          className={`inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-control border px-4 text-sm font-bold transition duration-150 disabled:opacity-60 ${
+            activo ? 'border-atardecer/40 bg-atardecer/10 text-atardecer-700' : 'border-borde bg-white text-noche hover:bg-cielo'
+          }`}
+        >
+          <span className={activo ? 'text-atardecer' : 'text-piedra-texto'}><IconoCorazon relleno={activo} /></span>
+          {activo ? 'Guardado' : 'Guardar'}
+        </button>
+        {error && <p className="mt-1 rounded-lg bg-red-50 px-2 py-1 text-xs font-semibold text-red-700" role="alert">{error}</p>}
+      </div>
+    )
+  }
+
   return (
     <div className={className}>
       <button
@@ -55,8 +68,8 @@ function BotonFavorito({ idDestino, idElemento = idDestino, tipo = 'destino', cl
         aria-pressed={activo}
         aria-label={`${activo ? 'Quitar de' : 'Agregar a'} favoritos`}
         title={`${activo ? 'Quitar de' : 'Agregar a'} favoritos`}
-        className={`flex h-10 w-10 items-center justify-center rounded-full bg-white/95 shadow-md backdrop-blur transition hover:scale-110 active:scale-95 disabled:opacity-60 ${
-          activo ? 'text-rose-500' : 'text-slate-500 hover:text-rose-500'
+        className={`flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-suave transition-colors duration-150 disabled:opacity-60 ${
+          activo ? 'text-atardecer' : 'text-piedra-texto hover:text-atardecer'
         }`}
       >
         <IconoCorazon relleno={activo} />

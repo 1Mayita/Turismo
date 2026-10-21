@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ArrowRight, Heart, Mountain } from 'lucide-react'
+import { Chip, EstadoVacio, claseBoton } from './ui'
 import BotonFavorito from './BotonFavorito.jsx'
 import TarjetaDestino from './TarjetaDestino.jsx'
 import TarjetaEstablecimiento from './TarjetaEstablecimiento.jsx'
@@ -86,13 +88,13 @@ function ListaFavoritos() {
     }
 
     return (
-      <article key={`actividad-${elemento.id}`} className="relative rounded-3xl p-6 cristal">
-        <span className="mb-4 inline-flex rounded-full bg-brand-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-brand-800">Actividad</span>
+      <article key={`actividad-${elemento.id}`} className="relative rounded-tarjeta border border-borde bg-white p-5 shadow-suave">
+        <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-cielo px-2.5 py-1 text-xs font-bold text-noche"><Mountain aria-hidden="true" size={14} className="text-cielo-700" /> Actividad</span>
         <BotonFavorito idElemento={idElementoDeFavorito(favorito)} tipo="actividad" className="absolute right-4 top-4" />
-        <h3 className="pr-10 text-lg font-bold text-slate-900">{elemento.nombre}</h3>
-        {elemento.descripcion && <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{elemento.descripcion}</p>}
+        <h3 className="pr-10 text-lg font-bold text-noche">{elemento.nombre}</h3>
+        {elemento.descripcion && <p className="mt-2 line-clamp-3 text-sm leading-6 text-piedra-texto">{elemento.descripcion}</p>}
         {elemento.id_destino && (
-          <Link to={`/destinos/${elemento.id_destino}`} className="mt-4 inline-flex text-sm font-semibold text-brand-700 underline">
+          <Link to={`/destinos/${elemento.id_destino}`} className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-cielo-700 underline">
             Ver el destino de esta actividad
           </Link>
         )}
@@ -101,14 +103,16 @@ function ListaFavoritos() {
   }
 
   if (cargando) return <GrillaEsqueleto cantidad={3} />
-  if (error) return <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
+  if (error) return <p className="rounded-control border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
 
   if (guardados.length === 0) {
     return (
-      <p className="rounded-2xl px-5 py-6 text-slate-600 cristal">
-        Todavía no guardaste nada. Toca el corazón en un destino, actividad, restaurante o alojamiento para agregarlo.{' '}
-        <Link to="/destinos" className="font-semibold text-brand-700 underline">Explorar destinos</Link>
-      </p>
+      <EstadoVacio
+        icono={Heart}
+        titulo="Aún no guardaste nada"
+        mensaje="Explora y toca el ♥ en un destino, actividad, restaurante o alojamiento para encontrarlo aquí."
+        accion={<Link to="/destinos" className={claseBoton('secundario', 'normal', 'bg-white')}>Explorar destinos <ArrowRight aria-hidden="true" size={16} /></Link>}
+      />
     )
   }
 
@@ -116,22 +120,14 @@ function ListaFavoritos() {
     <div>
       <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Filtrar favoritos por tipo">
         {FILTROS.filter((item) => item.id === 'todos' || cantidadDe(item.id) > 0).map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            aria-pressed={filtro === item.id}
-            onClick={() => setFiltro(item.id)}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-              filtro === item.id ? 'bg-brand-700 text-white' : 'bg-white/70 text-brand-800 ring-1 ring-white/80 hover:bg-white'
-            }`}
-          >
-            {item.etiqueta} <span className={filtro === item.id ? 'text-white/75' : 'text-slate-500'}>({cantidadDe(item.id)})</span>
-          </button>
+          <Chip key={item.id} activo={filtro === item.id} onClick={() => setFiltro(item.id)}>
+            {item.etiqueta} <span className="font-medium opacity-70">{cantidadDe(item.id)}</span>
+          </Chip>
         ))}
       </div>
 
       {visibles.length === 0 ? (
-        <p className="rounded-2xl px-5 py-6 text-slate-600 cristal">Ya no tienes favoritos de este tipo.</p>
+        <p className="rounded-control bg-sal-2 px-5 py-4 text-piedra-texto">Ya no tienes favoritos de este tipo.</p>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {visibles.map(renderElemento)}

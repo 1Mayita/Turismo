@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Navbar from '../../components/Navbar.jsx'
 import AdminNav from '../../components/AdminNav.jsx'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
+import SelectorImagen from '../../components/SelectorImagen.jsx'
 import { actualizarPlato, crearPlato, eliminarPlato, getPlatos } from '../../services/platosService.js'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
 
@@ -27,6 +28,7 @@ function AdminPlatos() {
   const [platoEditando, setPlatoEditando] = useState(null)
   const [formulario, setFormulario] = useState(FORMULARIO_VACIO)
   const [guardando, setGuardando] = useState(false)
+  const [subidasPendientes, setSubidasPendientes] = useState(0)
   const [version, setVersion] = useState(0)
 
   useEffect(() => {
@@ -138,7 +140,7 @@ function AdminPlatos() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+      <main className="admin-layout contenedor max-w-6xl py-12">
         <h1 className="mb-6 text-3xl font-bold text-slate-900">Administración de platos típicos</h1>
         <AdminNav />
 
@@ -170,10 +172,12 @@ function AdminPlatos() {
                 Origen (texto que verá el turista, opcional)
                 <input name="origen" value={formulario.origen} onChange={actualizarCampo} placeholder="Ej.: Valles de Cochabamba" className={CLASE_CAMPO} />
               </label>
-              <label className="block text-sm font-semibold text-slate-700">
-                URL de la foto
-                <input name="imagen" value={formulario.imagen} onChange={actualizarCampo} placeholder="https://..." className={CLASE_CAMPO} />
-              </label>
+              <SelectorImagen
+                etiqueta="Foto del plato"
+                valor={formulario.imagen}
+                onUploading={(subiendo) => setSubidasPendientes((pendientes) => pendientes + (subiendo ? 1 : -1))}
+                onChange={(imagen) => setFormulario((actual) => ({ ...actual, imagen }))}
+              />
             </div>
             {formulario.imagen.trim() && (
               <ImagenSegura key={formulario.imagen} src={formulario.imagen.trim()} alt="No se pudo cargar la foto" className="h-28 w-44 rounded-lg object-cover text-xs" />
@@ -194,8 +198,8 @@ function AdminPlatos() {
             </div>
             <p className="text-xs text-slate-500">Los restaurantes que tengan este plato en su menú aparecen solos en “Dónde probarlo”: el nombre debe coincidir.</p>
             <div className="flex gap-3">
-              <button disabled={guardando} className="rounded-xl bg-brand-700 px-5 py-2.5 font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60">
-                {guardando ? 'Guardando...' : 'Guardar'}
+              <button disabled={guardando || subidasPendientes > 0} className="rounded-xl bg-brand-700 px-5 py-2.5 font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60">
+                {guardando ? 'Guardando...' : subidasPendientes > 0 ? 'Subiendo imágenes...' : 'Guardar'}
               </button>
               <button type="button" onClick={() => setFormularioAbierto(false)} className="rounded-xl border border-sky-200 bg-white/70 px-5 py-2.5 font-bold text-slate-700 transition hover:bg-white">
                 Cancelar
@@ -205,7 +209,7 @@ function AdminPlatos() {
         )}
 
         {cargando ? (
-          <div className="h-48 animate-pulse rounded-2xl bg-white/50" />
+          <div className="h-48 animate-pulse rounded-2xl bg-sal-2" />
         ) : (
           <div className="overflow-x-auto rounded-2xl cristal">
             <table className="w-full text-left text-sm">

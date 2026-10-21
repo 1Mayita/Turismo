@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { CalendarRange, Compass, Link2, Map as IconoMapa, Pencil, Plus, Share2, Trash2 } from 'lucide-react'
 import Navbar from '../../components/Navbar.jsx'
+import { EstadoVacio, claseBoton } from '../../components/ui'
 import Migas from '../../components/Migas.jsx'
 import Modal from '../../components/Modal.jsx'
 import { OpcionesCompartir } from '../../components/BotonCompartir.jsx'
@@ -118,57 +120,70 @@ function ViajeDetalle() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-10 lg:px-8">
+      <main className="contenedor max-w-6xl py-10">
         <Migas pasos={migas} />
 
         {cargando ? (
           <div className="space-y-4">
-            <div className="h-28 animate-pulse rounded-3xl bg-white/50" />
-            <div className="h-80 animate-pulse rounded-3xl bg-white/50" />
+            <div className="h-28 animate-pulse rounded-tarjeta bg-sal-2" />
+            <div className="h-80 animate-pulse rounded-tarjeta bg-sal-2" />
           </div>
         ) : !viaje ? (
-          <div className="rounded-2xl p-6 cristal">
-            <p className="font-semibold text-slate-800">{error}</p>
-            <Link to="/viajes" className="mt-3 inline-block font-semibold text-brand-700 underline">Ir a mis viajes</Link>
-          </div>
+          <EstadoVacio icono={IconoMapa} titulo={error} accion={<Link to="/viajes" className={claseBoton('secundario', 'normal', 'bg-white')}>Ir a mis viajes</Link>} />
         ) : (
           <>
-            <header className="mb-6 flex flex-wrap items-start justify-between gap-4 rounded-[2rem] p-6 cristal sm:p-8">
+            <header className="mb-10 flex flex-wrap items-start justify-between gap-5 rounded-tarjeta border border-borde bg-white p-6 shadow-suave sm:p-8">
               <div className="min-w-0">
-                <p className="text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Mi viaje · {textoDeFechas(viaje)}</p>
-                <h1 className="mt-1 break-words text-3xl font-extrabold text-slate-900 sm:text-4xl">{viaje.nombre}</h1>
-                <p className="mt-1 text-sm text-slate-600">{items.length} {items.length === 1 ? 'destino' : 'destinos'}{viaje.token_compartido ? ' · Compartido con enlace' : ''}</p>
-                {viaje.notas && <p className="mt-3 max-w-2xl whitespace-pre-line text-slate-700">{viaje.notas}</p>}
+                <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] text-cobre-texto">
+                  <CalendarRange aria-hidden="true" size={15} /> Mi viaje · {textoDeFechas(viaje)}
+                </p>
+                <h1 className="titulo-display mt-1 break-words text-[40px] sm:text-[52px]">{viaje.nombre}</h1>
+                <p className="mt-1 flex items-center gap-1.5 text-sm text-piedra-texto">
+                  {items.length} {items.length === 1 ? 'destino' : 'destinos'}
+                  {viaje.token_compartido && <><span aria-hidden="true">·</span><Link2 aria-hidden="true" size={14} /> Compartido con enlace</>}
+                </p>
+                {viaje.notas && <p className="texto-lectura mt-3 whitespace-pre-line text-noche/85">{viaje.notas}</p>}
               </div>
               <div className="flex flex-wrap gap-2">
-                <button type="button" onClick={() => { setErrorVentana(''); setVentana('compartir') }} className="rounded-xl boton-principal px-4 py-2.5 text-sm font-bold">Compartir</button>
-                <button type="button" onClick={() => setVentana('editar')} className="rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-brand-800 ring-1 ring-sky-100 transition hover:bg-brand-50">Editar</button>
-                <button type="button" onClick={() => { setErrorVentana(''); setVentana('eliminar') }} className="rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-red-700 ring-1 ring-red-100 transition hover:bg-red-50">Eliminar</button>
+                <button type="button" onClick={() => { setErrorVentana(''); setVentana('compartir') }} className={claseBoton('primario', 'pequeno')}>
+                  <Share2 aria-hidden="true" size={16} /> Compartir
+                </button>
+                <button type="button" onClick={() => setVentana('editar')} className={claseBoton('secundario', 'pequeno', 'bg-white')}>
+                  <Pencil aria-hidden="true" size={16} /> Editar
+                </button>
+                <button type="button" onClick={() => { setErrorVentana(''); setVentana('eliminar') }} className={claseBoton('fantasma', 'pequeno', 'text-red-700 hover:bg-red-50')}>
+                  <Trash2 aria-hidden="true" size={16} /> Eliminar
+                </button>
               </div>
             </header>
 
-            {error && <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
+            {error && <p className="mb-4 rounded-control bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
 
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-2xl font-bold text-slate-900">Itinerario</h2>
+              <h2 className="titulo-display text-[36px]">Itinerario</h2>
               <div className="flex items-center gap-4">
-                <span className="text-sm font-semibold text-emerald-700" aria-live="polite">{estadoGuardado}</span>
-                <Link to="/destinos" className="rounded-xl bg-white/70 px-4 py-2 text-sm font-bold text-brand-800 ring-1 ring-white/80 transition hover:bg-white">+ Agregar destinos</Link>
+                <span className="text-sm font-bold text-emerald-700" aria-live="polite">{estadoGuardado}</span>
+                <Link to="/destinos" className={claseBoton('secundario', 'pequeno', 'bg-white')}>
+                  <Plus aria-hidden="true" size={16} /> Agregar destinos
+                </Link>
               </div>
             </div>
 
             {items.length === 0 ? (
-              <div className="rounded-3xl p-8 text-center cristal">
-                <p className="text-lg font-bold text-slate-900">Tu viaje todavía no tiene destinos</p>
-                <p className="mt-1 text-slate-600">Busca lugares en el catálogo o el mapa y toca “Agregar a mi viaje”.</p>
-                <div className="mt-4 flex flex-wrap justify-center gap-3">
-                  <Link to="/destinos" className="rounded-xl boton-principal px-5 py-2.5 font-bold">Explorar destinos</Link>
-                  <Link to="/mapa" className="rounded-xl bg-white px-5 py-2.5 font-bold text-brand-800 ring-1 ring-sky-100">Abrir el mapa</Link>
-                </div>
-              </div>
+              <EstadoVacio
+                icono={Compass}
+                titulo="Tu viaje todavía no tiene destinos"
+                mensaje="Busca lugares en el catálogo o el mapa y toca “Agregar a mi viaje”."
+                accion={
+                  <div className="flex flex-wrap justify-center gap-3">
+                    <Link to="/destinos" className={claseBoton('secundario', 'normal', 'bg-white')}>Explorar destinos</Link>
+                    <Link to="/mapa" className={claseBoton('fantasma')}>Abrir el mapa</Link>
+                  </div>
+                }
+              />
             ) : (
               <>
-                <p className="mb-3 text-sm text-slate-600">Arrastra con el ícono ⠿ o usa las flechas ↑ ↓ para ordenar las paradas. Los cambios se guardan solos.</p>
+                <p className="mb-4 text-sm text-piedra-texto">Arrastra cada parada desde su asa (los seis puntos) o usa las flechas para ordenarlas. Los cambios se guardan solos.</p>
                 <Itinerario items={items} editable onReordenar={reordenar} onQuitar={quitar} />
               </>
             )}
@@ -179,7 +194,7 @@ function ViajeDetalle() {
       {ventana === 'editar' && (
         <Modal titulo="Editar viaje" onCerrar={() => setVentana(null)}>
           <div className="p-6 sm:p-8">
-            <h2 className="mb-5 pr-10 text-2xl font-bold text-slate-900">Editar viaje</h2>
+            <h2 className="titulo-display mb-5 pr-12 text-[32px]">Editar viaje</h2>
             <FormularioViaje inicial={viaje} textoBoton="Guardar cambios" onGuardar={guardarDatos} onCancelar={() => setVentana(null)} />
           </div>
         </Modal>
@@ -188,11 +203,11 @@ function ViajeDetalle() {
       {ventana === 'compartir' && (
         <Modal titulo="Compartir viaje" onCerrar={() => setVentana(null)}>
           <div className="space-y-5 p-6 sm:p-8">
-            <h2 className="pr-10 text-2xl font-bold text-slate-900">Compartir “{viaje.nombre}”</h2>
-            {errorVentana && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{errorVentana}</p>}
+            <h2 className="titulo-display pr-12 text-[32px]">Compartir “{viaje.nombre}”</h2>
+            {errorVentana && <p className="rounded-control bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{errorVentana}</p>}
             {viaje.token_compartido ? (
               <>
-                <p className="text-sm text-slate-600">Quien tenga este enlace verá el itinerario en modo solo lectura y podrá copiarlo a su cuenta. Los cambios que hagas se verán en el enlace.</p>
+                <p className="text-sm text-piedra-texto">Quien tenga este enlace verá el itinerario en modo solo lectura y podrá copiarlo a su cuenta. Los cambios que hagas se verán en el enlace.</p>
                 <OpcionesCompartir
                   titulo={viaje.nombre}
                   texto={`Mira mi viaje "${viaje.nombre}" en Rutas de Bolivia:`}
@@ -202,19 +217,19 @@ function ViajeDetalle() {
                   type="button"
                   disabled={procesando}
                   onClick={() => ejecutar(async () => setViaje(await desactivarEnlaceCompartido(viaje)))}
-                  className="w-full rounded-xl bg-red-50 px-4 py-3 text-sm font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
+                  className="flex min-h-11 w-full items-center justify-center rounded-control bg-red-50 px-4 text-sm font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
                 >
                   {procesando ? 'Desactivando...' : 'Desactivar el enlace (dejará de funcionar para todos)'}
                 </button>
               </>
             ) : (
               <>
-                <p className="text-sm text-slate-600">Tu viaje es privado. Crea un enlace para compartirlo en modo solo lectura; podrás desactivarlo cuando quieras.</p>
+                <p className="text-sm text-piedra-texto">Tu viaje es privado. Crea un enlace para compartirlo en modo solo lectura; podrás desactivarlo cuando quieras.</p>
                 <button
                   type="button"
                   disabled={procesando}
                   onClick={() => ejecutar(async () => setViaje(await activarEnlaceCompartido(viaje, usuario.displayName?.split(' ')[0])))}
-                  className="w-full rounded-xl boton-principal px-4 py-3 font-bold disabled:opacity-60"
+                  className={claseBoton('primario', 'normal', 'w-full')}
                 >
                   {procesando ? 'Creando enlace...' : 'Crear enlace para compartir'}
                 </button>
@@ -227,19 +242,19 @@ function ViajeDetalle() {
       {ventana === 'eliminar' && (
         <Modal titulo="Eliminar viaje" onCerrar={() => setVentana(null)}>
           <div className="space-y-4 p-6 sm:p-8">
-            <h2 className="pr-10 text-2xl font-bold text-slate-900">¿Eliminar este viaje?</h2>
-            <p className="text-slate-600">Se borrará “{viaje.nombre}” con sus {items.length} paradas{viaje.token_compartido ? ' y el enlace compartido dejará de funcionar' : ''}. Esta acción no se puede deshacer.</p>
-            {errorVentana && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{errorVentana}</p>}
+            <h2 className="titulo-display pr-12 text-[32px]">¿Eliminar este viaje?</h2>
+            <p className="text-piedra-texto">Se borrará “{viaje.nombre}” con sus {items.length} paradas{viaje.token_compartido ? ' y el enlace compartido dejará de funcionar' : ''}. Esta acción no se puede deshacer.</p>
+            {errorVentana && <p className="rounded-control bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{errorVentana}</p>}
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
                 disabled={procesando}
                 onClick={() => ejecutar(async () => { await eliminarViaje(viaje); navegar('/viajes', { replace: true }) })}
-                className="flex-1 rounded-xl bg-red-600 px-4 py-3 font-bold text-white transition hover:bg-red-700 disabled:opacity-60"
+                className="flex min-h-11 flex-1 items-center justify-center rounded-control bg-red-700 px-4 font-bold text-white transition hover:bg-red-800 disabled:opacity-60"
               >
                 {procesando ? 'Eliminando...' : 'Sí, eliminar'}
               </button>
-              <button type="button" onClick={() => setVentana(null)} className="rounded-xl border border-sky-200 bg-white px-5 py-3 font-bold text-slate-700">Cancelar</button>
+              <button type="button" onClick={() => setVentana(null)} className={claseBoton('secundario')}>Cancelar</button>
             </div>
           </div>
         </Modal>

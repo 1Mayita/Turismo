@@ -1,11 +1,11 @@
-import { collection, getDocs, orderBy, query } from 'firebase/firestore'
+import { collection, doc, getDoc, getDocs, orderBy, query, runTransaction, serverTimestamp } from 'firebase/firestore'
 import { crearServicio, SOLO_EJEMPLOS } from './coleccion.js'
 import { eventosDeEjemplo } from './datosDeEjemplo.js'
 import { db } from './firebase.js'
 import { conLimiteDeTiempo } from './tiempoLimite.js'
 
 // Campos de un evento: nombre, descripcion, fecha_inicio, fecha_fin, ubicacion,
-// id_departamento, imagen, cronograma [], recomendaciones.
+// id_departamento, latitud, longitud, imagen, cronograma [], recomendaciones.
 const eventos = crearServicio('eventos', eventosDeEjemplo)
 
 export const getEventoPorId = eventos.uno
@@ -45,4 +45,45 @@ export async function getEventosProximos() {
   const hoy = fechaHoyISO()
   const lista = await getEventos()
   return lista.filter((evento) => (evento.fecha_fin || evento.fecha_inicio) >= hoy)
+}
+
+export async function getAsistenciaEvento(idEvento, idUsuario) {
+  if (SOLO_EJEMPLOS) return false
+  const asistencia = await conLimiteDeTiempo(getDoc(doc(db, 'eventos', idEvento, 'asistentes', idUsuario)))
+  return asistencia.exists()
+}
+
+export async function getAsistentesEvento(idEvento) {
+  if (SOLO_EJEMPLOS) return []
+  const consulta = await conLimiteDeTiempo(getDocs(collection(db, 'eventos', idEvento, 'asistentes')))
+  return consulta.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
+}
+
+export async function alternarAsistenciaEvento(idEvento, idUsuario) {
+  if (SOLO_EJEMPLOS) {
+    throw new Error('La inscripción a eventos requiere conexión con Firestore.')
+  }
+  const referenciaEvento = doc(db, 'eventos', idEvento)
+  const referenciaAsistencia = doc(db, 'eventos', idEvento, 'asistentes', idUsuario)
+  return conLimiteDeTiempo(runTransaction(db, async (transaccion) => {
+    const [evento, asistencia] = await Promise.all([
+      transaccion.get(referenciaEvento),
+      transaccion.get(referenciaAsistencia),
+    ])
+    if (!evento.exists()) throw new Error('Este evento ya no está disponible.')
+
+    if (asistencia.exists()) {
+      transaccion.delete(referenciaAsistencia)
+      transaccion.update(referenciaEvento, { asistentes_count: Math.max(0, (Number(evento.data().asistentes_count) || 0) - 1) })
+      return false
+    }
+
+    const datosEvento = evento.data()
+    if ((datosEvento.fecha_fin || datosEvento.fecha_inicio) < fechaHoyISO()) {
+      throw new Error('Ya no puedes anotarte a un evento finalizado.')
+    }
+    transaccion.set(referenciaAsistencia, { id_usuario: idUsuario, fecha: serverTimestamp() })
+    transaccion.update(referenciaEvento, { asistentes_count: (Number(datosEvento.asistentes_count) || 0) + 1 })
+    return true
+  }))
 }

@@ -22,6 +22,25 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/administradores/$(request.auth.token.email));
     }
 
+    function contadorAsistenciaValido(idEvento) {
+      let rutaAsistencia = /databases/$(database)/documents/eventos/$(idEvento)/asistentes/$(request.auth.uid);
+      let anterior = resource.data.get('asistentes_count', 0);
+      let nuevo = request.resource.data.get('asistentes_count', -1);
+      return conSesion()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['asistentes_count'])
+        && (
+          (nuevo == anterior + 1
+            && !exists(rutaAsistencia)
+            && existsAfter(rutaAsistencia)
+            && getAfter(rutaAsistencia).data.id_usuario == request.auth.uid
+            && getAfter(rutaAsistencia).data.fecha == request.time)
+          || (nuevo == anterior - 1
+            && exists(rutaAsistencia)
+            && !existsAfter(rutaAsistencia)
+            && get(rutaAsistencia).data.id_usuario == request.auth.uid)
+        );
+    }
+
     // ---------- Catálogo público ----------
     match /destinos/{id}      { allow read: if true; allow write: if esAdmin(); }
     match /categorias/{id}    { allow read: if true; allow write: if esAdmin(); }
@@ -29,7 +48,28 @@ service cloud.firestore {
     match /municipios/{id}    { allow read: if true; allow write: if esAdmin(); }
     match /regiones/{id}      { allow read: if true; allow write: if esAdmin(); }
     match /actividades/{id}   { allow read: if true; allow write: if esAdmin(); }
-    match /eventos/{id}       { allow read: if true; allow write: if esAdmin(); }
+    match /eventos/{id} {
+      allow read: if true;
+      allow create, delete: if esAdmin();
+      allow update: if esAdmin() || contadorAsistenciaValido(id);
+
+      match /asistentes/{uid} {
+        allow read: if esAdmin() || (conSesion() && request.auth.uid == uid);
+        allow create: if conSesion()
+          && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['id_usuario', 'fecha'])
+          && request.resource.data.id_usuario == uid
+          && request.resource.data.fecha == request.time
+          && getAfter(/databases/$(database)/documents/eventos/$(id)).data.get('asistentes_count', 0)
+            == get(/databases/$(database)/documents/eventos/$(id)).data.get('asistentes_count', 0) + 1;
+        allow delete: if conSesion()
+          && request.auth.uid == uid
+          && resource.data.id_usuario == uid
+          && getAfter(/databases/$(database)/documents/eventos/$(id)).data.get('asistentes_count', 0)
+            == get(/databases/$(database)/documents/eventos/$(id)).data.get('asistentes_count', 0) - 1;
+        allow update: if false;
+      }
+    }
     match /platos/{id}        { allow read: if true; allow write: if esAdmin(); }
     match /restaurantes/{id}  { allow read: if true; allow write: if esAdmin(); }
     match /alojamientos/{id}  { allow read: if true; allow write: if esAdmin(); }

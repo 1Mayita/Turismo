@@ -17,8 +17,8 @@ function aNumeroOVacio(valor) {
 export const CAMPO_DESCRIPCION = { nombre: 'descripcion', etiqueta: 'Descripción', tipo: 'textarea', placeholder: 'Qué lo hace especial, ambiente, a quién se lo recomendarías...' }
 
 export const CAMPOS_COMUNES = [
-  { nombre: 'imagen_principal', etiqueta: 'URL de la foto principal', tipo: 'url', placeholder: 'https://...' },
-  { nombre: 'imagenes', etiqueta: 'Fotos de la galería (una URL por línea)', tipo: 'textarea', placeholder: 'https://.../foto-1.jpg\nhttps://.../foto-2.jpg', aFormulario: (elemento) => aTexto(elemento.imagenes) },
+  { nombre: 'imagen_principal', etiqueta: 'Foto principal', tipo: 'image' },
+  { nombre: 'imagenes', etiqueta: 'Fotos de la galería', tipo: 'images', aFormulario: (elemento) => aTexto(elemento.imagenes) },
   { nombre: 'latitud', etiqueta: 'Latitud (se llena al marcar en el mapa)', tipo: 'number', step: 'any', placeholder: '-17.3895', aFormulario: (elemento) => elemento.latitud ?? '' },
   { nombre: 'longitud', etiqueta: 'Longitud (se llena al marcar en el mapa)', tipo: 'number', step: 'any', placeholder: '-66.1568', aFormulario: (elemento) => elemento.longitud ?? '' },
   { nombre: 'facebook', etiqueta: 'Facebook (enlace)', tipo: 'url', placeholder: 'https://facebook.com/...' },

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
 import AdminNav from '../../components/AdminNav.jsx'
-import { ESTADOS, MOTIVOS, TIPOS_REPORTABLES, cambiarEstadoReporte, getReportes } from '../../services/reportesService.js'
+import { ESTADOS, LARGO_MAXIMO_DESCRIPCION, MOTIVOS, TIPOS_REPORTABLES, cambiarEstadoReporte, getReportes } from '../../services/reportesService.js'
 
 function fechaLegible(fecha) {
   return typeof fecha?.toDate === 'function'
@@ -18,6 +18,8 @@ function AdminReportes() {
   const [error, setError] = useState('')
   const [mensaje, setMensaje] = useState('')
   const [guardandoId, setGuardandoId] = useState('')
+  // Respuestas que el admin está escribiendo, por reporte: { id: texto }.
+  const [borradores, setBorradores] = useState({})
 
   useEffect(() => {
     let activo = true
@@ -37,20 +39,35 @@ function AdminReportes() {
     }
   }, [])
 
-  async function cambiarEstado(reporte, estado) {
+  const notaDe = (reporte) => borradores[reporte.id] ?? reporte.nota_admin ?? ''
+
+  // Guarda el estado junto con la respuesta escrita: quien reportó recibe
+  // ambas cosas en su campana.
+  async function guardar(reporte, estado, textoExito) {
     setError('')
     setMensaje('')
     setGuardandoId(reporte.id)
+    const nota = notaDe(reporte).trim()
     try {
-      await cambiarEstadoReporte(reporte.id, estado)
-      setReportes((lista) => lista.map((item) => (item.id === reporte.id ? { ...item, estado } : item)))
-      setMensaje(`Reporte marcado como "${ESTADOS.find((item) => item.id === estado).etiqueta.toLocaleLowerCase('es')}".`)
+      await cambiarEstadoReporte(reporte.id, estado, nota)
+      setReportes((lista) => lista.map((item) => (item.id === reporte.id ? { ...item, estado, nota_admin: nota } : item)))
+      setBorradores((actuales) => {
+        const restantes = { ...actuales }
+        delete restantes[reporte.id]
+        return restantes
+      })
+      setMensaje(textoExito)
     } catch (errorGuardado) {
-      console.error('Error al cambiar el estado del reporte:', errorGuardado)
-      setError('No se pudo cambiar el estado del reporte.')
+      console.error('Error al guardar el reporte:', errorGuardado)
+      setError('No se pudo guardar el cambio del reporte.')
     } finally {
       setGuardandoId('')
     }
+  }
+
+  function cambiarEstado(reporte, estado) {
+    const etiqueta = ESTADOS.find((item) => item.id === estado).etiqueta.toLocaleLowerCase('es')
+    return guardar(reporte, estado, `Reporte marcado como "${etiqueta}". Quien lo envió verá el aviso en sus notificaciones.`)
   }
 
   const cantidad = (estado) => reportes.filter((reporte) => reporte.estado === estado).length
@@ -60,7 +77,7 @@ function AdminReportes() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+      <main className="admin-layout contenedor max-w-6xl py-12">
         <h1 className="mb-6 text-3xl font-bold text-slate-900">Reportes de información</h1>
         <AdminNav />
 
@@ -82,7 +99,7 @@ function AdminReportes() {
         </div>
 
         {cargando ? (
-          <div className="space-y-3">{Array.from({ length: 3 }).map((_, indice) => <div key={indice} className="h-32 animate-pulse rounded-2xl bg-white/50" />)}</div>
+          <div className="space-y-3">{Array.from({ length: 3 }).map((_, indice) => <div key={indice} className="h-32 animate-pulse rounded-2xl bg-sal-2" />)}</div>
         ) : visibles.length === 0 ? (
           !error && <p className="rounded-2xl px-5 py-6 text-slate-600 cristal">{filtro === 'pendiente' ? '¡Todo al día! No hay reportes pendientes.' : 'No hay reportes con este estado.'}</p>
         ) : (
@@ -105,6 +122,30 @@ function AdminReportes() {
                       </p>
                       <p className="mt-1 text-sm font-semibold text-slate-700">{motivo(reporte.motivo)}</p>
                       {reporte.descripcion && <p className="mt-2 whitespace-pre-line rounded-xl bg-white/70 px-4 py-3 text-sm text-slate-700">“{reporte.descripcion}”</p>}
+
+                      <label htmlFor={`nota-${reporte.id}`} className="mt-4 block text-xs font-bold uppercase tracking-wider text-slate-500">
+                        Respuesta para {reporte.nombre_usuario || 'quien reportó'} (opcional)
+                      </label>
+                      <textarea
+                        id={`nota-${reporte.id}`}
+                        rows={2}
+                        maxLength={LARGO_MAXIMO_DESCRIPCION}
+                        value={notaDe(reporte)}
+                        onChange={(evento) => setBorradores((actuales) => ({ ...actuales, [reporte.id]: evento.target.value }))}
+                        placeholder="Ej.: Ya actualizamos el horario de visita. ¡Gracias por avisarnos!"
+                        className="mt-1 w-full rounded-xl border border-sky-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-brand-500/30"
+                      />
+                      <div className="mt-2 flex flex-wrap items-center gap-3">
+                        <button
+                          type="button"
+                          disabled={guardandoId === reporte.id || notaDe(reporte).trim() === (reporte.nota_admin || '').trim()}
+                          onClick={() => guardar(reporte, reporte.estado, 'Respuesta guardada. Quien reportó la verá en sus notificaciones.')}
+                          className="rounded-full bg-brand-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-800 disabled:opacity-50"
+                        >
+                          Guardar respuesta
+                        </button>
+                        <span className="text-xs text-slate-500">La respuesta también se envía al cambiar el estado.</span>
+                      </div>
                     </div>
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
                       Cambiar estado

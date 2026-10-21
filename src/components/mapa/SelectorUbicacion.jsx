@@ -74,13 +74,13 @@ function SelectorUbicacion({ latitud, longitud, onCambiar, clave }) {
   return (
     <div>
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-semibold text-slate-700">Ubicación en el mapa</p>
+        <p className="text-sm font-semibold text-noche/80">Ubicación en el mapa</p>
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={usarMiUbicacion} disabled={cargandoUbicacion} className="rounded-lg border border-sky-200 bg-white/70 px-3 py-1.5 text-xs font-bold text-brand-800 transition hover:bg-white disabled:opacity-60">
+          <button type="button" onClick={usarMiUbicacion} disabled={cargandoUbicacion} className="rounded-lg border border-borde bg-white/70 px-3 py-1.5 text-xs font-bold text-cielo-700 transition hover:bg-white disabled:opacity-60">
             {cargandoUbicacion ? 'Buscando...' : 'Usar mi ubicación actual'}
           </button>
           {tienePunto && (
-            <button type="button" onClick={() => onCambiar({ latitud: '', longitud: '' })} className="rounded-lg border border-sky-200 bg-white/70 px-3 py-1.5 text-xs font-bold text-red-700 transition hover:bg-white">
+            <button type="button" onClick={() => onCambiar({ latitud: '', longitud: '' })} className="rounded-lg border border-borde bg-white/70 px-3 py-1.5 text-xs font-bold text-red-700 transition hover:bg-white">
               Quitar ubicación
             </button>
           )}
@@ -88,7 +88,7 @@ function SelectorUbicacion({ latitud, longitud, onCambiar, clave }) {
       </div>
 
       {/* "relative z-0" encierra los z-index de Leaflet para que no tapen la Navbar. */}
-      <div className="relative z-0 h-80 overflow-hidden rounded-2xl ring-1 ring-sky-200">
+      <div className="relative z-0 h-80 overflow-hidden rounded-2xl ring-1 ring-borde">
         <MapContainer center={posicion || CENTRO_BOLIVIA} zoom={posicion ? ZOOM_LUGAR : ZOOM_PAIS} scrollWheelZoom className="h-full w-full cursor-crosshair">
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -100,7 +100,7 @@ function SelectorUbicacion({ latitud, longitud, onCambiar, clave }) {
         </MapContainer>
       </div>
 
-      <p className="mt-2 text-xs text-slate-500" aria-live="polite">
+      <p className="mt-2 text-xs text-piedra-texto" aria-live="polite">
         {tienePunto
           ? `Ubicación marcada: ${Number(latitud)}, ${Number(longitud)}. Haz clic en otro punto o arrastra el marcador para ajustarla.`
           : 'Haz clic en el mapa para marcar dónde está. Acerca el mapa con la rueda del mouse o los botones + y −.'}

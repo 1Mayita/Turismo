@@ -32,7 +32,7 @@ function Grafico({ titulo, descripcion, datos, unidad, orientacion = 'horizontal
   const hayDatos = datos.some((dato) => dato.valor > 0)
 
   return (
-    <section className="rounded-3xl bg-white/90 p-5 shadow-sm ring-1 ring-white sm:p-6" aria-label={titulo}>
+    <section className="rounded-tarjeta border border-panel-borde bg-white p-5 sm:p-6" aria-label={titulo}>
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-bold text-slate-900">{titulo}</h2>

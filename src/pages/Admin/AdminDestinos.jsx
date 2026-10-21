@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
+import SelectorImagen from '../../components/SelectorImagen.jsx'
 import { publicarNovedad } from '../../services/notificacionesService.js'
 import AdminNav from '../../components/AdminNav.jsx'
 import { actualizarDestino, crearDestino, eliminarDestino, getDestinos } from '../../services/destinosService.js'
@@ -32,7 +33,7 @@ function lineasDe(texto) {
   return texto.split(/\r?\n/).map((linea) => linea.trim()).filter(Boolean)
 }
 
-// Convierte el texto del formulario (una URL por línea) en una lista limpia.
+// Convierte la lista del formulario en una lista de imágenes sin duplicados.
 function listaDeUrls(texto) {
   return [...new Set(texto.split(/\r?\n/).map((url) => url.trim()).filter(Boolean))]
 }
@@ -75,6 +76,7 @@ function AdminDestinos() {
   const [destinoEditando, setDestinoEditando] = useState(null)
   const [formulario, setFormulario] = useState(FORMULARIO_VACIO)
   const [guardando, setGuardando] = useState(false)
+  const [subidasPendientes, setSubidasPendientes] = useState(0)
   const [actualizandoEjemplos, setActualizandoEjemplos] = useState(false)
   const [version, setVersion] = useState(0)
 
@@ -268,12 +270,10 @@ function AdminDestinos() {
     }
   }
 
-  const vistaPreviaFotos = listaDeUrls([formulario.imagen_principal, formulario.imagenes].join('\n'))
-
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+      <main className="admin-layout contenedor max-w-6xl py-12">
         <h1 className="mb-6 text-3xl font-bold text-slate-900">Administración de destinos</h1>
         <AdminNav />
 
@@ -287,14 +287,6 @@ function AdminDestinos() {
             className="rounded-xl boton-principal px-5 py-3 font-bold text-white transition"
           >
             Nuevo destino
-          </button>
-          <button
-            type="button"
-            onClick={cargarDatosDeEjemplo}
-            disabled={actualizandoEjemplos}
-            className="rounded-xl border border-neutral-300 bg-white px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {actualizandoEjemplos ? 'Cargando datos...' : 'Cargar datos de ejemplo'}
           </button>
         </div>
 
@@ -350,26 +342,18 @@ function AdminDestinos() {
                 Horario
                 <input name="horario" value={formulario.horario} onChange={actualizarCampo} placeholder="Todos los días, 08:00 - 18:00" className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
               </label>
-              <label className="block text-sm font-semibold text-slate-700">
-                URL de imagen principal
-                <input name="imagen_principal" value={formulario.imagen_principal} onChange={actualizarCampo} placeholder="https://..." className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
-              </label>
+              <SelectorImagen
+                etiqueta="Imagen principal"
+                valor={formulario.imagen_principal}
+                onUploading={(subiendo) => setSubidasPendientes((pendientes) => pendientes + (subiendo ? 1 : -1))}
+                onChange={(imagen_principal) => setFormulario((actual) => ({ ...actual, imagen_principal }))}
+              />
               <label className="block text-sm font-semibold text-slate-700">
                 Dirección
                 <input name="direccion" value={formulario.direccion} onChange={actualizarCampo} placeholder="Referencia o dirección" className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
               </label>
-              <div className="grid grid-cols-2 gap-4">
-                <label className="block text-sm font-semibold text-slate-700">
-                  Latitud
-                  <input name="latitud" type="number" step="any" value={formulario.latitud} onChange={actualizarCampo} placeholder="-17.4013" className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
-                </label>
-                <label className="block text-sm font-semibold text-slate-700">
-                  Longitud
-                  <input name="longitud" type="number" step="any" value={formulario.longitud} onChange={actualizarCampo} placeholder="-66.1489" className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
-                </label>
-              </div>
             </div>
-            <Suspense fallback={<div className="h-80 animate-pulse rounded-2xl bg-white/50" />}>
+            <Suspense fallback={<div className="h-80 animate-pulse rounded-2xl bg-sal-2" />}>
               <SelectorUbicacion
                 latitud={formulario.latitud}
                 longitud={formulario.longitud}
@@ -419,28 +403,20 @@ function AdminDestinos() {
               </label>
               <p className="text-xs text-slate-500">El clima actual se muestra solo a partir de la ubicación en el mapa (Open-Meteo); aquí va el clima típico por época.</p>
             </fieldset>
-            <label className="block text-sm font-semibold text-slate-700">
-              Fotos de la galería (una URL por línea)
-              <textarea name="imagenes" value={formulario.imagenes} onChange={actualizarCampo} rows={3} placeholder={'https://.../foto-1.jpg\nhttps://.../foto-2.jpg'} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30" />
-              <span className="mt-1 block text-xs font-normal text-slate-500">La imagen principal se agrega sola como primera foto. Usa enlaces directos a la imagen (.jpg, .png, .webp).</span>
-            </label>
-            {vistaPreviaFotos.length > 0 && (
-              <div>
-                <p className="mb-2 text-sm font-semibold text-slate-700">Vista previa ({vistaPreviaFotos.length})</p>
-                <div className="flex flex-wrap gap-3">
-                  {vistaPreviaFotos.map((url, indice) => (
-                    <ImagenSegura key={url} src={url} alt={`No se pudo cargar la foto ${indice + 1}`} className="h-20 w-28 rounded-lg object-cover text-xs" />
-                  ))}
-                </div>
-              </div>
-            )}
+            <SelectorImagen
+              multiple
+              etiqueta="Fotos de la galería"
+              valor={listaDeUrls(formulario.imagenes)}
+              onUploading={(subiendo) => setSubidasPendientes((pendientes) => pendientes + (subiendo ? 1 : -1))}
+              onChange={(imagenes) => setFormulario((actual) => ({ ...actual, imagenes: imagenes.join('\n') }))}
+            />
             <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
               <input name="destacado" type="checkbox" checked={formulario.destacado} onChange={actualizarCampo} className="h-4 w-4 rounded border-neutral-300" />
               Mostrar como destacado en la página de inicio
             </label>
             <div className="flex gap-3">
-              <button disabled={guardando} className="rounded-xl bg-brand-700 px-5 py-2.5 font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60">
-                {guardando ? 'Guardando...' : 'Guardar'}
+              <button disabled={guardando || subidasPendientes > 0} className="rounded-xl bg-brand-700 px-5 py-2.5 font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60">
+                {guardando ? 'Guardando...' : subidasPendientes > 0 ? 'Subiendo imágenes...' : 'Guardar'}
               </button>
               <button type="button" onClick={() => setFormularioAbierto(false)} className="rounded-xl border border-neutral-300 px-5 py-2.5 font-bold text-slate-700 transition hover:bg-slate-100">
                 Cancelar
@@ -450,12 +426,13 @@ function AdminDestinos() {
         )}
 
         {cargando ? (
-          <div className="h-64 animate-pulse rounded-2xl bg-white/50 cristal" />
+          <div className="h-64 animate-pulse rounded-2xl bg-sal-2 cristal" />
         ) : (
           <div className="overflow-x-auto rounded-2xl cristal">
             <table className="w-full text-left text-sm">
               <thead className="bg-white/40 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <tr>
+                  <th className="px-5 py-3">Foto</th>
                   <th className="px-5 py-3">Nombre</th>
                   <th className="px-5 py-3">Categoría</th>
                   <th className="px-5 py-3">Ubicación</th>
@@ -465,6 +442,7 @@ function AdminDestinos() {
               <tbody>
                 {destinos.map((destino) => (
                   <tr key={destino.id} className="border-t border-neutral-100">
+                    <td className="px-5 py-3"><ImagenSegura src={destino.imagen_principal || destino.imagenes?.[0]} alt="" className="h-12 w-16 rounded-lg object-cover" /></td>
                     <td className="px-5 py-3 font-semibold text-slate-900">{destino.nombre}</td>
                     <td className="px-5 py-3 text-slate-600">{destino.categoria}</td>
                     <td className="px-5 py-3 text-slate-600">{destino.ubicacion}</td>
@@ -477,7 +455,7 @@ function AdminDestinos() {
                 ))}
                 {destinos.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-5 py-6 text-center text-slate-500">No hay destinos registrados todavía.</td>
+                    <td colSpan={5} className="px-5 py-6 text-center text-slate-500">No hay destinos registrados todavía.</td>
                   </tr>
                 )}
               </tbody>

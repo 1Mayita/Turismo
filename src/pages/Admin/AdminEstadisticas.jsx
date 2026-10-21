@@ -83,7 +83,7 @@ function porPeriodo(fechas, desde, hasta) {
 
 function Tarjeta({ titulo, valor, detalle }) {
   return (
-    <div className="rounded-3xl bg-white/90 p-5 shadow-sm ring-1 ring-white">
+    <div className="rounded-tarjeta border border-panel-borde bg-white p-5">
       <p className="text-sm font-semibold text-slate-500">{titulo}</p>
       <p className="mt-1 text-3xl font-extrabold tabular-nums text-slate-900">{valor}</p>
       {detalle && <p className="mt-1 text-xs font-semibold text-slate-500">{detalle}</p>}
@@ -148,14 +148,14 @@ function AdminEstadisticas() {
     return (
       <div className="min-h-screen">
         <Navbar />
-        <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+        <main className="admin-layout contenedor max-w-6xl py-12">
           <h1 className="mb-6 text-3xl font-bold text-slate-900">Estadísticas</h1>
           <AdminNav />
           {error ? (
             <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              {Array.from({ length: 5 }).map((_, indice) => <div key={indice} className="h-28 animate-pulse rounded-3xl bg-white/50" />)}
+              {Array.from({ length: 5 }).map((_, indice) => <div key={indice} className="h-28 animate-pulse rounded-3xl bg-sal-2" />)}
             </div>
           )}
         </main>
@@ -209,7 +209,7 @@ function AdminEstadisticas() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+      <main className="admin-layout contenedor max-w-6xl py-12">
         <h1 className="mb-6 text-3xl font-bold text-slate-900">Estadísticas</h1>
         <AdminNav />
 

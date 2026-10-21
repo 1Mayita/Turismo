@@ -1,8 +1,10 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
+import ImagenSegura from '../../components/ImagenSegura.jsx'
 import AdminNav from '../../components/AdminNav.jsx'
 import AdminZonaCampos from '../../components/AdminZonaCampos.jsx'
+import SelectorImagen from '../../components/SelectorImagen.jsx'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
 import { municipiosDeEjemplo, getMunicipios } from '../../services/municipiosService.js'
 import { regionesDeEjemplo, getRegiones } from '../../services/regionesService.js'
@@ -37,6 +39,7 @@ function AdminEstablecimientos({ configuracion }) {
   const [elementoEditando, setElementoEditando] = useState(null)
   const [formulario, setFormulario] = useState(formularioVacio)
   const [guardando, setGuardando] = useState(false)
+  const [subidasPendientes, setSubidasPendientes] = useState(0)
   const [version, setVersion] = useState(0)
 
   useEffect(() => {
@@ -169,7 +172,7 @@ function AdminEstablecimientos({ configuracion }) {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+      <main className="admin-layout contenedor max-w-6xl py-12">
         <h1 className="mb-6 text-3xl font-bold text-slate-900">Administración de {configuracion.plural.toLocaleLowerCase('es')}</h1>
         <AdminNav />
 
@@ -188,16 +191,37 @@ function AdminEstablecimientos({ configuracion }) {
                 Nombre
                 <input required maxLength={150} name="nombre" value={formulario.nombre} onChange={actualizarCampo} className={CLASE_CAMPO} />
               </label>
-              {configuracion.campos.map((campo) => (
-                <label key={campo.nombre} className={`block text-sm font-semibold text-slate-700 ${campo.tipo === 'textarea' ? 'sm:col-span-2' : ''}`}>
-                  {campo.etiqueta}
-                  {campo.tipo === 'textarea' ? (
-                    <textarea name={campo.nombre} value={formulario[campo.nombre]} onChange={actualizarCampo} rows={3} maxLength={campo.maxLength || 2000} placeholder={campo.placeholder} className={CLASE_CAMPO} />
-                  ) : (
-                    <input required={campo.requerido} type={campo.tipo || 'text'} min={campo.min} step={campo.step} name={campo.nombre} value={formulario[campo.nombre]} onChange={actualizarCampo} placeholder={campo.placeholder} className={CLASE_CAMPO} />
-                  )}
-                </label>
-              ))}
+              {configuracion.campos.map((campo) => {
+                if (['latitud', 'longitud'].includes(campo.nombre)) return null
+                if (campo.tipo === 'image' || campo.tipo === 'images') {
+                  return (
+                    <SelectorImagen
+                      key={campo.nombre}
+                      className="sm:col-span-2"
+                      multiple={campo.tipo === 'images'}
+                      etiqueta={campo.etiqueta}
+                      onUploading={(subiendo) => setSubidasPendientes((pendientes) => pendientes + (subiendo ? 1 : -1))}
+                      valor={campo.tipo === 'images'
+                        ? String(formulario[campo.nombre] || '').split(/\r?\n/).filter(Boolean)
+                        : formulario[campo.nombre]}
+                      onChange={(imagenes) => setFormulario((actual) => ({
+                        ...actual,
+                        [campo.nombre]: Array.isArray(imagenes) ? imagenes.join('\n') : imagenes,
+                      }))}
+                    />
+                  )
+                }
+                return (
+                  <label key={campo.nombre} className={`block text-sm font-semibold text-slate-700 ${campo.tipo === 'textarea' ? 'sm:col-span-2' : ''}`}>
+                    {campo.etiqueta}
+                    {campo.tipo === 'textarea' ? (
+                      <textarea name={campo.nombre} value={formulario[campo.nombre]} onChange={actualizarCampo} rows={3} maxLength={campo.maxLength || 2000} placeholder={campo.placeholder} className={CLASE_CAMPO} />
+                    ) : (
+                      <input required={campo.requerido} type={campo.tipo || 'text'} min={campo.min} step={campo.step} name={campo.nombre} value={formulario[campo.nombre]} onChange={actualizarCampo} placeholder={campo.placeholder} className={CLASE_CAMPO} />
+                    )}
+                  </label>
+                )
+              })}
               <label className="block text-sm font-semibold text-slate-700">
                 Dirección
                 <input name="direccion" maxLength={255} value={formulario.direccion} onChange={actualizarCampo} className={CLASE_CAMPO} />
@@ -208,7 +232,7 @@ function AdminEstablecimientos({ configuracion }) {
               </label>
             </div>
             {configuracion.campos.some((campo) => campo.nombre === 'latitud') && (
-              <Suspense fallback={<div className="h-80 animate-pulse rounded-2xl bg-white/50" />}>
+              <Suspense fallback={<div className="h-80 animate-pulse rounded-2xl bg-sal-2" />}>
                 <SelectorUbicacion
                   latitud={formulario.latitud}
                   longitud={formulario.longitud}
@@ -225,8 +249,8 @@ function AdminEstablecimientos({ configuracion }) {
               onChange={actualizarCampo}
             />
             <div className="flex gap-3">
-              <button disabled={guardando} className="rounded-xl bg-brand-700 px-5 py-2.5 font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60">
-                {guardando ? 'Guardando...' : 'Guardar'}
+              <button disabled={guardando || subidasPendientes > 0} className="rounded-xl bg-brand-700 px-5 py-2.5 font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60">
+                {guardando ? 'Guardando...' : subidasPendientes > 0 ? 'Subiendo imágenes...' : 'Guardar'}
               </button>
               <button type="button" onClick={() => setFormularioAbierto(false)} className="rounded-xl border border-neutral-300 px-5 py-2.5 font-bold text-slate-700 transition hover:bg-slate-100">Cancelar</button>
             </div>
@@ -234,12 +258,13 @@ function AdminEstablecimientos({ configuracion }) {
         )}
 
         {cargando ? (
-          <div className="h-48 animate-pulse rounded-2xl bg-white/50 cristal" />
+          <div className="h-48 animate-pulse rounded-2xl bg-sal-2 cristal" />
         ) : (
           <div className="overflow-x-auto rounded-2xl cristal">
             <table className="w-full text-left text-sm">
               <thead className="bg-white/40 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <tr>
+                  <th className="px-5 py-3">Foto</th>
                   <th className="px-5 py-3">Nombre</th>
                   {configuracion.columnas.map((columna) => <th key={columna.titulo} className="px-5 py-3">{columna.titulo}</th>)}
                   <th className="px-5 py-3">Ubicación</th>
@@ -249,6 +274,7 @@ function AdminEstablecimientos({ configuracion }) {
               <tbody>
                 {elementos.map((elemento) => (
                   <tr key={elemento.id} className="border-t border-neutral-100">
+                    <td className="px-5 py-3"><ImagenSegura src={elemento.imagen_principal || elemento.imagenes?.[0]} alt="" className="h-12 w-16 rounded-lg object-cover" /></td>
                     <td className="px-5 py-3 font-semibold text-slate-900">{elemento.nombre}</td>
                     {configuracion.columnas.map((columna) => <td key={columna.titulo} className="px-5 py-3 text-slate-600">{columna.mostrar(elemento)}</td>)}
                     <td className="px-5 py-3 text-slate-600">{elemento.ubicacion || elemento.direccion || '—'}</td>
@@ -260,7 +286,7 @@ function AdminEstablecimientos({ configuracion }) {
                   </tr>
                 ))}
                 {elementos.length === 0 && (
-                  <tr><td colSpan={configuracion.columnas.length + 3} className="px-5 py-6 text-center text-slate-500">No hay {configuracion.plural.toLocaleLowerCase('es')} registrados todavía.</td></tr>
+                  <tr>                  <td colSpan={configuracion.columnas.length + 4} className="px-5 py-6 text-center text-slate-500">No hay {configuracion.plural.toLocaleLowerCase('es')} registrados todavía.</td></tr>
                 )}
               </tbody>
             </table>

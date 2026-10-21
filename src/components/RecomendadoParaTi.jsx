@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ArrowRight, Sparkles } from 'lucide-react'
 import TarjetaDestino from './TarjetaDestino.jsx'
-import { GrillaEsqueleto } from './EsqueletoTarjeta.jsx'
+import EncabezadoSeccion from './ui/EncabezadoSeccion.jsx'
+import { EsqueletoTarjetaBase } from './ui/Esqueleto.jsx'
 import { useAuth } from '../context/useAuth.js'
 import { useFavoritos } from '../context/useFavoritos.js'
 import { useResumenCalificaciones } from '../hooks/useResumenCalificaciones.js'
@@ -58,37 +60,43 @@ function RecomendadoParaTi({ titulo = 'Recomendado para ti', cantidad = 3, class
 
   return (
     <section className={className} aria-labelledby="titulo-recomendaciones">
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="mb-2 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">{esPersonalizada ? 'Para ti' : 'Populares'}</p>
-          <h2 id="titulo-recomendaciones" className="text-3xl font-bold text-slate-900">{esPersonalizada ? titulo : 'Los destinos más populares'}</h2>
-        </div>
-        <Link to="/destinos" className="text-sm font-semibold text-brand-700 underline">Ver todo el catálogo</Link>
-      </div>
+      <EncabezadoSeccion
+        id="titulo-recomendaciones"
+        antetitulo={esPersonalizada ? 'Para ti' : 'Populares'}
+        titulo={esPersonalizada ? titulo : 'Los destinos más populares'}
+        accion={
+          <Link to="/destinos" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-cielo-700 hover:underline">
+            Ver todo el catálogo
+            <ArrowRight aria-hidden="true" size={16} />
+          </Link>
+        }
+      />
 
       {sinPreferencias && (
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-brand-50 px-5 py-4 ring-1 ring-brand-100">
-          <p className="text-sm text-brand-900">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-tarjeta border border-borde bg-cielo/60 px-5 py-4">
+          <p className="text-sm text-noche">
             <span className="font-bold">¿Qué te gusta hacer cuando viajas?</span> Elige tus intereses y te recomendaremos lugares a tu medida.
           </p>
-          <Link to="/perfil" className="rounded-xl bg-brand-700 px-4 py-2 text-sm font-bold text-white transition hover:bg-brand-800">Completar mi perfil</Link>
+          <Link to="/perfil" className="inline-flex min-h-11 items-center rounded-control border border-noche/80 bg-white px-4 text-sm font-bold text-noche transition hover:bg-noche hover:text-white">Completar mi perfil</Link>
         </div>
       )}
 
       {error ? (
         <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
       ) : !datos ? (
-        <GrillaEsqueleto cantidad={cantidad} />
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: cantidad }).map((_, indice) => <EsqueletoTarjetaBase key={indice} className={indice > 0 ? 'hidden sm:block' : ''} />)}
+        </div>
       ) : visibles.length === 0 ? (
-        <p className="rounded-2xl px-5 py-6 text-slate-600 cristal">¡Ya guardaste o reseñaste todos los destinos! Pronto agregaremos más.</p>
+        <p className="rounded-tarjeta border border-borde bg-white px-5 py-6 text-piedra-texto">¡Ya guardaste o reseñaste todos los destinos! Pronto agregaremos más.</p>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {visibles.map(({ destino, motivo }) => (
             <div key={destino.id} className="flex flex-col gap-2">
-              <p className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-brand-800 ring-1 ring-white">
-                <span aria-hidden="true">✨</span> {motivo}
+              <p className="inline-flex w-fit items-center gap-1.5 rounded-full bg-cielo px-3 py-1 text-xs font-bold text-noche">
+                <Sparkles aria-hidden="true" size={14} className="text-atardecer-700" /> {motivo}
               </p>
-              <TarjetaDestino destino={destino} />
+              <TarjetaDestino destino={destino} nivelTitulo="h3" />
             </div>
           ))}
         </div>

@@ -1,10 +1,14 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { BedDouble, Check, Clock, ExternalLink, Globe, MapPin, Phone, UtensilsCrossed, Wallet } from 'lucide-react'
 import Navbar from '../../components/Navbar.jsx'
 import BotonCompartir from '../../components/BotonCompartir.jsx'
 import BotonFavorito from '../../components/BotonFavorito.jsx'
 import BotonReportar from '../../components/BotonReportar.jsx'
-import ImagenSegura from '../../components/ImagenSegura.jsx'
+import GaleriaMosaico from '../../components/GaleriaMosaico.jsx'
+import DatoClave from '../../components/ui/DatoClave.jsx'
+import TituloSeccion from '../../components/ui/TituloSeccion.jsx'
+import { claseBoton } from '../../components/ui/estilos.js'
 import Migas from '../../components/Migas.jsx'
 import VisorImagenes from '../../components/VisorImagenes.jsx'
 import { ResumenCalificacion } from '../../components/Estrellas.jsx'
@@ -22,15 +26,6 @@ const REDES = [
   { campo: 'instagram', etiqueta: 'Instagram' },
   { campo: 'sitio_web', etiqueta: 'Sitio web' },
 ]
-
-function Dato({ titulo, children }) {
-  return (
-    <div className="rounded-2xl cristal p-5">
-      <p className="mb-1 text-xs font-bold uppercase tracking-wider text-accent-600">{titulo}</p>
-      <div className="text-slate-700">{children}</div>
-    </div>
-  )
-}
 
 // Detalle de un restaurante o de un alojamiento (según "tipo"): fotos, datos
 // de contacto, menú o servicios, mapa y reseñas.
@@ -97,142 +92,167 @@ function EstablecimientoDetalle({ tipo }) {
     { etiqueta: lugar.nombre || configuracion.titulo },
   ]
 
+  const IconoTipo = esRestaurante ? UtensilsCrossed : BedDouble
+
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-5xl px-5 py-12 lg:px-8">
+      <main className="contenedor max-w-6xl pb-16 pt-8">
         <Migas pasos={migas} />
 
         {cargando ? (
-          <div className="animate-pulse space-y-6">
-            <div className="h-80 w-full rounded-3xl bg-white/50" />
-            <div className="h-6 w-1/3 rounded bg-white/50" />
-            <div className="h-4 w-2/3 rounded bg-white/50" />
+          <div className="space-y-6" aria-hidden="true">
+            <div className="h-80 w-full animate-pulse rounded-tarjeta bg-sal-2 sm:h-[440px]" />
+            <div className="h-10 w-1/2 animate-pulse rounded-control bg-sal-2" />
+            <div className="h-4 w-2/3 animate-pulse rounded-control bg-sal-2" />
           </div>
         ) : error ? (
-          <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
+          <p className="rounded-control border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
         ) : (
           <article>
-            <div className="relative mb-8 h-72 w-full overflow-hidden rounded-3xl sm:h-[26rem]">
-              <ImagenSegura key={lugar.imagen_principal} src={lugar.imagen_principal} alt={lugar.nombre} className="h-full w-full object-cover" />
-              <span className="absolute bottom-4 left-4 rounded-full bg-white/90 px-4 py-1.5 text-sm font-semibold text-brand-800 shadow-sm">
-                {esRestaurante ? 'Restaurante' : lugar.tipo || 'Alojamiento'}
-              </span>
-            </div>
-
-            <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-3">
-                  <h1 className="text-4xl font-bold text-slate-900">{lugar.nombre}</h1>
-                  <BotonFavorito idElemento={lugar.id} tipo={tipo} />
-                </div>
-                <BotonCompartir className="mt-3" titulo={lugar.nombre} texto={`Mira ${lugar.nombre} en Rutas de Bolivia:`} />
-                {calificacion && <ResumenCalificacion promedio={calificacion.promedio} total={calificacion.total} className="mt-1" />}
-                {esRestaurante && lugar.especialidad && <p className="mt-2 font-semibold text-accent-600">{lugar.especialidad}</p>}
-                {lugar.ubicacion && <p className="mt-1 text-slate-600">{[lugar.ubicacion, lugar.direccion].filter(Boolean).join(' · ')}</p>}
-              </div>
-              {!esRestaurante && lugar.precio_noche != null && (
-                <p className="whitespace-nowrap rounded-2xl bg-brand-100 px-5 py-3 text-brand-900">
-                  <span className="text-2xl font-extrabold">Bs {Number(lugar.precio_noche).toFixed(0)}</span>
-                  <span className="text-sm"> por noche (referencial)</span>
-                </p>
-              )}
-            </div>
-
-            {lugar.descripcion && <p className="mb-8 text-lg leading-7 text-slate-700">{lugar.descripcion}</p>}
-
-            <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {esRestaurante && lugar.horario && <Dato titulo="Días y horarios de atención">{lugar.horario}</Dato>}
-              {!esRestaurante && (lugar.check_in || lugar.check_out) && (
-                <Dato titulo="Horarios">
-                  {lugar.check_in && <p>Entrada (check-in): desde las {lugar.check_in}</p>}
-                  {lugar.check_out && <p>Salida (check-out): hasta las {lugar.check_out}</p>}
-                </Dato>
-              )}
-              {lugar.telefono && (
-                <Dato titulo="Teléfono de contacto">
-                  <a href={`tel:${String(lugar.telefono).replace(/\s+/g, '')}`} className="font-semibold text-brand-700 underline">{lugar.telefono}</a>
-                </Dato>
-              )}
-              {redes.length > 0 && (
-                <Dato titulo="Redes sociales y web">
-                  <ul className="flex flex-wrap gap-2">
-                    {redes.map((red) => (
-                      <li key={red.campo}>
-                        <a href={lugar[red.campo]} target="_blank" rel="noreferrer" className="inline-block rounded-full bg-brand-100 px-3 py-1 text-sm font-semibold text-brand-800 transition hover:bg-brand-200">
-                          {red.etiqueta} ↗
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </Dato>
-              )}
-            </div>
-
-            {esRestaurante && (menu.length > 0 || platos.length > 0) && (
-              <section className="mb-10">
-                <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Menú</p>
-                {menu.length > 0 ? (
-                  <ul className="divide-y divide-white/80 rounded-2xl cristal px-5">
-                    {menu.map((plato) => (
-                      <li key={plato.nombre} className="flex items-center justify-between gap-4 py-3">
-                        <span className="font-semibold text-slate-800">{plato.nombre}</span>
-                        {plato.precio != null && plato.precio !== '' && <span className="whitespace-nowrap font-bold text-brand-800">Bs {plato.precio}</span>}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <ul className="flex flex-wrap gap-2">
-                    {platos.map((plato) => <li key={plato} className="rounded-full bg-white/70 px-4 py-1.5 text-sm font-semibold text-slate-700 ring-1 ring-white/80">{plato}</li>)}
-                  </ul>
-                )}
-              </section>
-            )}
-
-            {!esRestaurante && servicios.length > 0 && (
-              <section className="mb-10">
-                <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Servicios incluidos</p>
-                <ul className="flex flex-wrap gap-2">
-                  {servicios.map((servicio) => (
-                    <li key={servicio} className="rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-semibold text-emerald-800">✓ {servicio}</li>
-                  ))}
-                </ul>
-              </section>
-            )}
-
-            {tieneMapa && (
-              <section className="mb-10">
-                <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Ubicación</p>
-                <Suspense fallback={<div className="h-72 animate-pulse rounded-2xl bg-white/50" />}>
-                  <MapaUbicacion latitud={lugar.latitud} longitud={lugar.longitud} titulo={lugar.nombre} clave={tipo} />
-                </Suspense>
-              </section>
-            )}
-
             {galeria.length > 0 && (
-              <section className="mb-10">
-                <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Galería</p>
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                  {galeria.map((url, indice) => (
-                    <button
-                      key={url + indice}
-                      type="button"
-                      onClick={() => setIndiceVisor(indice)}
-                      aria-label={`Ampliar foto ${indice + 1} de ${galeria.length}`}
-                      className="overflow-hidden rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-600"
-                    >
-                      <ImagenSegura src={url} alt={`${lugar.nombre}, foto ${indice + 1}`} loading="lazy" decoding="async" className="h-32 w-full object-cover transition hover:scale-105" />
-                    </button>
-                  ))}
-                </div>
-                <p className="mt-3 text-xs text-slate-500">Fotos referenciales de Wikimedia Commons (licencias Creative Commons).</p>
-              </section>
+              <GaleriaMosaico
+                fotos={galeria}
+                nombre={lugar.nombre}
+                credito="Fotos referenciales de Wikimedia Commons (licencias Creative Commons)."
+                alAbrir={setIndiceVisor}
+              />
             )}
 
-            <ResenasDestino tipo={tipo} idElemento={lugar.id} onResenaCreada={() => setVersionCalificacion((valorAnterior) => valorAnterior + 1)} />
+            <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-12">
+              <div className="min-w-0">
+                <header className="mb-8">
+                  <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-cielo px-2.5 py-1 text-xs font-bold text-noche">
+                    <IconoTipo aria-hidden="true" size={14} className="text-cielo-700" />
+                    {esRestaurante ? 'Restaurante' : lugar.tipo || 'Alojamiento'}
+                  </span>
+                  <h1 className="titulo-display text-[40px] sm:text-[52px]">{lugar.nombre}</h1>
+                  {esRestaurante && lugar.especialidad && <p className="mt-1 font-bold text-cobre-texto">{lugar.especialidad}</p>}
+                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                    {calificacion && <ResumenCalificacion promedio={calificacion.promedio} total={calificacion.total} />}
+                    {lugar.ubicacion && (
+                      <p className="flex items-center gap-1.5 text-piedra-texto">
+                        <MapPin aria-hidden="true" size={18} className="text-piedra" />
+                        {[lugar.ubicacion, lugar.direccion].filter(Boolean).join(' · ')}
+                      </p>
+                    )}
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2 lg:hidden">
+                    <BotonFavorito idElemento={lugar.id} tipo={tipo} conTexto />
+                    <BotonCompartir titulo={lugar.nombre} texto={`Mira ${lugar.nombre} en Rutas de Bolivia:`} />
+                  </div>
+                </header>
 
-            <div className="border-t border-white/80 pt-6">
-              <BotonReportar tipo={tipo} elemento={lugar} enlace={`${configuracion.ruta}/${lugar.id}`} />
+                {lugar.descripcion && <p className="texto-lectura mb-8 text-lg text-noche/85">{lugar.descripcion}</p>}
+
+                <div className="mb-14 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {!esRestaurante && lugar.precio_noche != null && (
+                    <DatoClave icono={Wallet} etiqueta="Precio por noche">Bs {Number(lugar.precio_noche).toFixed(0)} (referencial)</DatoClave>
+                  )}
+                  {esRestaurante && lugar.horario && <DatoClave icono={Clock} etiqueta="Días y horarios de atención">{lugar.horario}</DatoClave>}
+                  {!esRestaurante && (lugar.check_in || lugar.check_out) && (
+                    <DatoClave icono={Clock} etiqueta="Horarios">
+                      {lugar.check_in && <span className="block">Entrada (check-in): desde las {lugar.check_in}</span>}
+                      {lugar.check_out && <span className="block">Salida (check-out): hasta las {lugar.check_out}</span>}
+                    </DatoClave>
+                  )}
+                  {lugar.telefono && (
+                    <DatoClave icono={Phone} etiqueta="Teléfono de contacto">
+                      <a href={`tel:${String(lugar.telefono).replace(/\s+/g, '')}`} className="font-bold text-cielo-700 underline">{lugar.telefono}</a>
+                    </DatoClave>
+                  )}
+                  {redes.length > 0 && (
+                    <DatoClave icono={Globe} etiqueta="Redes sociales y web">
+                      <span className="mt-1 flex flex-wrap gap-2">
+                        {redes.map((red) => (
+                          <a key={red.campo} href={lugar[red.campo]} target="_blank" rel="noreferrer" className="inline-flex min-h-9 items-center gap-1 rounded-full bg-cielo px-3 text-sm font-bold text-noche transition hover:bg-cielo-600/30">
+                            {red.etiqueta}
+                            <ExternalLink aria-hidden="true" size={14} />
+                          </a>
+                        ))}
+                      </span>
+                    </DatoClave>
+                  )}
+                </div>
+
+                {esRestaurante && (menu.length > 0 || platos.length > 0) && (
+                  <section className="mb-14" aria-labelledby="titulo-menu">
+                    <TituloSeccion id="titulo-menu">Menú</TituloSeccion>
+                    {menu.length > 0 ? (
+                      <ul className="divide-y divide-borde rounded-tarjeta border border-borde bg-white px-5 shadow-suave">
+                        {menu.map((plato) => (
+                          <li key={plato.nombre} className="flex items-center justify-between gap-4 py-3.5">
+                            <span className="font-bold text-noche">{plato.nombre}</span>
+                            {plato.precio != null && plato.precio !== '' && <span className="whitespace-nowrap font-bold text-atardecer-700">Bs {plato.precio}</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <ul className="flex flex-wrap gap-2">
+                        {platos.map((plato) => <li key={plato} className="rounded-full bg-cielo px-4 py-1.5 text-sm font-bold text-noche">{plato}</li>)}
+                      </ul>
+                    )}
+                  </section>
+                )}
+
+                {!esRestaurante && servicios.length > 0 && (
+                  <section className="mb-14" aria-labelledby="titulo-servicios">
+                    <TituloSeccion id="titulo-servicios">Servicios incluidos</TituloSeccion>
+                    <ul className="grid gap-2 sm:grid-cols-2">
+                      {servicios.map((servicio) => (
+                        <li key={servicio} className="flex items-center gap-2.5 rounded-control border border-borde bg-white px-4 py-3 text-sm font-bold text-noche">
+                          <Check aria-hidden="true" size={18} className="shrink-0 text-emerald-700" />
+                          {servicio}
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
+
+                {tieneMapa && (
+                  <section className="mb-14" aria-labelledby="titulo-ubicacion">
+                    <TituloSeccion id="titulo-ubicacion">Ubicación</TituloSeccion>
+                    <div className="overflow-hidden rounded-tarjeta border border-borde shadow-suave">
+                      <Suspense fallback={<div className="h-72 animate-pulse bg-sal-2" />}>
+                        <MapaUbicacion latitud={lugar.latitud} longitud={lugar.longitud} titulo={lugar.nombre} clave={tipo} />
+                      </Suspense>
+                    </div>
+                  </section>
+                )}
+
+                <ResenasDestino tipo={tipo} idElemento={lugar.id} onResenaCreada={() => setVersionCalificacion((valorAnterior) => valorAnterior + 1)} />
+
+                <div className="border-t border-borde pt-6">
+                  <BotonReportar tipo={tipo} elemento={lugar} enlace={`${configuracion.ruta}/${lugar.id}`} />
+                </div>
+              </div>
+
+              {/* Escritorio: datos y acciones siempre a la vista. */}
+              <aside className="hidden lg:block" aria-label="Acciones">
+                <div className="sticky top-24 rounded-tarjeta border border-borde bg-white p-5 shadow-suave">
+                  {!esRestaurante && lugar.precio_noche != null ? (
+                    <>
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-cobre-texto">Por noche</p>
+                      <p className="titulo-display text-[36px] leading-tight">Bs {Number(lugar.precio_noche).toFixed(0)}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-cobre-texto">{esRestaurante ? 'Restaurante' : 'Alojamiento'}</p>
+                      <p className="titulo-display text-[32px] leading-tight">{lugar.nombre}</p>
+                    </>
+                  )}
+                  {calificacion?.total > 0 && <ResumenCalificacion promedio={calificacion.promedio} total={calificacion.total} className="mt-1" />}
+                  <div className="mt-5 space-y-2.5">
+                    <BotonFavorito idElemento={lugar.id} tipo={tipo} conTexto />
+                    <BotonCompartir titulo={lugar.nombre} texto={`Mira ${lugar.nombre} en Rutas de Bolivia:`} className="w-full" />
+                    {lugar.telefono && (
+                      <a href={`tel:${String(lugar.telefono).replace(/\s+/g, '')}`} className={claseBoton('fantasma', 'pequeno', 'w-full')}>
+                        <Phone aria-hidden="true" size={16} /> Llamar
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </aside>
             </div>
           </article>
         )}

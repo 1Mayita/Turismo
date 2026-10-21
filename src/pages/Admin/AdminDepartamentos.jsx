@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import Navbar from '../../components/Navbar.jsx'
+import ImagenSegura from '../../components/ImagenSegura.jsx'
 import AdminNav from '../../components/AdminNav.jsx'
+import SelectorImagen from '../../components/SelectorImagen.jsx'
 import { actualizarDepartamento, crearDepartamento, eliminarDepartamento, getDepartamentos } from '../../services/departamentosService.js'
 import { actualizarMunicipio, crearMunicipio, eliminarMunicipio, getMunicipiosPorDepartamento } from '../../services/municipiosService.js'
 import { actualizarRegion, crearRegion, eliminarRegion, getRegionesPorMunicipio } from '../../services/regionesService.js'
@@ -102,6 +104,7 @@ function AdminDepartamentos() {
   const [departamentoEditando, setDepartamentoEditando] = useState(null)
   const [formulario, setFormulario] = useState(FORMULARIO_VACIO)
   const [guardando, setGuardando] = useState(false)
+  const [subidasPendientes, setSubidasPendientes] = useState(0)
   const [version, setVersion] = useState(0)
 
   const [departamentoSeleccionado, setDepartamentoSeleccionado] = useState(null)
@@ -302,7 +305,7 @@ function AdminDepartamentos() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+      <main className="admin-layout contenedor max-w-6xl py-12">
         <h1 className="mb-6 text-3xl font-bold text-slate-900">Departamentos, municipios y regiones</h1>
         <AdminNav />
 
@@ -328,17 +331,15 @@ function AdminDepartamentos() {
               Eslogan
               <input value={formulario.eslogan || ''} onChange={(e) => setFormulario({ ...formulario, eslogan: e.target.value })} placeholder="Ej.: La Capital Gastronómica de Bolivia" className={CLASE_INPUT} />
             </label>
-            <label className="block text-sm font-semibold text-slate-700">
-              URL de la imagen de portada
-              <input value={formulario.imagen_portada || ''} onChange={(e) => setFormulario({ ...formulario, imagen_portada: e.target.value })} placeholder="https://..." className={CLASE_INPUT} />
-              <span className="mt-1 block text-xs font-normal text-slate-500">Se usa en la tarjeta del departamento y como banner de su página. Mejor una foto horizontal y grande.</span>
-            </label>
-            {formulario.imagen_portada?.trim() && (
-              <img src={formulario.imagen_portada.trim()} alt="Vista previa de la portada" className="h-32 w-full max-w-md rounded-xl object-cover" />
-            )}
+            <SelectorImagen
+              etiqueta="Imagen de portada del departamento"
+              valor={formulario.imagen_portada || ''}
+              onUploading={(subiendo) => setSubidasPendientes((pendientes) => pendientes + (subiendo ? 1 : -1))}
+              onChange={(imagen_portada) => setFormulario((actual) => ({ ...actual, imagen_portada }))}
+            />
             <div className="flex gap-3">
-              <button disabled={guardando} className="rounded-xl bg-brand-700 px-5 py-2.5 font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60">
-                {guardando ? 'Guardando...' : 'Guardar'}
+              <button disabled={guardando || subidasPendientes > 0} className="rounded-xl bg-brand-700 px-5 py-2.5 font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60">
+                {guardando ? 'Guardando...' : subidasPendientes > 0 ? 'Subiendo imágenes...' : 'Guardar'}
               </button>
               <button type="button" onClick={() => setFormularioAbierto(false)} className="rounded-xl border border-neutral-300 px-5 py-2.5 font-bold text-slate-700 transition hover:bg-slate-100">
                 Cancelar
@@ -348,12 +349,13 @@ function AdminDepartamentos() {
         )}
 
         {cargando ? (
-          <div className="h-48 animate-pulse rounded-2xl bg-white/50 cristal" />
+          <div className="h-48 animate-pulse rounded-2xl bg-sal-2 cristal" />
         ) : (
           <div className="overflow-x-auto rounded-2xl cristal">
             <table className="w-full text-left text-sm">
               <thead className="bg-white/40 text-xs font-bold uppercase tracking-wider text-slate-500">
                 <tr>
+                  <th className="px-5 py-3">Foto</th>
                   <th className="px-5 py-3">Nombre</th>
                   <th className="px-5 py-3">Descripción</th>
                   <th className="px-5 py-3 text-right">Acciones</th>
@@ -362,6 +364,7 @@ function AdminDepartamentos() {
               <tbody>
                 {departamentos.map((departamento) => (
                   <tr key={departamento.id} className={`border-t border-neutral-100 ${departamentoSeleccionado?.id === departamento.id ? 'bg-brand-50' : ''}`}>
+                    <td className="px-5 py-3"><ImagenSegura src={departamento.imagen_portada} alt="" className="h-12 w-16 rounded-lg object-cover" /></td>
                     <td className="px-5 py-3 font-semibold text-slate-900">{departamento.nombre}</td>
                     <td className="px-5 py-3 text-slate-600">{departamento.descripcion}</td>
                     <td className="whitespace-nowrap px-5 py-3 text-right">
@@ -375,7 +378,7 @@ function AdminDepartamentos() {
                 ))}
                 {departamentos.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="px-5 py-6 text-center text-slate-500">No hay departamentos registrados todavía.</td>
+                    <td colSpan={4} className="px-5 py-6 text-center text-slate-500">No hay departamentos registrados todavía.</td>
                   </tr>
                 )}
               </tbody>

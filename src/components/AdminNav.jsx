@@ -16,14 +16,14 @@ const ENLACES = [
 ]
 
 function claseEnlace({ isActive }) {
-  return `rounded-full px-4 py-2 text-sm font-semibold transition ${
-    isActive ? 'bg-brand-700 text-white' : 'bg-white text-brand-800 ring-1 ring-white/80 hover:bg-brand-100'
+  return `flex min-h-11 shrink-0 items-center border-b-2 px-3 text-sm font-semibold transition-colors ${
+    isActive ? 'border-panel-azul text-panel-texto' : 'border-transparent text-panel-muted hover:border-panel-borde hover:text-panel-texto'
   }`
 }
 
 function AdminNav() {
   return (
-    <nav className="mb-8 flex flex-wrap gap-2">
+    <nav aria-label="Navegación de administración" className="admin-navigation mb-8 flex gap-1 overflow-x-auto border-b border-panel-borde">
       {ENLACES.map((enlace) => (
         <NavLink key={enlace.to} to={enlace.to} className={claseEnlace}>
           {enlace.etiqueta}

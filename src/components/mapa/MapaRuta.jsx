@@ -10,7 +10,7 @@ function iconoNumerado(numero) {
     iconSize: [34, 34],
     iconAnchor: [17, 17],
     popupAnchor: [0, -16],
-    html: `<div style="width:34px;height:34px;border-radius:9999px;background:linear-gradient(135deg,#2563eb,#0e7490);color:#fff;border:3px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;font:800 14px/1 'Plus Jakarta Sans',sans-serif">${numero}</div>`,
+    html: `<div style="width:34px;height:34px;border-radius:9999px;background:#0e2233;color:#fff;border:3px solid #fff;box-shadow:0 6px 14px rgba(14,34,51,.3);display:flex;align-items:center;justify-content:center;font:800 14px/1 'Manrope',sans-serif">${numero}</div>`,
   })
 }
 
@@ -33,7 +33,7 @@ function Encuadrar({ puntos }) {
 // puntos: [{ numero, nombre, posicion: [lat, lng] }]
 function MapaRuta({ puntos }) {
   return (
-    <div className="relative z-0 h-80 overflow-hidden rounded-3xl ring-1 ring-white/80 lg:h-full lg:min-h-[28rem]">
+    <div className="relative z-0 h-80 overflow-hidden rounded-tarjeta border border-borde shadow-suave lg:h-full lg:min-h-[28rem]">
       <MapContainer center={[-16.5, -64.8]} zoom={5} scrollWheelZoom={false} className="h-full w-full">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -41,7 +41,7 @@ function MapaRuta({ puntos }) {
         />
         <Encuadrar puntos={puntos} />
         {puntos.length > 1 && (
-          <Polyline positions={puntos.map((punto) => punto.posicion)} pathOptions={{ color: '#0e7490', weight: 4, opacity: 0.8, dashArray: '8 10' }} />
+          <Polyline positions={puntos.map((punto) => punto.posicion)} pathOptions={{ color: '#b4532a', weight: 3, opacity: 0.9, dashArray: '8 10' }} />
         )}
         {puntos.map((punto) => (
           <Marker key={`${punto.numero}-${punto.nombre}`} position={punto.posicion} icon={iconoNumerado(punto.numero)} title={`${punto.numero}. ${punto.nombre}`}>

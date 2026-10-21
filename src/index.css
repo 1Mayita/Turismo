@@ -1,17 +1,18 @@
 @import "tailwindcss";
 
-/* Sistema de diseño de "Rutas de Bolivia", estilo "cristal": fondo con
-   degradados suaves y paneles translúcidos con desenfoque.
+/* Sistema de diseño de "Rutas de Bolivia". Está en transición al rediseño
+   "Salar cálido" (DESIGN.md): los tokens nuevos están más abajo y las páginas
+   se van pasando a ellos fase por fase.
    Cambiar el look del sitio entero pasa por aquí: las páginas usan estos
-   nombres (brand, accent, cristal), no colores sueltos.
+   nombres (brand, accent, cristal...), no colores sueltos.
 
-   - brand  = turquesa / azul celeste del lago Titicaca y el cielo del salar.
-              Marca, navegación, enlaces y botones.
+   - brand  = turquesa del estilo anterior. Todavía lo usan enlaces y detalles
+              de algunas páginas hasta su fase del rediseño.
    - accent = café de la tierra y la madera. Se usa poco: rótulos y detalles.
    - El verde esmeralda (naturaleza) y el ámbar (cultura) quedan solo en las
      insignias de categoría. */
 @theme {
-  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
   --color-brand-50: #ecfeff;
   --color-brand-100: #cffafe;
@@ -33,34 +34,136 @@
   --color-accent-500: #a9703e;
   --color-accent-600: #8b5a2b;
   --color-accent-700: #6f4722;
+
+  /* ---------- Rediseño "Salar cálido" (DESIGN.md) ----------
+     Tokens nuevos. Conviven con brand/accent/cristal mientras cada página se
+     pasa al estilo nuevo en su fase; no reemplazan nada todavía. */
+
+  /* Tipografía: Cormorant solo para títulos grandes (>= 32px); Manrope para
+     toda la interfaz. */
+  --font-titulo: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-ui: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Sitio público (modo claro). Valores exactos de la guía. */
+  --color-sal: #fafaf7;
+  --color-sal-2: #f2f0ea;
+  --color-cielo: #e8eef2;
+  --color-cielo-600: #6f8ba1;
+  --color-piedra: #7a8b99;
+  --color-noche: #0e2233;
+  --color-cobre: #b88a5a;
+  --color-atardecer: #e07a4f;
+  --color-atardecer-hover: #c9653b;
+  --color-borde: #e4e2dc;
+
+  /* Variantes para TEXTO con contraste AA (>= 4.5:1). Los tonos de la guía
+     piedra, cielo-600, cobre y atardecer quedan por debajo de 4.5:1 como
+     texto, así que se usan en iconos, bordes y fondos, y estas en letras:
+       piedra-texto  5.1:1 sobre sal   cielo-700  5.5:1 sobre sal
+       cobre-texto   5.1:1 sobre sal   atardecer-700 + texto blanco 5.0:1 */
+  --color-piedra-texto: #5d6d7a;
+  --color-cielo-700: #3f6a8f;
+  --color-cobre-texto: #8a6339;
+  --color-atardecer-700: #b4532a;
+  --color-atardecer-800: #9a4523;
+
+  /* Superficies profesionales del panel de administración. */
+  --color-panel-fondo: #f5f6f5;
+  --color-panel-superficie: #ffffff;
+  --color-panel-borde: #e1e5e7;
+  --color-panel-texto: #26343d;
+  --color-panel-muted: #667680;
+  --color-panel-azul: #486c86;
+  --color-panel-azul-suave: #edf3f6;
+
+  /* Colores para superficies oscuras existentes, como el pie de página. */
+  --color-admin-bg: #0b1a27;
+  --color-admin-texto: #f4f1ec;
+  --color-admin-muted: #9aa8b4;
+  --color-cielo-claro: #9cc3e0;
+  --color-ok: #5bbf8a;
+  --color-alerta: #e8b44c;
+  --color-error: #e05a5a;
+
+  /* Forma y profundidad. */
+  --radius-tarjeta: 16px;
+  --radius-imagen: 12px;
+  --radius-control: 10px;
+  --shadow-suave: 0 4px 18px rgb(14 34 51 / 0.05);
+  --shadow-elevada: 0 8px 24px rgb(14 34 51 / 0.08);
+  --ease-salida: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Panel de cristal: blanco translúcido, desenfoque del fondo, borde luminoso
-   y sombra azulada suave. Es la base de tarjetas, formularios y tablas. */
+/* Título grande del sitio público (hero y títulos de sección). */
+@utility titulo-display {
+  font-family: var(--font-titulo);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  /* Números de altura pareja (Cormorant trae por defecto los "antiguos"). */
+  font-variant-numeric: lining-nums;
+  color: var(--color-noche);
+}
+
+/* Párrafo de lectura cómoda: interlineado 1.6 y ~70 caracteres por línea. */
+@utility texto-lectura {
+  line-height: 1.6;
+  max-width: 70ch;
+}
+
+/* Fondo neutro del panel: el azul se reserva para estados y navegación activa. */
+@utility fondo-admin {
+  background-color: var(--color-panel-fondo);
+  color: var(--color-panel-texto);
+}
+
+/* Superficie sólida y legible para tarjetas del panel de administración. */
+@utility vidrio {
+  background-color: var(--color-panel-superficie);
+  border: 1px solid var(--color-panel-borde);
+}
+
+/* Superficie de tarjetas, formularios y tablas. Antes era un vidrio
+   translúcido sobre el fondo celeste; con el fondo "sal" del rediseño pasa a
+   ser una tarjeta blanca con borde y sombra suaves (DESIGN.md §3.4). El
+   nombre se mantiene para no tocar las ~80 piezas que la usan. */
 @utility cristal {
-  background-image: linear-gradient(135deg, rgb(255 255 255 / 0.78), rgb(255 255 255 / 0.5));
-  border: 1px solid rgb(255 255 255 / 0.8);
-  box-shadow:
-    0 12px 32px -14px rgb(14 116 144 / 0.28),
-    inset 0 1px 0 rgb(255 255 255 / 0.7);
-  backdrop-filter: blur(18px) saturate(1.5);
-  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  background-color: #fff;
+  border: 1px solid var(--color-borde);
+  box-shadow: var(--shadow-suave);
 }
 
-/* Botón de acción principal: degradado de azul a turquesa con un brillo suave. */
+/* Botón de acción principal: relleno atardecer con texto blanco
+   (atardecer-700 para que el texto cumpla contraste AA). */
 @utility boton-principal {
-  background-image: linear-gradient(120deg, #2563eb, #0e7490);
+  background-color: var(--color-atardecer-700);
   color: #fff;
-  box-shadow: 0 8px 20px -8px rgb(37 99 235 / 0.55);
-  transition: filter 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow-suave);
+  transition: background-color 0.18s, box-shadow 0.18s;
 
   &:hover {
-    filter: brightness(1.1);
-    box-shadow: 0 10px 24px -8px rgb(37 99 235 / 0.65);
+    background-color: var(--color-atardecer-800);
   }
 
   &:active {
-    transform: scale(0.98);
+    background-color: var(--color-atardecer-800);
+  }
+}
+
+/* Contenedor de página: centrado, con 16px de margen lateral en celular,
+   24px en tablet y 32px en escritorio. El ancho máximo lo pone cada página
+   (max-w-6xl, max-w-3xl...). */
+@utility contenedor {
+  margin-inline: auto;
+  width: 100%;
+  padding-inline: 1rem;
+
+  @media (width >= 40rem) {
+    padding-inline: 1.5rem;
+  }
+
+  @media (width >= 64rem) {
+    padding-inline: 2rem;
   }
 }
 
@@ -71,20 +174,13 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  color: var(--color-slate-800);
+  color: var(--color-noche);
   font-family: var(--font-sans);
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  /* Fondo: manchas de color difuminadas (turquesa, celeste, azul y un toque
-     café arena) sobre un degradado celeste. Queda fijo al hacer scroll. */
-  background-color: #e6f4fb;
-  background-image:
-    radial-gradient(60rem 40rem at 8% -5%, rgb(103 232 249 / 0.55), transparent 60%),
-    radial-gradient(50rem 38rem at 95% 8%, rgb(147 197 253 / 0.6), transparent 60%),
-    radial-gradient(46rem 34rem at 88% 92%, rgb(230 204 176 / 0.55), transparent 62%),
-    radial-gradient(52rem 40rem at 5% 95%, rgb(125 211 252 / 0.5), transparent 60%),
-    linear-gradient(160deg, #e0f7fb 0%, #e6f0fd 55%, #f3ede6 100%);
-  background-attachment: fixed;
+  /* Fondo "sal": blanco cálido, como el salar. */
+  background-color: var(--color-sal);
 }
 
 h1,
@@ -94,8 +190,8 @@ h3 {
 }
 
 ::selection {
-  background: var(--color-brand-200);
-  color: var(--color-brand-950);
+  background: var(--color-cielo);
+  color: var(--color-noche);
 }
 
 #root {
@@ -105,9 +201,96 @@ h3 {
 /* Foco de teclado visible en enlaces y botones de toda la app. Los campos de
    formulario ya dibujan su propio anillo con las clases focus:ring. */
 :where(a, button, [role='button'], summary):focus-visible {
-  outline: 3px solid var(--color-brand-500);
+  outline: 3px solid var(--color-cielo-600);
   outline-offset: 2px;
   border-radius: 0.5rem;
+}
+
+/* Presentación compartida del panel de administración. */
+.admin-layout {
+  color: var(--color-panel-texto);
+}
+
+.admin-layout :is(h1, h2, h3) {
+  color: var(--color-panel-texto);
+}
+
+.admin-layout :is(.text-slate-900, .text-slate-800, .text-slate-700) {
+  color: var(--color-panel-texto);
+}
+
+.admin-layout :is(.text-slate-600, .text-slate-500, .text-slate-400) {
+  color: var(--color-panel-muted);
+}
+
+.admin-layout .text-brand-700,
+.admin-layout .text-brand-800 {
+  color: var(--color-panel-azul);
+}
+
+.admin-layout .bg-brand-700,
+.admin-layout .bg-brand-800 {
+  background-color: var(--color-panel-azul);
+}
+
+.admin-layout .bg-brand-50,
+.admin-layout .bg-brand-100 {
+  background-color: var(--color-panel-azul-suave);
+}
+
+.admin-layout .cristal {
+  border-color: var(--color-panel-borde);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.admin-layout .rounded-2xl,
+.admin-layout .rounded-3xl {
+  border-radius: 12px;
+}
+
+.admin-layout :is(input, select, textarea) {
+  border-color: var(--color-panel-borde);
+  border-radius: 8px;
+}
+
+.admin-layout :is(input, select, textarea):focus {
+  border-color: var(--color-panel-azul);
+  outline-color: var(--color-panel-azul);
+}
+
+.admin-layout table {
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+.admin-layout thead {
+  background-color: var(--color-panel-fondo);
+  color: var(--color-panel-muted);
+}
+
+.admin-layout th {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  padding-block: 0.8rem;
+}
+
+.admin-layout td {
+  border-color: var(--color-panel-borde);
+}
+
+.admin-layout tbody tr:hover {
+  background-color: var(--color-panel-fondo);
+}
+
+/* Barra de la pantalla de carga: un tramo atardecer que cruza de lado a lado. */
+@keyframes cargando {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(200%);
+  }
 }
 
 /* Quien pidió "reducir movimiento" en su sistema no ve animaciones ni

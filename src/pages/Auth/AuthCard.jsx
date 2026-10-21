@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
+import Logo from '../../components/Logo.jsx'
+import { claseBoton, claseControl, claseEtiqueta } from '../../components/ui/estilos.js'
 import { useAuth } from '../../context/useAuth.js'
 import { auth } from '../../services/firebase.js'
 import { FOTOS } from '../../services/fotosDeEjemplo.js'
@@ -59,7 +62,7 @@ function esperarConLimite(promesa, milisegundos) {
 function CampoContrasena({ etiqueta, valor, onCambiar, autoComplete, ayuda, claseInput }) {
   const [visible, setVisible] = useState(false)
   return (
-    <label className="block text-sm font-semibold text-slate-700">
+    <label className={claseEtiqueta}>
       {etiqueta}
       <span className="relative mt-2 block">
         <input
@@ -73,12 +76,12 @@ function CampoContrasena({ etiqueta, valor, onCambiar, autoComplete, ayuda, clas
           type="button"
           onClick={() => setVisible(!visible)}
           aria-pressed={visible}
-          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1 text-xs font-bold text-brand-700 hover:bg-brand-50"
+          className="absolute right-1.5 top-1/2 flex min-h-9 -translate-y-1/2 items-center rounded-control px-2.5 text-xs font-bold text-cielo-700 hover:bg-cielo/60"
         >
           {visible ? 'Ocultar' : 'Mostrar'}
         </button>
       </span>
-      {ayuda && <span className="mt-1 block text-xs font-normal text-slate-500">{ayuda}</span>}
+      {ayuda && <span className="mt-1 block text-xs font-normal text-piedra-texto">{ayuda}</span>}
     </label>
   )
 }
@@ -210,18 +213,31 @@ function AuthCard({ modoInicial = 'login' }) {
   }
 
   return (
-    <main
-      className="relative flex min-h-screen items-center justify-center overflow-hidden px-5 py-10"
-      style={{
-        backgroundImage:
-          `linear-gradient(160deg, rgba(8,51,68,0.55), rgba(30,58,138,0.75)), url(${FOTOS['portada-acceso'].imagen_principal})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
-      <Link to="/" className="absolute left-6 top-6 text-xl font-bold tracking-tight text-white sm:left-10 sm:top-10">
-        ← Rutas de Bolivia
-      </Link>
+    <main className="grid min-h-screen bg-sal lg:grid-cols-[1.05fr_1fr]">
+      {/* Escritorio: foto de paisaje boliviano a un lado (DESIGN.md §7). */}
+      <aside className="relative hidden overflow-hidden lg:block" aria-label="Salar de Uyuni al atardecer">
+        <img src={FOTOS['portada-acceso'].imagen_principal} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-noche/80 via-noche/10 to-noche/30" />
+        <div className="relative flex h-full flex-col justify-between p-10 text-white">
+          <Link to="/" className="w-fit rounded-full bg-noche/55 py-1.5 pl-1.5 pr-4 backdrop-blur" aria-label="Rutas de Bolivia, ir al inicio">
+            <Logo claro />
+          </Link>
+          <div>
+            <p className="titulo-display max-w-md text-[48px] text-white">Bolivia te espera</p>
+            <p className="mt-3 max-w-sm text-white/85">Guarda tus lugares favoritos, arma tus viajes y descubre qué hacer en cada departamento.</p>
+            <p className="mt-6 text-xs text-white/70">{FOTOS['portada-acceso'].credito_imagenes}</p>
+          </div>
+        </div>
+      </aside>
+
+      <div className="flex flex-col items-center justify-center px-4 py-8 sm:px-8">
+        <Link to="/" className="mb-6 inline-flex min-h-11 items-center gap-2 self-start rounded-control px-2 text-sm font-bold text-noche hover:bg-sal-2 sm:self-center lg:hidden">
+          <ArrowLeft aria-hidden="true" size={18} />
+          <Logo />
+        </Link>
+        <Link to="/" className="mb-6 hidden min-h-11 items-center gap-1.5 self-center rounded-control px-3 text-sm font-bold text-cielo-700 hover:bg-sal-2 lg:inline-flex">
+          <ArrowLeft aria-hidden="true" size={16} /> Volver al inicio
+        </Link>
 
       <div className="w-full max-w-md [perspective:1600px]">
         <div
@@ -230,22 +246,22 @@ function AuthCard({ modoInicial = 'login' }) {
         >
           {/* Cara frontal: iniciar sesión. "inert" saca del foco de teclado y de
               los lectores de pantalla a la cara que está oculta. */}
-          <section inert={mostrarRegistro} className="absolute inset-0 flex flex-col justify-center overflow-y-auto rounded-3xl bg-white p-8 shadow-2xl [backface-visibility:hidden] sm:p-10">
-            <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Explora Bolivia</p>
-            <h1 className="mb-2 text-4xl font-bold text-slate-900">Bienvenido de vuelta</h1>
-            <p className="mb-8 text-slate-600">Ingresa para descubrir tu próximo destino.</p>
-            {origen.aviso && !loginError && !loginMensaje && <p className="mb-5 rounded-lg bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{origen.aviso}</p>}
-            {loginError && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{loginError}</p>}
-            {loginMensaje && <p className="mb-5 rounded-lg bg-brand-100 px-4 py-3 text-sm font-semibold text-brand-800" role="status">{loginMensaje}</p>}
+          <section inert={mostrarRegistro} className="absolute inset-0 flex flex-col justify-center overflow-y-auto rounded-tarjeta border border-borde bg-white p-6 shadow-elevada [backface-visibility:hidden] sm:p-10">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Explora Bolivia</p>
+            <h1 className="titulo-display mb-2 text-[40px]">Bienvenido de vuelta</h1>
+            <p className="mb-8 text-piedra-texto">Ingresa para descubrir tu próximo destino.</p>
+            {origen.aviso && !loginError && !loginMensaje && <p className="mb-5 rounded-control bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{origen.aviso}</p>}
+            {loginError && <p className="mb-5 rounded-control bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{loginError}</p>}
+            {loginMensaje && <p className="mb-5 rounded-control bg-cielo px-4 py-3 text-sm font-semibold text-noche" role="status">{loginMensaje}</p>}
             <form onSubmit={iniciarSesion} className="space-y-5">
-              <label className="block text-sm font-semibold text-slate-700">
+              <label className={claseEtiqueta}>
                 Correo electrónico
                 <input
                   type="email"
                   autoComplete="email"
                   value={loginForm.email}
                   onChange={(evento) => setLoginForm({ ...loginForm, email: evento.target.value })}
-                  className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-3 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+                  className={`${claseControl} mt-2 font-normal`}
                 />
               </label>
               <CampoContrasena
@@ -253,18 +269,18 @@ function AuthCard({ modoInicial = 'login' }) {
                 valor={loginForm.contrasena}
                 onCambiar={(contrasena) => setLoginForm({ ...loginForm, contrasena })}
                 autoComplete="current-password"
-                claseInput="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-3 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+                claseInput={`${claseControl} mt-2 font-normal`}
               />
-              <button type="button" onClick={recuperarContrasena} className="-mt-2 block text-sm font-semibold text-brand-700 underline">
+              <button type="button" onClick={recuperarContrasena} className="-mt-2 block min-h-11 text-sm font-bold text-cielo-700 underline">
                 ¿Olvidaste tu contraseña?
               </button>
-              <button disabled={loginEnviando} className="w-full rounded-xl boton-principal px-4 py-3 font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-60">
+              <button disabled={loginEnviando} className={claseBoton('primario', 'normal', 'w-full')}>
                 {loginEnviando ? 'Ingresando...' : 'Iniciar sesión'}
               </button>
             </form>
-            <p className="mt-7 text-center text-sm text-slate-600">
+            <p className="mt-7 text-center text-sm text-piedra-texto">
               ¿Aún no tienes cuenta?{' '}
-              <button type="button" onClick={() => voltear('registro')} className="font-bold text-brand-700 underline">
+              <button type="button" onClick={() => voltear('registro')} className="font-bold text-cielo-700 underline">
                 Crear cuenta
               </button>
             </p>
@@ -273,42 +289,42 @@ function AuthCard({ modoInicial = 'login' }) {
           {/* Cara trasera: crear cuenta */}
           <section
             inert={!mostrarRegistro}
-            className="absolute inset-0 flex flex-col justify-center overflow-y-auto rounded-3xl bg-white p-8 shadow-2xl [backface-visibility:hidden] sm:p-10"
+            className="absolute inset-0 flex flex-col justify-center overflow-y-auto rounded-tarjeta border border-borde bg-white p-6 shadow-elevada [backface-visibility:hidden] sm:p-10"
             style={{ transform: 'rotateY(180deg)' }}
           >
-            <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Rutas de Bolivia</p>
-            <h1 className="mb-2 text-4xl font-bold text-slate-900">Crea tu cuenta</h1>
-            <p className="mb-6 text-slate-600">Guarda la inspiración para tu próxima aventura.</p>
-            {registroError && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{registroError}</p>}
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Rutas de Bolivia</p>
+            <h1 className="titulo-display mb-2 text-[40px]">Crea tu cuenta</h1>
+            <p className="mb-6 text-piedra-texto">Guarda la inspiración para tu próxima aventura.</p>
+            {registroError && <p className="mb-5 rounded-control bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{registroError}</p>}
             <form onSubmit={registrarUsuario} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                <label className="block text-sm font-semibold text-slate-700">
+                <label className={claseEtiqueta}>
                   Nombre
                   <input
                     autoComplete="given-name"
                     value={registroForm.nombre}
                     onChange={(evento) => setRegistroForm({ ...registroForm, nombre: evento.target.value })}
-                    className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+                    className={`${claseControl} mt-2 font-normal`}
                   />
                 </label>
-                <label className="block text-sm font-semibold text-slate-700">
+                <label className={claseEtiqueta}>
                   Apellido
                   <input
                     autoComplete="family-name"
                     value={registroForm.apellido}
                     onChange={(evento) => setRegistroForm({ ...registroForm, apellido: evento.target.value })}
-                    className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+                    className={`${claseControl} mt-2 font-normal`}
                   />
                 </label>
               </div>
-              <label className="block text-sm font-semibold text-slate-700">
+              <label className={claseEtiqueta}>
                 Correo electrónico
                 <input
                   type="email"
                   autoComplete="email"
                   value={registroForm.email}
                   onChange={(evento) => setRegistroForm({ ...registroForm, email: evento.target.value })}
-                  className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+                  className={`${claseControl} mt-2 font-normal`}
                 />
               </label>
               <CampoContrasena
@@ -317,20 +333,21 @@ function AuthCard({ modoInicial = 'login' }) {
                 onCambiar={(contrasena) => setRegistroForm({ ...registroForm, contrasena })}
                 autoComplete="new-password"
                 ayuda={`Mínimo ${LARGO_MINIMO_CONTRASENA} caracteres.`}
-                claseInput="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+                claseInput={`${claseControl} mt-2 font-normal`}
               />
-              <button disabled={registroEnviando} className="w-full rounded-xl boton-principal px-4 py-3 font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-60">
+              <button disabled={registroEnviando} className={claseBoton('primario', 'normal', 'w-full')}>
                 {registroEnviando ? 'Creando cuenta...' : 'Registrarme'}
               </button>
             </form>
-            <p className="mt-6 text-center text-sm text-slate-600">
+            <p className="mt-6 text-center text-sm text-piedra-texto">
               ¿Ya tienes cuenta?{' '}
-              <button type="button" onClick={() => voltear('login')} className="font-bold text-brand-700 underline">
+              <button type="button" onClick={() => voltear('login')} className="font-bold text-cielo-700 underline">
                 Inicia sesión
               </button>
             </p>
           </section>
         </div>
+      </div>
       </div>
     </main>
   )

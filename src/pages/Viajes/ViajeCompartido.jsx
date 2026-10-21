@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Copy, Lock, Pencil } from 'lucide-react'
 import Navbar from '../../components/Navbar.jsx'
+import { EstadoVacio, claseBoton } from '../../components/ui'
 import { useAuth } from '../../context/useAuth.js'
 import { useTituloPagina } from '../../hooks/useTituloPagina.js'
 import { getDestinos } from '../../services/destinosService.js'
@@ -66,38 +68,40 @@ function ViajeCompartido() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-10 lg:px-8">
+      <main className="contenedor max-w-6xl py-10">
         {cargando ? (
           <div className="space-y-4">
-            <div className="h-28 animate-pulse rounded-3xl bg-white/50" />
-            <div className="h-80 animate-pulse rounded-3xl bg-white/50" />
+            <div className="h-28 animate-pulse rounded-tarjeta bg-sal-2" />
+            <div className="h-80 animate-pulse rounded-tarjeta bg-sal-2" />
           </div>
         ) : !viaje ? (
-          <div className="mx-auto max-w-xl rounded-[2rem] p-8 text-center cristal">
-            <p className="text-4xl" aria-hidden="true">🔒</p>
-            <p className="mt-3 text-lg font-bold text-slate-900">{error}</p>
-            <Link to="/destinos" className="mt-4 inline-block rounded-xl boton-principal px-5 py-2.5 font-bold">Explorar destinos</Link>
-          </div>
+          <EstadoVacio
+            icono={Lock}
+            titulo={error}
+            className="mx-auto max-w-xl"
+            accion={<Link to="/destinos" className={claseBoton('secundario', 'normal', 'bg-white')}>Explorar destinos</Link>}
+          />
         ) : (
           <>
-            <header className="mb-6 flex flex-wrap items-start justify-between gap-4 rounded-[2rem] p-6 cristal sm:p-8">
+            <header className="mb-10 flex flex-wrap items-start justify-between gap-5 rounded-tarjeta border border-borde bg-white p-6 shadow-suave sm:p-8">
               <div className="min-w-0">
-                <p className="text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Viaje compartido · {textoDeFechas(viaje)}</p>
-                <h1 className="mt-1 break-words text-3xl font-extrabold text-slate-900 sm:text-4xl">{viaje.nombre}</h1>
-                <p className="mt-1 text-sm text-slate-600">Armado por {viaje.nombre_autor || 'un viajero'} · {items.length} {items.length === 1 ? 'destino' : 'destinos'} · Solo lectura</p>
-                {viaje.notas && <p className="mt-3 max-w-2xl whitespace-pre-line text-slate-700">{viaje.notas}</p>}
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-cobre-texto">Viaje compartido · {textoDeFechas(viaje)}</p>
+                <h1 className="titulo-display mt-1 break-words text-[40px] sm:text-[52px]">{viaje.nombre}</h1>
+                <p className="mt-1 text-sm text-piedra-texto">Armado por {viaje.nombre_autor || 'un viajero'} · {items.length} {items.length === 1 ? 'destino' : 'destinos'} · Solo lectura</p>
+                {viaje.notas && <p className="texto-lectura mt-3 whitespace-pre-line text-noche/85">{viaje.notas}</p>}
               </div>
               {esMio ? (
-                <Link to={`/viajes/${viaje.id_viaje}`} className="rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-brand-800 ring-1 ring-sky-100">Es tu viaje: editarlo</Link>
+                <Link to={`/viajes/${viaje.id_viaje}`} className={claseBoton('secundario', 'pequeno', 'bg-white')}><Pencil aria-hidden="true" size={16} /> Es tu viaje: editarlo</Link>
               ) : (
-                <button type="button" onClick={copiarAMiCuenta} disabled={copiando} className="rounded-xl boton-principal px-4 py-2.5 text-sm font-bold disabled:opacity-60">
+                <button type="button" onClick={copiarAMiCuenta} disabled={copiando} className={claseBoton('primario', 'pequeno')}>
+                  <Copy aria-hidden="true" size={16} />
                   {copiando ? 'Copiando...' : usuario ? 'Copiar este viaje a mi cuenta' : 'Inicia sesión para copiarlo'}
                 </button>
               )}
             </header>
-            {error && <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
+            {error && <p className="mb-4 rounded-control bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
             {items.length === 0 ? (
-              <p className="rounded-2xl p-6 text-slate-600 cristal">Este viaje todavía no tiene destinos.</p>
+              <p className="rounded-control bg-sal-2 px-5 py-4 text-piedra-texto">Este viaje todavía no tiene destinos.</p>
             ) : (
               <Itinerario items={items} />
             )}

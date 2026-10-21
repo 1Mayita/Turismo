@@ -1,9 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ArrowRight } from 'lucide-react'
 import Navbar from '../../components/Navbar.jsx'
+import { Aparecer } from '../../components/ui'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
 import { sembrarCatalogoDeEjemplo } from '../../services/sembradoService.js'
+
+// En escritorio estas tarjetas ocupan dos columnas: arma un mosaico de 9
+// piezas sin huecos (3 columnas) y evita una grilla de tarjetas idénticas.
+const ANCHOS_EN_MOSAICO = [0, 5, 7]
 
 function Departamentos() {
   const [departamentos, setDepartamentos] = useState([])
@@ -44,50 +50,51 @@ function Departamentos() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+      <main className="contenedor max-w-6xl py-12">
         <div className="mb-10 max-w-2xl">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-accent-600">Los nueve departamentos</p>
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">Explora por departamento</h1>
-          <p className="mt-4 text-lg text-slate-600">Del altiplano a la Amazonía: elige un departamento y descubre sus municipios, destinos y sabores.</p>
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Los nueve departamentos</p>
+          <h1 className="titulo-display text-[44px] sm:text-[56px]">Explora por departamento</h1>
+          <p className="texto-lectura mt-3 text-lg text-piedra-texto">Del altiplano a la Amazonía: elige un departamento y descubre sus municipios, destinos y sabores.</p>
         </div>
 
-        {error && <p className="mb-8 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{error}</p>}
+        {error && <p className="mb-8 rounded-control border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{error}</p>}
 
         {cargando ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 6 }).map((_, indice) => (
-              <div key={indice} className="h-80 animate-pulse rounded-3xl bg-white/50" />
+              <div key={indice} className="h-80 animate-pulse rounded-tarjeta bg-sal-2" />
             ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {ordenados.map((departamento) => {
+            {ordenados.map((departamento, indice) => {
               const Contenedor = departamento.id ? Link : 'div'
               const props = departamento.id ? { to: `/departamentos/${departamento.id}` } : {}
               return (
+                <Aparecer key={departamento.id || departamento.nombre} indice={indice % 3} className={`h-80 ${ANCHOS_EN_MOSAICO.includes(indice) ? 'xl:col-span-2' : ''}`}>
                 <Contenedor
-                  key={departamento.id || departamento.nombre}
                   {...props}
-                  className="group relative flex h-80 flex-col justify-end overflow-hidden rounded-3xl shadow-[0_20px_40px_-20px_rgba(8,51,68,0.6)] transition duration-300 hover:-translate-y-1"
+                  className="group relative flex h-full flex-col justify-end overflow-hidden rounded-tarjeta shadow-suave transition-shadow duration-150 hover:shadow-elevada"
                 >
                   <ImagenSegura
                     src={departamento.imagen_portada}
                     alt=""
                     loading="lazy"
                     decoding="async"
-                    className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                    className="absolute inset-0 h-full w-full object-cover"
                   />
                   {/* Velo oscuro abajo para que el texto se lea sobre cualquier foto. */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-950/90 via-brand-950/35 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-noche/90 via-noche/35 to-transparent" />
                   <div className="relative p-6 text-white">
-                    <h2 className="text-3xl font-extrabold">{departamento.nombre}</h2>
-                    {departamento.eslogan && <p className="mt-1 text-base font-semibold text-brand-200">“{departamento.eslogan}”</p>}
-                    {departamento.descripcion && <p className="mt-2 line-clamp-2 text-sm text-white/85">{departamento.descripcion}</p>}
-                    <span className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-brand-800 transition group-hover:gap-3">
-                      Ver más <span aria-hidden="true">→</span>
+                    <h2 className="titulo-display text-[38px] text-white">{departamento.nombre}</h2>
+                    {departamento.eslogan && <p className="font-titulo text-xl italic text-white/90">“{departamento.eslogan}”</p>}
+                    {departamento.descripcion && <p className="mt-2 line-clamp-2 max-w-xl text-sm text-white/85">{departamento.descripcion}</p>}
+                    <span className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-control bg-white px-4 text-sm font-bold text-noche transition-[gap] group-hover:gap-3">
+                      Ver más <ArrowRight aria-hidden="true" size={16} />
                     </span>
                   </div>
                 </Contenedor>
+                </Aparecer>
               )
             })}
           </div>
