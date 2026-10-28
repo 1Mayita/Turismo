@@ -67,9 +67,9 @@ function ListaEstablecimientos({ tipo }) {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="contenedor max-w-6xl py-12">
+      <main className="contenedor max-w-[1440px] py-12">
         <div className="mb-8 max-w-3xl">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">{configuracion.rotulo}</p>
+          <p className="mb-3 rotulo">{configuracion.rotulo}</p>
           <h1 className="titulo-display text-[44px] sm:text-[56px]">{configuracion.titulo}</h1>
           <p className="texto-lectura mt-3 text-lg text-piedra-texto">{configuracion.bajada}</p>
         </div>

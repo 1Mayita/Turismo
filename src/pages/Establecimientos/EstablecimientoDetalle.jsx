@@ -97,7 +97,7 @@ function EstablecimientoDetalle({ tipo }) {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="contenedor max-w-6xl pb-16 pt-8">
+      <main className="contenedor max-w-[1440px] pb-16 pt-8">
         <Migas pasos={migas} />
 
         {cargando ? (
@@ -183,7 +183,7 @@ function EstablecimientoDetalle({ tipo }) {
                         {menu.map((plato) => (
                           <li key={plato.nombre} className="flex items-center justify-between gap-4 py-3.5">
                             <span className="font-bold text-noche">{plato.nombre}</span>
-                            {plato.precio != null && plato.precio !== '' && <span className="whitespace-nowrap font-bold text-atardecer-700">Bs {plato.precio}</span>}
+                            {plato.precio != null && plato.precio !== '' && <span className="whitespace-nowrap font-bold text-atardecer-texto">Bs {plato.precio}</span>}
                           </li>
                         ))}
                       </ul>
@@ -232,12 +232,12 @@ function EstablecimientoDetalle({ tipo }) {
                 <div className="sticky top-24 rounded-tarjeta border border-borde bg-white p-5 shadow-suave">
                   {!esRestaurante && lugar.precio_noche != null ? (
                     <>
-                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-cobre-texto">Por noche</p>
+                      <p className="rotulo">Por noche</p>
                       <p className="titulo-display text-[36px] leading-tight">Bs {Number(lugar.precio_noche).toFixed(0)}</p>
                     </>
                   ) : (
                     <>
-                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-cobre-texto">{esRestaurante ? 'Restaurante' : 'Alojamiento'}</p>
+                      <p className="rotulo">{esRestaurante ? 'Restaurante' : 'Alojamiento'}</p>
                       <p className="titulo-display text-[32px] leading-tight">{lugar.nombre}</p>
                     </>
                   )}

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import Navbar from '../../components/Navbar.jsx'
-import AdminNav from '../../components/AdminNav.jsx'
+import PanelAdmin from '../../components/PanelAdmin.jsx'
 import { ESTADOS, LARGO_MAXIMO_DESCRIPCION, MOTIVOS, TIPOS_REPORTABLES, cambiarEstadoReporte, getReportes } from '../../services/reportesService.js'
 
 function fechaLegible(fecha) {
@@ -75,97 +74,91 @@ function AdminReportes() {
   const motivo = (id) => MOTIVOS.find((item) => item.id === id)?.etiqueta || id
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <main className="admin-layout contenedor max-w-6xl py-12">
-        <h1 className="mb-6 text-3xl font-bold text-slate-900">Reportes de información</h1>
-        <AdminNav />
+    <PanelAdmin titulo="Reportes de información">
+      {error && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
+      {mensaje && <p className="mb-5 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800" role="status">{mensaje}</p>}
 
-        {error && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
-        {mensaje && <p className="mb-5 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800" role="status">{mensaje}</p>}
+      <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Filtrar por estado">
+        {[...ESTADOS, { id: 'todos', etiqueta: 'Todos' }].map((estado) => (
+          <button
+            key={estado.id}
+            type="button"
+            aria-pressed={filtro === estado.id}
+            onClick={() => setFiltro(estado.id)}
+            className={`rounded-lg border px-3.5 py-2 text-sm font-semibold transition-colors ${filtro === estado.id ? 'border-panel-texto bg-panel-texto text-white' : 'border-panel-borde bg-white text-panel-texto hover:border-slate-300'}`}
+          >
+            {estado.etiqueta} ({estado.id === 'todos' ? reportes.length : cantidad(estado.id)})
+          </button>
+        ))}
+      </div>
 
-        <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Filtrar por estado">
-          {[...ESTADOS, { id: 'todos', etiqueta: 'Todos' }].map((estado) => (
-            <button
-              key={estado.id}
-              type="button"
-              aria-pressed={filtro === estado.id}
-              onClick={() => setFiltro(estado.id)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition ${filtro === estado.id ? 'bg-brand-700 text-white' : 'bg-white/70 text-brand-800 ring-1 ring-white/80 hover:bg-white'}`}
-            >
-              {estado.etiqueta} ({estado.id === 'todos' ? reportes.length : cantidad(estado.id)})
-            </button>
-          ))}
-        </div>
-
-        {cargando ? (
-          <div className="space-y-3">{Array.from({ length: 3 }).map((_, indice) => <div key={indice} className="h-32 animate-pulse rounded-2xl bg-sal-2" />)}</div>
-        ) : visibles.length === 0 ? (
-          !error && <p className="rounded-2xl px-5 py-6 text-slate-600 cristal">{filtro === 'pendiente' ? '¡Todo al día! No hay reportes pendientes.' : 'No hay reportes con este estado.'}</p>
-        ) : (
-          <ul className="space-y-4">
-            {visibles.map((reporte) => {
-              const estado = ESTADOS.find((item) => item.id === reporte.estado) || ESTADOS[0]
-              return (
-                <li key={reporte.id} className="rounded-2xl p-5 cristal">
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div className="min-w-0 flex-1">
-                      <div className="mb-2 flex flex-wrap items-center gap-2">
-                        <span className={`rounded-full px-3 py-1 text-xs font-bold ${estado.clase}`}>{estado.etiqueta}</span>
-                        <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600">{TIPOS_REPORTABLES[reporte.tipo_elemento] || 'Elemento'}</span>
-                        <span className="text-xs text-slate-500">{fechaLegible(reporte.fecha)} · por {reporte.nombre_usuario || 'Turista'}</span>
-                      </div>
-                      <p className="font-bold text-slate-900">
-                        {reporte.enlace ? (
-                          <Link to={reporte.enlace} className="text-brand-700 underline">{reporte.nombre_elemento || 'Ver elemento'}</Link>
-                        ) : reporte.nombre_elemento}
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-slate-700">{motivo(reporte.motivo)}</p>
-                      {reporte.descripcion && <p className="mt-2 whitespace-pre-line rounded-xl bg-white/70 px-4 py-3 text-sm text-slate-700">“{reporte.descripcion}”</p>}
-
-                      <label htmlFor={`nota-${reporte.id}`} className="mt-4 block text-xs font-bold uppercase tracking-wider text-slate-500">
-                        Respuesta para {reporte.nombre_usuario || 'quien reportó'} (opcional)
-                      </label>
-                      <textarea
-                        id={`nota-${reporte.id}`}
-                        rows={2}
-                        maxLength={LARGO_MAXIMO_DESCRIPCION}
-                        value={notaDe(reporte)}
-                        onChange={(evento) => setBorradores((actuales) => ({ ...actuales, [reporte.id]: evento.target.value }))}
-                        placeholder="Ej.: Ya actualizamos el horario de visita. ¡Gracias por avisarnos!"
-                        className="mt-1 w-full rounded-xl border border-sky-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-brand-500/30"
-                      />
-                      <div className="mt-2 flex flex-wrap items-center gap-3">
-                        <button
-                          type="button"
-                          disabled={guardandoId === reporte.id || notaDe(reporte).trim() === (reporte.nota_admin || '').trim()}
-                          onClick={() => guardar(reporte, reporte.estado, 'Respuesta guardada. Quien reportó la verá en sus notificaciones.')}
-                          className="rounded-full bg-brand-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-800 disabled:opacity-50"
-                        >
-                          Guardar respuesta
-                        </button>
-                        <span className="text-xs text-slate-500">La respuesta también se envía al cambiar el estado.</span>
-                      </div>
+      {cargando ? (
+        <div className="space-y-3">{Array.from({ length: 3 }).map((_, indice) => <div key={indice} className="h-32 animate-pulse rounded-2xl bg-sal-2" />)}</div>
+      ) : visibles.length === 0 ? (
+        !error && <p className="rounded-2xl px-5 py-6 text-slate-600 cristal">{filtro === 'pendiente' ? '¡Todo al día! No hay reportes pendientes.' : 'No hay reportes con este estado.'}</p>
+      ) : (
+        <ul className="space-y-4">
+          {visibles.map((reporte) => {
+            const estado = ESTADOS.find((item) => item.id === reporte.estado) || ESTADOS[0]
+            return (
+              <li key={reporte.id} className="rounded-2xl p-5 cristal">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-2 flex flex-wrap items-center gap-2">
+                      <span className={`rounded-full px-3 py-1 text-xs font-bold ${estado.clase}`}>{estado.etiqueta}</span>
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{TIPOS_REPORTABLES[reporte.tipo_elemento] || 'Elemento'}</span>
+                      <span className="text-xs text-slate-500">{fechaLegible(reporte.fecha)} · por {reporte.nombre_usuario || 'Turista'}</span>
                     </div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                      Cambiar estado
-                      <select
-                        value={reporte.estado}
-                        disabled={guardandoId === reporte.id}
-                        onChange={(evento) => cambiarEstado(reporte, evento.target.value)}
-                        className="mt-1 block rounded-xl border border-sky-200 bg-white px-3 py-2 text-sm font-semibold normal-case tracking-normal text-slate-800 outline-none focus:ring-2 focus:ring-brand-500/30"
-                      >
-                        {ESTADOS.map((item) => <option key={item.id} value={item.id}>{item.etiqueta}</option>)}
-                      </select>
+                    <p className="font-bold text-slate-900">
+                      {reporte.enlace ? (
+                        <Link to={reporte.enlace} className="text-brand-700 underline">{reporte.nombre_elemento || 'Ver elemento'}</Link>
+                      ) : reporte.nombre_elemento}
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-slate-700">{motivo(reporte.motivo)}</p>
+                    {reporte.descripcion && <p className="mt-2 whitespace-pre-line rounded-lg bg-panel-fondo px-4 py-3 text-sm text-slate-700">“{reporte.descripcion}”</p>}
+
+                    <label htmlFor={`nota-${reporte.id}`} className="mt-4 block text-xs font-bold uppercase tracking-wider text-slate-500">
+                      Respuesta para {reporte.nombre_usuario || 'quien reportó'} (opcional)
                     </label>
+                    <textarea
+                      id={`nota-${reporte.id}`}
+                      rows={2}
+                      maxLength={LARGO_MAXIMO_DESCRIPCION}
+                      value={notaDe(reporte)}
+                      onChange={(evento) => setBorradores((actuales) => ({ ...actuales, [reporte.id]: evento.target.value }))}
+                      placeholder="Ej.: Ya actualizamos el horario de visita. ¡Gracias por avisarnos!"
+                      className="mt-1 w-full rounded-xl border border-sky-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-brand-500/30"
+                    />
+                    <div className="mt-2 flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        disabled={guardandoId === reporte.id || notaDe(reporte).trim() === (reporte.nota_admin || '').trim()}
+                        onClick={() => guardar(reporte, reporte.estado, 'Respuesta guardada. Quien reportó la verá en sus notificaciones.')}
+                        className="rounded-full bg-brand-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-800 disabled:opacity-50"
+                      >
+                        Guardar respuesta
+                      </button>
+                      <span className="text-xs text-slate-500">La respuesta también se envía al cambiar el estado.</span>
+                    </div>
                   </div>
-                </li>
-              )
-            })}
-          </ul>
-        )}
-      </main>
-    </div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Cambiar estado
+                    <select
+                      value={reporte.estado}
+                      disabled={guardandoId === reporte.id}
+                      onChange={(evento) => cambiarEstado(reporte, evento.target.value)}
+                      className="mt-1 block rounded-xl border border-sky-200 bg-white px-3 py-2 text-sm font-semibold normal-case tracking-normal text-slate-800 outline-none focus:ring-2 focus:ring-brand-500/30"
+                    >
+                      {ESTADOS.map((item) => <option key={item.id} value={item.id}>{item.etiqueta}</option>)}
+                    </select>
+                  </label>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </PanelAdmin>
   )
 }
 

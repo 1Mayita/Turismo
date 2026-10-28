@@ -137,7 +137,7 @@ function Itinerario({ items, editable = false, onReordenar, onQuitar }) {
         {items.length > 1 && totalKm > 0 && (
           <div className="mt-4 rounded-tarjeta border border-borde bg-cielo/50 px-5 py-4 text-sm text-noche">
             <p className="flex items-start gap-2 font-bold">
-              <Route aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-atardecer-700" />
+              <Route aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-atardecer-texto" />
               Recorrido total aproximado: {totalKm.toFixed(0)} km en línea recta · ~{formatearDuracion(totalMinutos)} por tierra
             </p>
             <p className="mt-1 pl-[26px] text-xs text-noche/75">Es una estimación orientativa (carretera ≈ 1,3 veces la línea recta, a unos 50 km/h). Consulta horarios reales de buses y vuelos.</p>

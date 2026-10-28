@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { OrbitControls, PerformanceMonitor } from '@react-three/drei'
+import { OrbitControls } from '@react-three/drei'
 import { Color, ExtrudeGeometry, Shape, Vector3 } from 'three'
 import { ALTO_MAPA, ANCHO_MAPA, DEPARTAMENTOS_MAPA, proyectar } from './boliviaSvg.js'
 
 // Mapa 3D de Bolivia (DESIGN.md §6.1): los 9 departamentos como piezas
 // extruidas, con más altura en el altiplano que en los llanos. Se carga en
-// diferido desde HeroMapa; si el equipo no rinde, avisa con alFallar() y se
-// vuelve al mapa 2D.
+// diferido desde HeroMapa y usa una calidad fija para evitar saltos de cámara
+// o cambios de apariencia cuando varía la medición de FPS.
 
 const ESCALA = 1 / 100 // 1000 unidades del SVG = 10 unidades 3D
 const ALTURA_REGION = {
@@ -16,11 +16,11 @@ const ALTURA_REGION = {
   beni: 0.2, pando: 0.18, 'santa-cruz': 0.24,
 }
 const COLOR_REGION = {
-  'la-paz': '#e9eff4', oruro: '#eef2f5', potosi: '#f1f3f4',
-  cochabamba: '#e8e2d3', chuquisaca: '#ebe5d7', tarija: '#e6e0d0',
-  beni: '#d3dfcd', pando: '#cfdbc7', 'santa-cruz': '#d8e2d1',
+  'la-paz': '#e9e7ef', oruro: '#eeecf2', potosi: '#f2f0f4',
+  cochabamba: '#f1dccb', chuquisaca: '#f4e3d4', tarija: '#efd7c3',
+  beni: '#cbd5e2', pando: '#c6d1df', 'santa-cruz': '#d0d9e5',
 }
-const COLOR_ACTIVO = new Color('#6f8ba1')
+const COLOR_ACTIVO = new Color('#7d93c8')
 const ELEVACION = 0.14
 const SEPARACION = 0.985 // cada pieza se encoge un poco para que se vean separadas
 const CAMARA_GENERAL = { objetivo: new Vector3(0, 0, 0.4), distancia: 21 }
@@ -219,11 +219,11 @@ function Escena({ idActivo, alElegir, pines, sombras, conPanel, alMoverEtiqueta,
             <group key={pin.id} position={[x, 0, z]}>
               <mesh position={[0, 0.16, 0]} castShadow={sombras}>
                 <sphereGeometry args={[0.085, 20, 20]} />
-                <meshStandardMaterial color="#b4532a" roughness={0.5} />
+                <meshStandardMaterial color="#1a3c62" roughness={0.5} />
               </mesh>
               <mesh position={[0, 0.06, 0]}>
                 <cylinderGeometry args={[0.012, 0.012, 0.12, 8]} />
-                <meshStandardMaterial color="#b4532a" />
+                <meshStandardMaterial color="#1a3c62" />
               </mesh>
             </group>
           )
@@ -291,9 +291,7 @@ function Escena({ idActivo, alElegir, pines, sombras, conPanel, alMoverEtiqueta,
   )
 }
 
-function MapaBolivia3D({ cantidades = {}, idActivo = '', alElegir, pines = [], conPanel = false, alFallar, className = '' }) {
-  const [dpr, setDpr] = useState(1.5)
-  const [sombras, setSombras] = useState(true)
+function MapaBolivia3D({ cantidades = {}, idActivo = '', alElegir, pines = [], conPanel = false, className = '' }) {
   const etiqueta = useRef(null)
   const [idEtiqueta, setIdEtiqueta] = useState('')
   const departamentoEtiqueta = DEPARTAMENTOS_MAPA.find((departamento) => departamento.id === idEtiqueta)
@@ -311,39 +309,27 @@ function MapaBolivia3D({ cantidades = {}, idActivo = '', alElegir, pines = [], c
   return (
     <div className={`relative aspect-[1000/1050] w-full ${className}`}>
       <Canvas
-        dpr={dpr}
-        // "percentage" = sombras PCF (la variante suave ya no existe en three).
-        shadows={sombras ? 'percentage' : false}
+        dpr={1.25}
+        shadows={false}
         // Sin "tone mapping", para que los colores sean los de la paleta.
         flat
         camera={{ position: inicio.toArray(), fov: 34, near: 0.1, far: 100 }}
         gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
         aria-hidden="true"
       >
-        {/* Si el equipo no da abasto, primero baja la calidad y, si sigue
-            lento, vuelve al mapa 2D. */}
-        <PerformanceMonitor
-          flipflops={3}
-          onDecline={() => {
-            setDpr(1)
-            setSombras(false)
-          }}
-          onFallback={() => alFallar?.()}
-        >
-          <Escena
-            idActivo={idActivo}
-            alElegir={alElegir}
-            pines={pines}
-            sombras={sombras}
-            conPanel={conPanel}
-            alMoverEtiqueta={moverEtiqueta}
-            alCambiarEtiqueta={setIdEtiqueta}
-          />
-        </PerformanceMonitor>
+        <Escena
+          idActivo={idActivo}
+          alElegir={alElegir}
+          pines={pines}
+          sombras={false}
+          conPanel={conPanel}
+          alMoverEtiqueta={moverEtiqueta}
+          alCambiarEtiqueta={setIdEtiqueta}
+        />
       </Canvas>
       <div ref={etiqueta} className="pointer-events-none absolute left-0 top-0 z-10 opacity-0 transition-opacity duration-150" aria-hidden="true">
         {departamentoEtiqueta && (
-          <div className="rounded-control bg-noche px-3 py-2 text-center text-white shadow-elevada">
+          <div className="rounded-control bg-noche px-3 py-2 text-center text-white shadow-elevada ring-1 ring-white/20">
             <p className="whitespace-nowrap text-sm font-bold">{departamentoEtiqueta.nombre}</p>
             <p className="whitespace-nowrap text-xs text-admin-muted">
               {cantidad ? `${cantidad} ${cantidad === 1 ? 'destino' : 'destinos'}` : 'Ver el departamento'}

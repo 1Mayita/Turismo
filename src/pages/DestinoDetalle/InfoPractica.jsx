@@ -74,7 +74,7 @@ function InfoPractica({ destino }) {
                       {transporte.medio}{transporte.desde ? ` desde ${transporte.desde}` : ''}
                     </p>
                     {transporte.tiempo && (
-                      <p className="mt-0.5 flex items-center gap-1 text-sm font-bold text-atardecer-700">
+                      <p className="mt-0.5 flex items-center gap-1 text-sm font-bold text-atardecer-texto">
                         <Clock aria-hidden="true" size={14} /> {transporte.tiempo} aprox.
                       </p>
                     )}

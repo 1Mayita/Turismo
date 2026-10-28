@@ -142,14 +142,14 @@ function GuiaDeEstilo() {
         <div className="space-y-6">
           <p className="titulo-display text-[40px] sm:text-[56px]">Descubre Bolivia</p>
           <p className="titulo-display text-[40px]">Destacados en Cochabamba</p>
-          <p className="text-[28px] font-bold">Manrope 28 · subtítulo</p>
-          <p className="text-[22px] font-bold">Manrope 22 · título de tarjeta grande</p>
-          <p className="text-lg font-medium">Manrope 18 · texto destacado</p>
+          <p className="text-[28px] font-bold">Hanken Grotesk 28 · subtítulo</p>
+          <p className="text-[22px] font-bold">Hanken Grotesk 22 · título de tarjeta grande</p>
+          <p className="text-lg font-medium">Hanken Grotesk 18 · texto destacado</p>
           <p className="texto-lectura text-base">
-            Manrope 16 · cuerpo. El Salar de Uyuni es el desierto de sal más grande del mundo. En época de lluvias se
+            Hanken Grotesk 16 · cuerpo. El Salar de Uyuni es el desierto de sal más grande del mundo. En época de lluvias se
             convierte en un espejo que refleja el cielo, y en época seca muestra un suelo blanco de hexágonos de sal.
           </p>
-          <p className="text-sm text-piedra-texto">Manrope 14 · texto secundario y etiquetas</p>
+          <p className="text-sm text-piedra-texto">Hanken Grotesk 14 · texto secundario y etiquetas</p>
         </div>
       </Seccion>
 

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import Navbar from '../../components/Navbar.jsx'
-import AdminNav from '../../components/AdminNav.jsx'
+import PanelAdmin, { BotonNuevo } from '../../components/PanelAdmin.jsx'
 import { actualizarActividad, crearActividad, eliminarActividad, getActividades } from '../../services/actividadesService.js'
 import { getDestinos } from '../../services/destinosService.js'
 import { sembrarCatalogoDeEjemplo } from '../../services/sembradoService.js'
@@ -121,99 +120,93 @@ function AdminActividades() {
   const actividadesVisibles = filtroDestino ? actividades.filter((actividad) => actividad.id_destino === filtroDestino) : actividades
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <main className="admin-layout contenedor max-w-5xl py-12">
-        <h1 className="mb-6 text-3xl font-bold text-slate-900">Administración de actividades</h1>
-        <AdminNav />
+    <PanelAdmin
+      titulo="Administración de actividades"
+      acciones={<BotonNuevo onClick={abrirNueva}>Nueva actividad</BotonNuevo>}
+    >
+      {error && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
+      {mensaje && <p className="mb-5 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800" role="status">{mensaje}</p>}
 
-        {error && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
-        {mensaje && <p className="mb-5 rounded-lg bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-800" role="status">{mensaje}</p>}
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <label className="block w-full max-w-sm text-sm font-semibold text-slate-700">
+          Filtrar por destino
+          <select value={filtroDestino} onChange={(e) => setFiltroDestino(e.target.value)} className={`${CLASE_CAMPO} bg-white`}>
+            <option value="">Todos los destinos</option>
+            {destinos.map((destino) => (
+              <option key={destino.id} value={destino.id}>{destino.nombre}</option>
+            ))}
+          </select>
+        </label>
+      </div>
 
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <button type="button" onClick={abrirNueva} className="rounded-xl boton-principal px-5 py-3 font-bold text-white transition">
-            Nueva actividad
-          </button>
-          <label className="block text-sm font-semibold text-slate-700">
-            Filtrar por destino
-            <select value={filtroDestino} onChange={(e) => setFiltroDestino(e.target.value)} className={`${CLASE_CAMPO} bg-white`}>
-              <option value="">Todos los destinos</option>
-              {destinos.map((destino) => (
-                <option key={destino.id} value={destino.id}>{destino.nombre}</option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        {formularioAbierto && (
-          <form onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
-            <h2 className="text-xl font-bold text-slate-900">{actividadEditando ? 'Editar actividad' : 'Nueva actividad'}</h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block text-sm font-semibold text-slate-700">
-                Nombre
-                <input name="nombre" value={formulario.nombre} onChange={actualizarCampo} placeholder="Ej: Avistamiento de flamencos" className={CLASE_CAMPO} />
-              </label>
-              <label className="block text-sm font-semibold text-slate-700">
-                Destino
-                <select name="id_destino" value={formulario.id_destino} onChange={actualizarCampo} className={CLASE_CAMPO}>
-                  <option value="">Selecciona un destino</option>
-                  {destinos.map((destino) => (
-                    <option key={destino.id} value={destino.id}>{destino.nombre}</option>
-                  ))}
-                </select>
-              </label>
-            </div>
+      {formularioAbierto && (
+        <form onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
+          <h2 className="text-xl font-bold text-slate-900">{actividadEditando ? 'Editar actividad' : 'Nueva actividad'}</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-sm font-semibold text-slate-700">
-              Descripción
-              <textarea name="descripcion" value={formulario.descripcion} onChange={actualizarCampo} rows={2} className={CLASE_CAMPO} />
+              Nombre
+              <input name="nombre" value={formulario.nombre} onChange={actualizarCampo} placeholder="Ej: Avistamiento de flamencos" className={CLASE_CAMPO} />
             </label>
-            <div className="flex gap-3">
-              <button disabled={guardando} className="rounded-xl bg-brand-700 px-5 py-2.5 font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60">
-                {guardando ? 'Guardando...' : 'Guardar'}
-              </button>
-              <button type="button" onClick={() => setFormularioAbierto(false)} className="rounded-xl border border-neutral-300 px-5 py-2.5 font-bold text-slate-700 transition hover:bg-slate-100">
-                Cancelar
-              </button>
-            </div>
-          </form>
-        )}
-
-        {cargando ? (
-          <div className="h-48 animate-pulse rounded-2xl bg-sal-2 cristal" />
-        ) : (
-          <div className="overflow-x-auto rounded-2xl cristal">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-white/40 text-xs font-bold uppercase tracking-wider text-slate-500">
-                <tr>
-                  <th className="px-5 py-3">Nombre</th>
-                  <th className="px-5 py-3">Destino</th>
-                  <th className="px-5 py-3">Descripción</th>
-                  <th className="px-5 py-3 text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {actividadesVisibles.map((actividad) => (
-                  <tr key={actividad.id} className="border-t border-neutral-100">
-                    <td className="px-5 py-3 font-semibold text-slate-900">{actividad.nombre}</td>
-                    <td className="px-5 py-3 text-slate-600">{nombreDestino(actividad.id_destino)}</td>
-                    <td className="px-5 py-3 text-slate-600">{actividad.descripcion}</td>
-                    <td className="whitespace-nowrap px-5 py-3 text-right">
-                      <button type="button" onClick={() => abrirEditar(actividad)} className="mr-3 font-semibold text-brand-700 hover:underline">Editar</button>
-                      <button type="button" onClick={() => eliminar(actividad)} className="font-semibold text-red-700 hover:underline">Eliminar</button>
-                    </td>
-                  </tr>
+            <label className="block text-sm font-semibold text-slate-700">
+              Destino
+              <select name="id_destino" value={formulario.id_destino} onChange={actualizarCampo} className={CLASE_CAMPO}>
+                <option value="">Selecciona un destino</option>
+                {destinos.map((destino) => (
+                  <option key={destino.id} value={destino.id}>{destino.nombre}</option>
                 ))}
-                {actividadesVisibles.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="px-5 py-6 text-center text-slate-500">No hay actividades registradas todavía.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+              </select>
+            </label>
           </div>
-        )}
-      </main>
-    </div>
+          <label className="block text-sm font-semibold text-slate-700">
+            Descripción
+            <textarea name="descripcion" value={formulario.descripcion} onChange={actualizarCampo} rows={2} className={CLASE_CAMPO} />
+          </label>
+          <div className="flex gap-3">
+            <button disabled={guardando} className="rounded-xl bg-brand-700 px-5 py-2.5 font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60">
+              {guardando ? 'Guardando...' : 'Guardar'}
+            </button>
+            <button type="button" onClick={() => setFormularioAbierto(false)} className="rounded-xl border border-neutral-300 px-5 py-2.5 font-bold text-slate-700 transition hover:bg-slate-100">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      )}
+
+      {cargando ? (
+        <div className="h-48 animate-pulse rounded-2xl bg-sal-2 cristal" />
+      ) : (
+        <div className="overflow-x-auto rounded-2xl cristal">
+          <table className="w-full text-left text-sm">
+            <thead className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              <tr>
+                <th className="px-5 py-3">Nombre</th>
+                <th className="px-5 py-3">Destino</th>
+                <th className="px-5 py-3">Descripción</th>
+                <th className="px-5 py-3 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {actividadesVisibles.map((actividad) => (
+                <tr key={actividad.id} className="border-t border-neutral-100">
+                  <td className="px-5 py-3 font-semibold text-slate-900">{actividad.nombre}</td>
+                  <td className="px-5 py-3 text-slate-600">{nombreDestino(actividad.id_destino)}</td>
+                  <td className="px-5 py-3 text-slate-600">{actividad.descripcion}</td>
+                  <td className="whitespace-nowrap px-5 py-3 text-right">
+                    <button type="button" onClick={() => abrirEditar(actividad)} className="mr-3 font-semibold text-brand-700 hover:underline">Editar</button>
+                    <button type="button" onClick={() => eliminar(actividad)} className="font-semibold text-red-700 hover:underline">Eliminar</button>
+                  </td>
+                </tr>
+              ))}
+              {actividadesVisibles.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-5 py-6 text-center text-slate-500">No hay actividades registradas todavía.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </PanelAdmin>
   )
 }
 

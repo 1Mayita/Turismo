@@ -89,12 +89,12 @@ function DepartamentoDetalle() {
       <Navbar />
 
       {cargando ? (
-        <main className="contenedor max-w-6xl py-12">
+        <main className="contenedor max-w-[1440px] py-12">
           <div className="mb-8 h-72 animate-pulse rounded-tarjeta bg-sal-2" />
           <GrillaEsqueleto cantidad={3} />
         </main>
       ) : error ? (
-        <main className="contenedor max-w-6xl py-12">
+        <main className="contenedor max-w-[1440px] py-12">
           <Migas pasos={migas} />
           <p className="rounded-control border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
         </main>
@@ -104,14 +104,14 @@ function DepartamentoDetalle() {
           <header className="relative mx-3 mt-3 flex h-72 items-end overflow-hidden rounded-tarjeta shadow-suave sm:mx-5 sm:h-[26rem]">
             <ImagenSegura src={departamento.imagen_portada} alt="" className="absolute inset-0 h-full w-full object-cover object-[50%_30%]" />
             <div className="absolute inset-0 bg-gradient-to-t from-noche/90 via-noche/30 to-transparent" />
-            <div className="relative contenedor max-w-6xl pb-8 text-white">
+            <div className="relative contenedor max-w-[1440px] pb-8 text-white">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/80">Departamento</p>
               <h1 className="titulo-display mt-1 text-[44px] text-white sm:text-[64px]">{departamento.nombre}</h1>
-              {departamento.eslogan && <p className="font-titulo text-xl italic text-white/90 sm:text-2xl">“{departamento.eslogan}”</p>}
+              {departamento.eslogan && <p className="text-lg font-medium text-white/90 sm:text-xl">“{departamento.eslogan}”</p>}
             </div>
           </header>
 
-          <main className="contenedor max-w-6xl py-10">
+          <main className="contenedor max-w-[1440px] py-10">
             <Migas pasos={migas} />
 
             {departamento.descripcion && <p className="texto-lectura mb-14 text-lg text-noche/85">{departamento.descripcion}</p>}

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, CalendarDays, Lightbulb, MapPin } from 'lucide-react'
 import Navbar from '../../components/Navbar.jsx'
-import { Aparecer, EstadoVacio, claseBoton } from '../../components/ui'
+import { Aparecer, EstadoVacio, FondoTarjetaFoto, claseBotonFoto, claseTarjetaFoto } from '../../components/ui'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
 import BotonReportar from '../../components/BotonReportar.jsx'
 import Modal from '../../components/Modal.jsx'
@@ -21,7 +21,7 @@ function FechaDestacada({ fechaISO }) {
   return (
     <div className="flex min-w-16 flex-col items-center rounded-control bg-white px-3 pb-1.5 pt-1 text-center shadow-suave">
       <span className="titulo-display text-[32px] leading-none">{formatearFechaEvento(fechaISO, { day: 'numeric' })}</span>
-      <span className="text-xs font-bold uppercase tracking-wider text-atardecer-700">{formatearFechaEvento(fechaISO, { month: 'short' }).replace('.', '')}</span>
+      <span className="text-xs font-bold uppercase tracking-wider text-atardecer-texto">{formatearFechaEvento(fechaISO, { month: 'short' }).replace('.', '')}</span>
     </div>
   )
 }
@@ -112,9 +112,9 @@ function Eventos() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="contenedor max-w-6xl py-12">
+      <main className="contenedor max-w-[1440px] py-12">
         <div className="mb-10 max-w-2xl">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Agenda cultural</p>
+          <p className="mb-3 rotulo">Agenda cultural</p>
           <h1 className="titulo-display text-[44px] sm:text-[56px]">Próximos eventos</h1>
           <p className="texto-lectura mt-3 text-lg text-piedra-texto">Festivales, ferias y celebraciones para sumar a tu viaje.</p>
         </div>
@@ -124,7 +124,7 @@ function Eventos() {
         {cargando ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 3 }).map((_, indice) => (
-              <div key={indice} className="h-80 animate-pulse rounded-tarjeta bg-sal-2" />
+              <div key={indice} className="h-[28rem] animate-pulse rounded-tarjeta bg-sal-2" />
             ))}
           </div>
         ) : eventos.length === 0 ? (
@@ -134,45 +134,43 @@ function Eventos() {
             {eventos.map((evento, indice) => {
               const enCurso = evento.fecha_inicio <= hoy
               return (
-                <Aparecer key={evento.id} indice={indice % 3} como="article" className="flex flex-col rounded-tarjeta border border-borde bg-white p-3 shadow-suave">
-                  <div className="relative aspect-[16/10] overflow-hidden rounded-imagen bg-sal-2">
-                    <ImagenSegura src={evento.imagen} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
-                    <div className="absolute left-3 top-3"><FechaDestacada fechaISO={evento.fecha_inicio} /></div>
-                    <span className={`absolute right-3 top-3 rounded-full px-3 py-1 text-xs font-bold shadow-suave ${enCurso ? 'bg-emerald-700 text-white' : 'bg-white/95 text-noche'}`}>
-                      {enCurso ? 'En curso' : 'Próximo'}
-                    </span>
-                  </div>
-                  <div className="flex flex-1 flex-col px-2 pb-1 pt-4">
-                    <p className="flex items-center gap-1.5 text-sm font-bold text-cobre-texto">
+                <Aparecer key={evento.id} indice={indice % 3} como="article" className={`group shadow-suave ${claseTarjetaFoto}`}>
+                  <FondoTarjetaFoto src={evento.imagen} />
+                  <div className="absolute left-4 top-4"><FechaDestacada fechaISO={evento.fecha_inicio} /></div>
+                  <span className={`absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-bold shadow-suave ${enCurso ? 'bg-emerald-700 text-white' : 'bg-white/95 text-noche'}`}>
+                    {enCurso ? 'En curso' : 'Próximo'}
+                  </span>
+                  <div className="relative p-5">
+                    <p className="flex items-center gap-1.5 text-sm font-bold text-atardecer">
                       <CalendarDays aria-hidden="true" size={16} /> {rangoDeFechas(evento)}
                     </p>
-                    <h2 className="mt-1.5 text-lg font-bold leading-snug text-noche">{evento.nombre}</h2>
-                    <p className="mt-1 flex items-start gap-1.5 text-sm text-piedra-texto">
-                      <MapPin aria-hidden="true" size={16} className="mt-0.5 shrink-0 text-piedra" /> {lugarDe(evento)}
+                    <h2 className="titulo-display mt-1.5 text-[30px] leading-tight text-white">{evento.nombre}</h2>
+                    <p className="mt-1 flex items-start gap-1.5 text-sm text-white/85">
+                      <MapPin aria-hidden="true" size={16} className="mt-0.5 shrink-0" /> {lugarDe(evento)}
                     </p>
-                    {evento.descripcion && <p className="mt-3 line-clamp-2 text-sm leading-6 text-piedra-texto">{evento.descripcion}</p>}
-                    <p className="mt-3 text-sm font-semibold text-noche" aria-live="polite">
+                    {evento.descripcion && <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/80">{evento.descripcion}</p>}
+                    <p className="mt-2 text-sm font-semibold text-white" aria-live="polite">
                       {Number(evento.asistentes_count) || 0} {Number(evento.asistentes_count) === 1 ? 'persona asistirá' : 'personas asistirán'}
                     </p>
-                    <div className="mt-auto pt-4">
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
+                      <button type="button" onClick={() => setEventoAbierto(evento)} className={claseBotonFoto}>
+                        Ver más
+                        <ArrowRight aria-hidden="true" size={16} />
+                      </button>
                       {usuario ? (
                         <button
                           type="button"
                           onClick={() => alternarAsistencia(evento)}
                           disabled={actualizandoAsistencia === evento.id || (evento.fecha_fin || evento.fecha_inicio) < hoy}
-                          className="mb-2 w-full rounded-xl border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-bold text-brand-800 transition hover:bg-brand-100 disabled:opacity-60"
+                          className="inline-flex min-h-10 items-center rounded-control border border-white/40 bg-white/10 px-4 text-sm font-bold text-white transition hover:bg-white/20 disabled:opacity-60"
                         >
                           {actualizandoAsistencia === evento.id ? 'Actualizando...' : asistencias[evento.id] ? 'Ya no asistiré' : 'Anotarme al evento'}
                         </button>
                       ) : (
-                        <Link to="/login" className="mb-2 block text-center text-sm font-semibold text-brand-700 underline">
+                        <Link to="/login" className="text-sm font-semibold text-white underline underline-offset-2">
                           Inicia sesión para anotarte
                         </Link>
                       )}
-                      <button type="button" onClick={() => setEventoAbierto(evento)} className={claseBoton('secundario', 'pequeno')}>
-                        Ver más
-                        <ArrowRight aria-hidden="true" size={16} />
-                      </button>
                     </div>
                   </div>
                 </Aparecer>

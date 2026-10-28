@@ -13,8 +13,10 @@ import {
   LogIn,
   LogOut,
   Map as IconoMapa,
+  Smartphone,
   MapPinned,
   Menu,
+  Plus,
   Route,
   Soup,
   User,
@@ -26,6 +28,7 @@ import { auth } from '../services/firebase.js'
 import BarraBusqueda from './BarraBusqueda.jsx'
 import Campana from './Campana.jsx'
 import Logo from './Logo.jsx'
+import { EVENTO_MOSTRAR_INSTALACION, yaEstaInstalada } from '../utils/instalacion.js'
 
 // Estructura del menú: un enlace directo a lo más usado y el resto agrupado.
 const GRUPO_EXPLORAR = {
@@ -49,14 +52,14 @@ const GRUPO_COMER_Y_DORMIR = {
 // Enlace de la barra: subrayado atardecer cuando es la página actual
 // (NavLink pone aria-current="page").
 const CLASE_ENLACE_BARRA = [
-  'relative flex min-h-11 items-center px-1 text-[15px] font-semibold text-noche/75 transition hover:text-noche',
-  'after:absolute after:inset-x-1 after:bottom-1.5 after:h-0.5 after:origin-left after:scale-x-0 after:rounded-full after:bg-atardecer after:transition-transform after:duration-200',
-  'aria-[current=page]:text-noche aria-[current=page]:after:scale-x-100 data-[activo=true]:text-noche data-[activo=true]:after:scale-x-100',
+  'relative flex min-h-11 items-center px-1 text-[15px] font-semibold text-white/70 transition-colors hover:text-white',
+  'after:absolute after:inset-x-1 after:bottom-1.5 after:h-0.5 after:origin-left after:scale-x-0 after:rounded-full after:bg-atardecer after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.16,1,0.3,1)] hover:after:scale-x-100',
+  'aria-[current=page]:text-white aria-[current=page]:after:scale-x-100 data-[activo=true]:text-white data-[activo=true]:after:scale-x-100',
 ].join(' ')
 
 function Inicial({ nombre }) {
   return (
-    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-cielo text-sm font-extrabold text-cielo-700" aria-hidden="true">
+    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-atardecer-700 text-sm font-bold text-noche" aria-hidden="true">
       {(nombre || '?').charAt(0).toLocaleUpperCase('es')}
     </span>
   )
@@ -97,23 +100,23 @@ function MenuDesplegable({ etiqueta, enlaces, alinear = 'left', boton, children 
         aria-haspopup="true"
         data-activo={contieneRutaActual || abierto}
         className={boton
-          ? 'flex min-h-11 items-center gap-2 rounded-full py-1 pl-1 pr-3 text-[15px] font-semibold text-noche transition hover:bg-cielo/70'
+          ? 'flex min-h-11 items-center gap-2 rounded-full border border-transparent py-1 pl-1 pr-3 text-[15px] font-semibold text-white transition hover:border-white/20 hover:bg-white/10 data-[activo=true]:border-white/20 data-[activo=true]:bg-white/10'
           : `${CLASE_ENLACE_BARRA} gap-1`}
       >
         {boton || etiqueta}
         <ChevronDown aria-hidden="true" size={16} className={`transition-transform duration-200 ${abierto ? 'rotate-180' : ''}`} />
       </button>
       {abierto && (
-        <div className={`absolute top-full z-50 mt-2 w-64 rounded-tarjeta border border-borde bg-white p-2 shadow-elevada ${alinear === 'right' ? 'right-0' : 'left-0'}`}>
+        <div className={`absolute top-full z-50 mt-2 w-72 animate-desplegar rounded-tarjeta border border-borde bg-white p-2 shadow-flotante ${alinear === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'}`}>
           {enlaces.map(({ to, etiqueta: texto, icono: Icono, detalle }) => (
             <NavLink
               key={to}
               to={to}
               onClick={() => setAbierto(false)}
-              className={({ isActive }) => `flex min-h-11 items-center gap-3 rounded-control px-3 py-2 transition ${isActive ? 'bg-cielo text-noche' : 'text-noche hover:bg-sal-2'}`}
+              className={({ isActive }) => `group/opcion flex min-h-11 items-center gap-3 rounded-control px-2.5 py-2 transition-colors ${isActive ? 'bg-cielo text-noche' : 'text-noche hover:bg-sal'}`}
             >
               {Icono && (
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-sal-2 text-cielo-700" aria-hidden="true">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control border border-borde bg-white text-cielo-700 transition-colors group-hover/opcion:border-cielo-600/40" aria-hidden="true">
                   <Icono size={18} />
                 </span>
               )}
@@ -130,7 +133,9 @@ function MenuDesplegable({ etiqueta, enlaces, alinear = 'left', boton, children 
   )
 }
 
-function Navbar() {
+// "anchoCompleto": en el panel de administración la barra ocupa todo el
+// ancho para alinearse con la barra lateral.
+function Navbar({ anchoCompleto = false }) {
   const { usuario, esAdmin } = useAuth()
   const navegar = useNavigate()
   const [parametros] = useSearchParams()
@@ -145,7 +150,7 @@ function Navbar() {
     { to: '/perfil#favoritos', etiqueta: 'Mis favoritos', icono: Heart },
     { to: '/notificaciones', etiqueta: 'Notificaciones', icono: Bell },
     { to: '/perfil', etiqueta: 'Mi perfil', icono: User },
-    ...(esAdmin ? [{ to: '/admin/destinos', etiqueta: 'Panel de administración', icono: LayoutDashboard }] : []),
+    ...(esAdmin ? [{ to: '/admin/estadisticas', etiqueta: 'Panel de administración', icono: LayoutDashboard, detalle: 'Gestionar el catálogo' }] : []),
   ]
   const nombreCorto = usuario?.displayName?.split(' ')[0] || 'Mi cuenta'
 
@@ -168,12 +173,12 @@ function Navbar() {
     principal.focus()
   }
 
-  const claseEnlaceMovil = ({ isActive }) => `flex min-h-12 items-center gap-3 rounded-control px-3 text-base font-semibold transition ${isActive ? 'bg-cielo text-noche' : 'text-noche hover:bg-sal-2'}`
-  const claseTituloMovil = 'px-3 pb-1 pt-5 text-xs font-bold uppercase tracking-[0.14em] text-piedra-texto'
+  const claseEnlaceMovil = ({ isActive }) => `flex min-h-12 items-center gap-3 rounded-control px-3 text-base font-semibold transition-colors ${isActive ? 'bg-cielo text-noche' : 'text-noche hover:bg-sal-2'}`
+  const claseTituloMovil = 'rotulo px-3 pb-1 pt-6 text-piedra-texto'
   const iconoMovil = (Icono) => <Icono aria-hidden="true" className="shrink-0 text-cielo-700" />
 
   return (
-    <header className="sticky top-0 z-40 border-b border-borde bg-sal text-noche">
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-noche text-white">
       <a
         href="#contenido"
         onClick={saltarAlContenido}
@@ -181,22 +186,32 @@ function Navbar() {
       >
         Saltar al contenido
       </a>
-      <nav aria-label="Principal" className="contenedor flex h-[72px] max-w-6xl items-center justify-between gap-4">
+      <nav aria-label="Principal" className={`contenedor flex h-[72px] items-center justify-between gap-4 ${anchoCompleto ? 'max-w-[1440px] lg:px-6' : 'max-w-[1440px]'}`}>
         <NavLink to="/" className="shrink-0 rounded-full" aria-label="Rutas de Bolivia, ir al inicio">
-          <Logo />
+          <Logo claro />
         </NavLink>
 
         {/* Escritorio */}
-        <div className="hidden items-center gap-5 lg:flex">
+        <div className="hidden items-center gap-6 lg:flex">
           <NavLink to="/destinos" className={CLASE_ENLACE_BARRA}>Destinos</NavLink>
           <MenuDesplegable {...GRUPO_EXPLORAR} />
           <MenuDesplegable {...GRUPO_COMER_Y_DORMIR} />
         </div>
 
         {/* key reinicia el input cuando cambia la búsqueda en la URL. */}
-        <BarraBusqueda key={busquedaActual} valorInicial={busquedaActual} onBuscar={buscar} placeholder="Buscar en Bolivia..." className="hidden min-w-0 max-w-xs flex-1 lg:block" />
+        <BarraBusqueda key={busquedaActual} valorInicial={busquedaActual} onBuscar={buscar} placeholder="Buscar en Bolivia..." oscura className="hidden min-w-0 max-w-xs flex-1 lg:block" />
 
         <div className="hidden shrink-0 items-center gap-2 lg:flex">
+          {usuario && (
+            <NavLink
+              to="/viajes"
+              aria-label="Mis viajes"
+              className={({ isActive }) => `mr-1 inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full border px-3 text-sm font-bold transition-colors xl:px-4 ${isActive ? 'border-white bg-white text-noche' : 'border-white/20 bg-white/5 text-white hover:border-white/50'}`}
+            >
+              <Route aria-hidden="true" size={18} />
+              <span className="hidden xl:inline">Mis viajes</span>
+            </NavLink>
+          )}
           {usuario && <Campana />}
           {usuario ? (
             <MenuDesplegable
@@ -215,7 +230,7 @@ function Navbar() {
               <NavLink to="/login" className={CLASE_ENLACE_BARRA}>Iniciar sesión</NavLink>
               <NavLink
                 to="/registro"
-                className="ml-2 flex min-h-11 items-center rounded-control border border-noche/80 px-4 text-sm font-bold text-noche transition hover:bg-noche hover:text-white"
+                className="ml-2 flex min-h-11 items-center rounded-full boton-principal px-5 text-sm font-bold"
               >
                 Registrarme
               </NavLink>
@@ -232,7 +247,7 @@ function Navbar() {
             aria-expanded={menuMovilAbierto}
             aria-controls="menu-movil"
             aria-label={menuMovilAbierto ? 'Cerrar menú' : 'Abrir menú'}
-            className="flex h-11 w-11 items-center justify-center rounded-control border border-borde bg-white text-noche transition hover:bg-cielo"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white transition hover:border-white/50"
           >
             {menuMovilAbierto ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
           </button>
@@ -240,9 +255,21 @@ function Navbar() {
       </nav>
 
       {menuMovilAbierto && (
-        <div id="menu-movil" className="max-h-[calc(100dvh-72px)] overflow-y-auto border-t border-borde bg-sal pb-8 pt-4 lg:hidden">
-          <div className="contenedor max-w-6xl">
+        <div id="menu-movil" className="max-h-[calc(100dvh-72px)] animate-desplegar overflow-y-auto border-t border-borde bg-sal pb-8 pt-4 lg:hidden">
+          <div className="contenedor max-w-[1440px]">
             <BarraBusqueda key={busquedaActual} valorInicial={busquedaActual} onBuscar={buscar} placeholder="Buscar en Bolivia..." />
+
+            {/* Con sesión, los viajes van arriba: es lo que más se usa. */}
+            {usuario && (
+              <div className="mt-4 grid grid-cols-2 gap-2" onClick={(evento) => { if (evento.target.closest('a')) setMenuMovilAbierto(false) }}>
+                <NavLink to="/viajes" end className="flex min-h-12 items-center justify-center gap-2 rounded-control border border-borde bg-white px-3 text-sm font-bold text-noche">
+                  <Route aria-hidden="true" size={18} /> Mis viajes
+                </NavLink>
+                <NavLink to="/viajes?nuevo=1" className="flex min-h-12 items-center justify-center gap-2 rounded-control boton-principal px-3 text-sm font-bold">
+                  <Plus aria-hidden="true" size={18} /> Nuevo viaje
+                </NavLink>
+              </div>
+            )}
 
             <div className="mt-3" onClick={(evento) => { if (evento.target.closest('a')) setMenuMovilAbierto(false) }}>
               <NavLink to="/" end className={claseEnlaceMovil}>{iconoMovil(House)}Inicio</NavLink>
@@ -275,6 +302,20 @@ function Navbar() {
                     Registrarme
                   </NavLink>
                 </>
+              )}
+
+              {!yaEstaInstalada() && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuMovilAbierto(false)
+                    window.dispatchEvent(new Event(EVENTO_MOSTRAR_INSTALACION))
+                  }}
+                  className="mt-6 flex min-h-12 w-full items-center gap-3 rounded-control border border-dashed border-borde px-3 text-left text-base font-semibold text-noche transition-colors hover:bg-sal-2"
+                >
+                  <Smartphone aria-hidden="true" className="shrink-0 text-cielo-700" />
+                  Instalar la app en este celular
+                </button>
               )}
             </div>
           </div>

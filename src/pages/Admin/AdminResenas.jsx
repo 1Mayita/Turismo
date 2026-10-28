@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import Navbar from '../../components/Navbar.jsx'
-import AdminNav from '../../components/AdminNav.jsx'
+import PanelAdmin from '../../components/PanelAdmin.jsx'
 import { Estrellas } from '../../components/Estrellas.jsx'
 import { getAlojamientos } from '../../services/alojamientosService.js'
 import { getDestinos } from '../../services/destinosService.js'
@@ -102,78 +101,72 @@ function AdminResenas() {
   const nombreDe = (resena) => nombres[`${resena.tipo_elemento}:${resena.id_elemento}`] || 'Ya no está disponible'
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <main className="admin-layout contenedor max-w-6xl py-12">
-        <h1 className="mb-6 text-3xl font-bold text-slate-900">Moderación de reseñas</h1>
-        <AdminNav />
+    <PanelAdmin titulo="Moderación de reseñas">
+      {error && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
+      {mensaje && <p className="mb-5 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800" role="status">{mensaje}</p>}
 
-        {error && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
-        {mensaje && <p className="mb-5 rounded-lg bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-800" role="status">{mensaje}</p>}
+      <div className="mb-6 grid max-w-2xl gap-4 sm:grid-cols-2">
+        <label className="block text-sm font-semibold text-slate-700">
+          Mostrar
+          <select value={filtro} onChange={(evento) => setFiltro(evento.target.value)} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30">
+            <option value="todas">Todas las reseñas</option>
+            <option value="publicadas">Publicadas</option>
+            <option value="ocultas">Ocultas</option>
+          </select>
+        </label>
+        <label className="block text-sm font-semibold text-slate-700">
+          Filtrar por usuario
+          <input
+            type="search"
+            value={busquedaUsuario}
+            onChange={(evento) => setBusquedaUsuario(evento.target.value)}
+            placeholder="Escribe el nombre del usuario"
+            className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+          />
+        </label>
+      </div>
 
-        <div className="mb-6 grid max-w-2xl gap-4 sm:grid-cols-2">
-          <label className="block text-sm font-semibold text-slate-700">
-            Mostrar
-            <select value={filtro} onChange={(evento) => setFiltro(evento.target.value)} className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30">
-              <option value="todas">Todas las reseñas</option>
-              <option value="publicadas">Publicadas</option>
-              <option value="ocultas">Ocultas</option>
-            </select>
-          </label>
-          <label className="block text-sm font-semibold text-slate-700">
-            Filtrar por usuario
-            <input
-              type="search"
-              value={busquedaUsuario}
-              onChange={(evento) => setBusquedaUsuario(evento.target.value)}
-              placeholder="Escribe el nombre del usuario"
-              className="mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
-            />
-          </label>
-        </div>
-
-        {cargando ? (
-          <div className="h-48 animate-pulse rounded-2xl bg-sal-2 cristal" />
-        ) : resenasVisibles.length === 0 ? (
-          <p className="rounded-2xl px-5 py-6 text-slate-600 cristal">No hay reseñas para mostrar.</p>
-        ) : (
-          <ul className="space-y-4">
-            {resenasVisibles.map((resena) => {
-              const oculta = resena.estado === 'oculta'
-              return (
-                <li key={resena.id} className="rounded-2xl p-5 cristal">
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div className="min-w-0 flex-1">
-                      <div className="mb-2 flex flex-wrap items-center gap-3">
-                        <p className="font-bold text-slate-900">{resena.nombre_usuario || 'Turista'}</p>
-                        <span className={`rounded-full px-3 py-1 text-xs font-bold ${oculta ? 'bg-red-50 text-red-700' : 'bg-brand-100 text-brand-800'}`}>
-                          {oculta ? 'Oculta' : 'Publicada'}
-                        </span>
-                      </div>
-                      <p className="text-sm text-slate-600">
-                        {ETIQUETA_DE_TIPO[resena.tipo_elemento] || 'Lugar'}:{' '}
-                        {resena.id_elemento ? (
-                          <Link to={`${RUTA_DE_TIPO[resena.tipo_elemento] || '/destinos'}/${resena.id_elemento}`} className="font-semibold text-brand-700 underline">{nombreDe(resena)}</Link>
-                        ) : 'No disponible'}
-                        {' · '}{fechaLegible(resena.fecha)}
-                      </p>
-                      <Estrellas valor={Number(resena.calificacion) || 0} />
-                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{resena.comentario || 'Sin comentario.'}</p>
+      {cargando ? (
+        <div className="h-48 animate-pulse rounded-2xl bg-sal-2 cristal" />
+      ) : resenasVisibles.length === 0 ? (
+        <p className="rounded-2xl px-5 py-6 text-slate-600 cristal">No hay reseñas para mostrar.</p>
+      ) : (
+        <ul className="space-y-4">
+          {resenasVisibles.map((resena) => {
+            const oculta = resena.estado === 'oculta'
+            return (
+              <li key={resena.id} className="rounded-2xl p-5 cristal">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-2 flex flex-wrap items-center gap-3">
+                      <p className="font-bold text-slate-900">{resena.nombre_usuario || 'Turista'}</p>
+                      <span className={`rounded-full px-3 py-1 text-xs font-bold ${oculta ? 'bg-red-50 text-red-700' : 'bg-brand-100 text-brand-800'}`}>
+                        {oculta ? 'Oculta' : 'Publicada'}
+                      </span>
                     </div>
-                    <div className="flex shrink-0 gap-3">
-                      <button type="button" onClick={() => cambiarVisibilidad(resena)} className="text-sm font-semibold text-brand-700 hover:underline">
-                        {oculta ? 'Publicar' : 'Ocultar'}
-                      </button>
-                      <button type="button" onClick={() => eliminar(resena)} className="text-sm font-semibold text-red-700 hover:underline">Eliminar</button>
-                    </div>
+                    <p className="text-sm text-slate-600">
+                      {ETIQUETA_DE_TIPO[resena.tipo_elemento] || 'Lugar'}:{' '}
+                      {resena.id_elemento ? (
+                        <Link to={`${RUTA_DE_TIPO[resena.tipo_elemento] || '/destinos'}/${resena.id_elemento}`} className="font-semibold text-brand-700 underline">{nombreDe(resena)}</Link>
+                      ) : 'No disponible'}
+                      {' · '}{fechaLegible(resena.fecha)}
+                    </p>
+                    <Estrellas valor={Number(resena.calificacion) || 0} />
+                    <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{resena.comentario || 'Sin comentario.'}</p>
                   </div>
-                </li>
-              )
-            })}
-          </ul>
-        )}
-      </main>
-    </div>
+                  <div className="flex shrink-0 gap-3">
+                    <button type="button" onClick={() => cambiarVisibilidad(resena)} className="text-sm font-semibold text-brand-700 hover:underline">
+                      {oculta ? 'Publicar' : 'Ocultar'}
+                    </button>
+                    <button type="button" onClick={() => eliminar(resena)} className="text-sm font-semibold text-red-700 hover:underline">Eliminar</button>
+                  </div>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </PanelAdmin>
   )
 }
 

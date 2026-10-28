@@ -5,9 +5,9 @@ import { descargarCSV } from '../../../utils/csv.js'
 // Un solo color por gráfico (cada uno muestra una sola medida, así que no
 // hace falta leyenda: el título dice qué se mide). Validado con el validador
 // de paletas: contraste ≥ 3:1 sobre la superficie clara.
-const COLOR_SERIE = '#2a78d6'
-const COLOR_GRILLA = '#e2e8f0'
-const COLOR_TEXTO = '#475569'
+const COLOR_SERIE = '#626d96'
+const COLOR_GRILLA = '#e2e5e7'
+const COLOR_TEXTO = '#4b5964'
 
 function Consejo({ active, payload, unidad }) {
   if (!active || !payload?.length) return null
@@ -32,10 +32,10 @@ function Grafico({ titulo, descripcion, datos, unidad, orientacion = 'horizontal
   const hayDatos = datos.some((dato) => dato.valor > 0)
 
   return (
-    <section className="rounded-tarjeta border border-panel-borde bg-white p-5 sm:p-6" aria-label={titulo}>
+    <section className="rounded-xl border border-panel-borde bg-white p-5 sm:p-6" aria-label={titulo}>
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">{titulo}</h2>
+          <h2 className="text-base font-bold text-slate-900">{titulo}</h2>
           {descripcion && <p className="text-sm text-slate-500">{descripcion}</p>}
         </div>
         {hayDatos && (

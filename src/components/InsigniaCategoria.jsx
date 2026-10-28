@@ -1,13 +1,16 @@
-// Color de la insignia según la familia de la categoría:
-// verde = naturaleza y aventura, ámbar = cultura e historia, naranja = gastronomía.
+// Color de la insignia según la familia de la categoría, en tonos suaves de
+// la foto del atardecer: azul crepúsculo = naturaleza y aventura, ámbar =
+// cultura e historia, durazno = gastronomía.
+const CREPUSCULO = 'bg-brand-50 text-brand-800'
+const AMBAR = 'bg-accent-50 text-cobre-texto'
 const COLORES = {
-  Naturaleza: 'bg-emerald-100 text-emerald-800',
-  Aventura: 'bg-emerald-100 text-emerald-800',
-  Cultura: 'bg-amber-100 text-amber-800',
-  Historia: 'bg-amber-100 text-amber-800',
-  Religioso: 'bg-amber-100 text-amber-800',
-  Entretenimiento: 'bg-amber-100 text-amber-800',
-  Gastronomía: 'bg-orange-100 text-orange-800',
+  Naturaleza: CREPUSCULO,
+  Aventura: CREPUSCULO,
+  Cultura: AMBAR,
+  Historia: AMBAR,
+  Religioso: AMBAR,
+  Entretenimiento: AMBAR,
+  Gastronomía: 'bg-atardecer-50 text-atardecer-texto',
 }
 const COLOR_POR_DEFECTO = 'bg-cielo text-cielo-700'
 

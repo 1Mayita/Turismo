@@ -60,15 +60,15 @@ function PanelDepartamento({ departamento, destinos, cantidad, alCerrar, classNa
   return (
     <section
       aria-label={`Destinos de ${departamento.nombre}`}
-      className={`rounded-tarjeta border border-borde bg-white p-4 shadow-elevada ${className}`}
+      className={`animate-subir rounded-tarjeta border border-borde bg-white p-4 shadow-flotante ${className}`}
       onKeyDown={(evento) => {
         if (evento.key === 'Escape') alCerrar()
       }}
     >
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-cobre-texto">Departamento</p>
-          <h2 ref={titulo} tabIndex={-1} className="titulo-display text-[32px] outline-none">{departamento.nombre}</h2>
+          <p className="rotulo">Departamento</p>
+          <h2 ref={titulo} tabIndex={-1} className="titulo-display mt-1 text-[30px] outline-none">{departamento.nombre}</h2>
         </div>
         <button type="button" onClick={alCerrar} aria-label="Cerrar" className="-mr-1 -mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-piedra-texto transition hover:bg-sal-2 hover:text-noche">
           <X aria-hidden="true" />
@@ -82,7 +82,7 @@ function PanelDepartamento({ departamento, destinos, cantidad, alCerrar, classNa
           {destinos.map((destino) => (
             <li key={destino.id}>
               <Link to={`/destinos/${destino.id}`} className="flex min-h-11 items-center gap-3 rounded-control p-1.5 transition hover:bg-sal-2">
-                <ImagenSegura src={destino.imagen_principal} alt="" loading="lazy" className="h-12 w-12 shrink-0 rounded-control object-cover" />
+                <ImagenSegura src={destino.imagen_principal} alt="" loading="lazy" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-bold text-noche">{destino.nombre}</span>
                   <span className="flex items-center gap-1 truncate text-xs text-piedra-texto">
@@ -105,9 +105,10 @@ function PanelDepartamento({ departamento, destinos, cantidad, alCerrar, classNa
 }
 
 // Mapa del inicio: 3D interactivo en escritorio y 2D en celular o equipos
-// lentos. Mientras el 3D se descarga se ve el 2D con el mismo encuadre.
+// lentos. Mientras el 3D se descarga se ve el 2D como placeholder.
 // Al elegir un departamento (mapa o lista) se abre su panel con destacados.
-function HeroMapa({ destinos, cantidades, idActivo, alElegir, pines }) {
+// "oscuro": textos y botones claros para usarlo sobre un fondo azul noche.
+function HeroMapa({ destinos, cantidades, idActivo, alElegir, pines, oscuro = false }) {
   const [usar3D, setUsar3D] = useState(false)
   const [idPanel, setIdPanel] = useState('')
   // Botón desde el que se abrió el panel, para devolverle el foco al cerrarlo.
@@ -148,7 +149,7 @@ function HeroMapa({ destinos, cantidades, idActivo, alElegir, pines }) {
         {usar3D ? (
           <SiFalla3D alFallar={() => setUsar3D(false)}>
             <Suspense fallback={mapa2D}>
-              <MapaBolivia3D cantidades={cantidades} idActivo={idActivo} alElegir={elegir} pines={pines} conPanel={Boolean(idPanel)} alFallar={() => setUsar3D(false)} />
+              <MapaBolivia3D cantidades={cantidades} idActivo={idActivo} alElegir={elegir} pines={pines} conPanel={Boolean(idPanel)} />
             </Suspense>
           </SiFalla3D>
         ) : mapa2D}
@@ -164,12 +165,14 @@ function HeroMapa({ destinos, cantidades, idActivo, alElegir, pines }) {
         )}
       </div>
 
-      <figcaption className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-piedra-texto">
+      <figcaption className={`mt-3 flex flex-wrap items-center justify-between gap-2 border-t pt-3 text-sm ${oscuro ? 'border-white/15 text-white/75' : 'border-borde text-piedra-texto'}`}>
         <span className="inline-flex items-center gap-1.5">
-          {usar3D ? <Move3d aria-hidden="true" size={16} className="text-atardecer-700" /> : <MapPinned aria-hidden="true" size={16} className="text-atardecer-700" />}
+          {usar3D
+            ? <Move3d aria-hidden="true" size={16} className={oscuro ? 'text-atardecer' : 'text-atardecer-texto'} />
+            : <MapPinned aria-hidden="true" size={16} className={oscuro ? 'text-atardecer' : 'text-atardecer-texto'} />}
           {usar3D ? 'Arrastra para girar el mapa y toca un departamento' : 'Toca un departamento para ver sus destinos'}
         </span>
-        <span className="text-xs">{CREDITO_MAPA}</span>
+        <span className={`text-xs ${oscuro ? 'text-white/50' : 'text-piedra-texto/80'}`}>{CREDITO_MAPA}</span>
       </figcaption>
 
       {/* La misma acción que tocar el mapa, para teclado y lectores de pantalla. */}
@@ -181,8 +184,10 @@ function HeroMapa({ destinos, cantidades, idActivo, alElegir, pines }) {
                 type="button"
                 onClick={() => elegir(departamento.id)}
                 aria-pressed={idPanel === departamento.id}
-                className={`min-h-11 rounded-full px-3 text-sm font-semibold transition ${
-                  idPanel === departamento.id ? 'bg-noche text-white' : 'text-piedra-texto hover:bg-white hover:text-noche'
+                className={`min-h-9 rounded-full border px-3 text-[13px] font-semibold transition-colors ${
+                  oscuro
+                    ? idPanel === departamento.id ? 'border-white bg-white text-noche' : 'border-white/20 bg-white/5 text-white/85 hover:border-white/60 hover:text-white'
+                    : idPanel === departamento.id ? 'border-noche bg-noche text-white' : 'border-borde bg-white text-noche/80 hover:border-noche/40 hover:text-noche'
                 }`}
               >
                 {departamento.nombre}

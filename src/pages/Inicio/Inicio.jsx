@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowRight, CalendarDays, Heart, Map as IconoMapa, MapPin, Route, Share2 } from 'lucide-react'
+import { ArrowRight, CalendarDays, ChevronDown, Heart, Map as IconoMapa, MapPin, Route, Share2 } from 'lucide-react'
 import Navbar from '../../components/Navbar.jsx'
 import BarraBusqueda from '../../components/BarraBusqueda.jsx'
 import RecomendadoParaTi from '../../components/RecomendadoParaTi.jsx'
 import TarjetaDestino from '../../components/TarjetaDestino.jsx'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
 import HeroMapa from '../../components/mapa/HeroMapa.jsx'
-import { Aparecer, Carrusel, Chip, EncabezadoSeccion, EstadoVacio, EsqueletoTarjetaBase, claseBoton, iconoDeCategoria } from '../../components/ui'
+import { Aparecer, Carrusel, Chip, EncabezadoSeccion, EstadoVacio, EsqueletoTarjetaBase, FondoTarjetaFoto, claseBoton, claseBotonFoto, claseTarjetaFoto, iconoDeCategoria } from '../../components/ui'
 import { useAuth } from '../../context/useAuth.js'
 import { destinosDeEjemplo, getDestinos } from '../../services/destinosService.js'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
@@ -22,6 +22,12 @@ const MAXIMO_PLATOS = 5
 // El reflejo del cielo en el Salar de Uyuni, en tamaño grande.
 const FOTO_SALAR = FOTOS['salar-de-uyuni'].imagenes[1].replace('width=960', 'width=1600')
 const CREDITO_FOTO_SALAR = 'Foto: Christopher Crouzet (CC BY-SA 4.0) — Wikimedia Commons'
+// Fondo del hero: atardecer en el Salar de Uyuni.
+const FOTO_HERO = FOTOS['salar-de-uyuni'].imagenes[2].replace('width=960', 'width=1920')
+const CREDITO_FOTO_HERO = 'Foto: Luca Galuzzi (CC BY-SA 2.5) — Wikimedia Commons'
+// Ancho de las secciones del inicio: aprovecha toda la pantalla, alineado
+// con la barra de navegación.
+const ANCHO = 'contenedor max-w-[1440px]'
 const TODOS = ''
 // Departamento por defecto del sistema (DESIGN.md §6.1). Si todavía no tiene
 // destinos publicados, se muestran los destacados de todo el país.
@@ -34,6 +40,31 @@ const PASOS_DEL_VIAJE = [
   { icono: Route, texto: 'Ordénalos en tu itinerario y mira la ruta en el mapa.' },
   { icono: Share2, texto: 'Compártelo con quienes viajan contigo.' },
 ]
+
+// Número que cuenta desde 0 hasta "valor" al aparecer (0,9 s, frena al final).
+// Con "reducir movimiento" se muestra directo.
+function Cifra({ valor }) {
+  const [mostrado, setMostrado] = useState(0)
+  const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  useEffect(() => {
+    if (reducir) return
+    const inicio = performance.now()
+    let id
+    function paso(ahora) {
+      const avance = Math.min(1, (ahora - inicio) / 900)
+      setMostrado(Math.round(valor * (1 - (1 - avance) ** 3)))
+      if (avance < 1) id = requestAnimationFrame(paso)
+    }
+    id = requestAnimationFrame(paso)
+    return () => cancelAnimationFrame(id)
+  }, [valor, reducir])
+
+  return reducir ? valor : mostrado
+}
+
+// Retraso escalonado para la entrada de los elementos del hero.
+const retraso = (segundos) => ({ animationDelay: `${segundos}s` })
 
 // "oct." → "oct", para el recuadro de fecha de los eventos.
 function mesCorto(fechaISO) {
@@ -52,29 +83,27 @@ function TarjetaEvento({ evento, indice }) {
   const dia = Number(evento.fecha_inicio?.split('-')[2]) || ''
   return (
     <Aparecer como="li" indice={indice}>
-      <Link
-        to="/eventos"
-        className="group flex h-full flex-col rounded-tarjeta border border-borde bg-white p-3 shadow-suave transition-shadow duration-150 hover:shadow-elevada"
-      >
-        <div className="relative aspect-[16/10] overflow-hidden rounded-imagen bg-sal-2">
-          <ImagenSegura src={evento.imagen} alt={evento.nombre} loading="lazy" decoding="async" className="h-full w-full object-cover" />
-          <div className="absolute left-3 top-3 flex min-w-16 flex-col items-center rounded-control bg-white px-3 pb-1.5 pt-1 text-center shadow-suave">
-            <span className="titulo-display text-[32px] leading-none">{dia}</span>
-            <span className="text-xs font-bold uppercase tracking-wider text-atardecer-700">{mesCorto(evento.fecha_inicio)}</span>
-          </div>
+      <Link to="/eventos" className={`group tarjeta-hover ${claseTarjetaFoto}`}>
+        <FondoTarjetaFoto src={evento.imagen} alt={evento.nombre} />
+        <div className="absolute left-4 top-4 flex min-w-16 flex-col items-center rounded-control bg-white px-3 pb-2 pt-1.5 text-center shadow-elevada">
+          <span className="text-[26px] font-bold leading-none tracking-tight text-noche">{dia}</span>
+          <span className="mt-0.5 text-[11px] font-bold uppercase tracking-[0.12em] text-atardecer-texto">{mesCorto(evento.fecha_inicio)}</span>
         </div>
-        <div className="flex flex-1 flex-col px-2 pb-1 pt-4">
-          <h3 className="text-lg font-bold leading-snug text-noche">{evento.nombre}</h3>
-          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-piedra-texto">
-            <CalendarDays aria-hidden="true" size={16} className="shrink-0 text-piedra" />
+        <div className="relative p-5">
+          <h3 className="titulo-display text-[30px] leading-tight text-white">{evento.nombre}</h3>
+          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-white/85">
+            <CalendarDays aria-hidden="true" size={16} className="shrink-0" />
             {rangoDeFechas(evento)}
           </p>
           {evento.ubicacion && (
-            <p className="mt-1 flex items-center gap-1.5 text-sm text-piedra-texto">
-              <MapPin aria-hidden="true" size={16} className="shrink-0 text-piedra" />
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-white/85">
+              <MapPin aria-hidden="true" size={16} className="shrink-0" />
               {evento.ubicacion}
             </p>
           )}
+          <span className={`mt-4 ${claseBotonFoto}`}>
+            Ver más <ArrowRight aria-hidden="true" size={16} />
+          </span>
         </div>
       </Link>
     </Aparecer>
@@ -165,38 +194,55 @@ function Inicio() {
     setIdDepartamentoElegido(id)
   }
 
-  const claseSecundarioHero = claseBoton('secundario', 'normal', 'bg-white/70')
+  const claseEnlaceHero = 'inline-flex min-h-12 items-center gap-2 rounded-control px-3 text-[15px] font-bold text-white transition-colors hover:bg-white/10'
 
   return (
     <div className="min-h-screen">
-      <Navbar />
+      <Navbar anchoCompleto />
 
-      {/* ---------- Hero ---------- */}
-      <section className="relative overflow-hidden border-b border-borde bg-sal">
-        <div className="contenedor grid max-w-6xl items-center gap-10 py-12 sm:py-16 lg:grid-cols-[1fr_1.05fr] lg:gap-6 lg:py-20">
+      {/* ---------- Hero ----------
+          Pantalla completa en azul noche con la foto del atardecer en el
+          salar de fondo. El texto entra escalonado; la foto se acerca una
+          sola vez al cargar (nada se mueve después). Abajo, la foto se funde
+          con el fondo claro de la página, como la bruma sobre el salar. */}
+      <section className="relative isolate flex min-h-[calc(100svh-72px)] items-center overflow-hidden bg-noche text-white">
+        <div aria-hidden="true" className="absolute inset-0 -z-10 opacity-50">
+          <img src={FOTO_HERO} alt="" decoding="async" fetchPriority="high" className="h-full w-full animate-[acercar_2.6s_var(--ease-salida)_both] object-cover object-[50%_70%]" />
+        </div>
+        <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[linear-gradient(100deg,#0e2233_10%,rgb(14_34_51/0.88)_42%,rgb(14_34_51/0.45)_75%,rgb(14_34_51/0.7)_100%)]" />
+        <div aria-hidden="true" className="absolute inset-x-0 bottom-0 -z-10 h-56 bg-[linear-gradient(to_bottom,rgb(248_249_251/0)_0%,rgb(248_249_251/0.12)_25%,rgb(248_249_251/0.55)_60%,rgb(248_249_251/0.9)_85%,#f8f9fb_100%)] sm:h-72" />
+
+        <div className={`${ANCHO} grid gap-10 pb-28 pt-12 sm:pb-44 sm:pt-16 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:gap-x-16 lg:pb-48 lg:pt-14`}>
           <div className="max-w-xl">
-            <p className="mb-5 text-xs font-bold uppercase tracking-[0.2em] text-cobre-texto">Turismo en Bolivia</p>
-            <h1 className="titulo-display text-[40px] sm:text-[56px]">
-              Descubre Bolivia
-              <span className="mt-1 block text-[28px] font-medium italic text-cobre-texto sm:text-[36px]">de sus salares a su Amazonía</span>
+            <p className="rotulo mb-5 animate-entrar text-atardecer" style={retraso(0.05)}>Turismo en Bolivia</p>
+            <h1 className="titulo-display animate-entrar text-[42px] leading-[1.03] text-white sm:text-[64px] xl:text-[72px]" style={retraso(0.12)}>
+              Descubre Bolivia,{' '}
+              <span className="text-white/55">de sus salares a su Amazonía</span>
             </h1>
-            <p className="texto-lectura mt-5 text-lg text-piedra-texto">
+            <p className="texto-lectura mt-6 max-w-md animate-entrar text-base text-white/75 sm:text-lg" style={retraso(0.22)}>
               Destinos, eventos, dónde comer y dónde dormir en los nueve departamentos, en un solo lugar.
             </p>
 
-            <BarraBusqueda tamano="grande" onBuscar={buscar} placeholder="¿A dónde vamos hoy?" className="mt-8" />
+            <div className="animate-entrar" style={retraso(0.3)}>
+              <BarraBusqueda tamano="grande" onBuscar={buscar} placeholder="¿A dónde vamos hoy?" className="mt-8" />
+            </div>
 
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Link to="/destinos" className={claseSecundarioHero}>Explorar destinos</Link>
-              <Link to="/departamentos" className={claseSecundarioHero}>Ver departamentos</Link>
-              <Link to="/mapa" className={claseSecundarioHero}>
-                <IconoMapa aria-hidden="true" size={18} />
+            {/* El buscador ya lleva el acento: "Explorar" va en blanco y el
+                resto como enlaces, para que no compitan cuatro botones iguales. */}
+            <div className="mt-5 flex animate-entrar flex-wrap items-center gap-1" style={retraso(0.38)}>
+              <Link to="/destinos" className={claseBoton('secundario', 'normal', 'group mr-2 border-white px-6 hover:border-white hover:bg-white/90')}>
+                Explorar destinos
+                <ArrowRight aria-hidden="true" size={18} className="transition-transform duration-200 group-hover:translate-x-0.5" />
+              </Link>
+              <Link to="/departamentos" className={claseEnlaceHero}>Ver departamentos</Link>
+              <Link to="/mapa" className={claseEnlaceHero}>
+                <IconoMapa aria-hidden="true" size={18} className="text-cielo-claro" />
                 Abrir el mapa
               </Link>
             </div>
 
             {!cargando && (
-              <dl className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-borde pt-6">
+              <dl className="mt-12 grid max-w-md animate-entrar grid-cols-3 divide-x divide-white/15 border-t border-white/15 pt-6 [&>div:not(:first-child)]:pl-5" style={retraso(0.1)}>
                 {[
                   [departamentos.length, 'Departamentos'],
                   [categorias.length, 'Categorías turísticas'],
@@ -204,47 +250,59 @@ function Inicio() {
                 ].map(([valor, etiqueta]) => (
                   <div key={etiqueta}>
                     <dt className="sr-only">{etiqueta}</dt>
-                    <dd className="titulo-display text-[36px] leading-none">{valor}</dd>
-                    <dd aria-hidden="true" className="mt-1.5 text-sm text-piedra-texto">{etiqueta}</dd>
+                    <dd className="text-[32px] font-bold leading-none tracking-[-0.02em] tabular-nums text-white sm:text-[38px]"><Cifra valor={valor} /></dd>
+                    <dd aria-hidden="true" className="mt-2 text-xs leading-snug text-white/60 sm:text-[13px]">{etiqueta}</dd>
                   </div>
                 ))}
               </dl>
             )}
           </div>
 
-          <HeroMapa
-            destinos={destinos}
-            cantidades={cantidades}
-            idActivo={departamentoActivo?.id || (cantidades[idDepartamentoElegido] === 0 ? idDepartamentoElegido : '')}
-            alElegir={elegirDepartamento}
-            pines={pines}
-          />
+          <div className="animate-[fundido_0.9s_ease-out_0.25s_both]">
+            <HeroMapa
+              oscuro
+              destinos={destinos}
+              cantidades={cantidades}
+              idActivo={departamentoActivo?.id || idDepartamentoElegido}
+              alElegir={elegirDepartamento}
+              pines={pines}
+            />
+          </div>
         </div>
+
+        <p className="absolute bottom-3 right-4 text-[11px] text-piedra-texto/80 sm:right-6">{CREDITO_FOTO_HERO}</p>
+        <a
+          href="#contenido-inicio"
+          className="absolute bottom-5 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1 text-xs font-semibold text-noche/60 transition-colors hover:text-noche lg:flex"
+        >
+          Seguir explorando
+          <ChevronDown aria-hidden="true" size={18} />
+        </a>
       </section>
 
-      <main>
+      <main id="contenido-inicio" className="scroll-mt-[72px]">
         {error && (
-          <div className="contenedor max-w-6xl pt-8">
+          <div className={`${ANCHO} pt-8`}>
             <p className="rounded-control border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{error}</p>
           </div>
         )}
 
         {/* ---------- 1. Categorías ---------- */}
         {categoriasConDestinos.length > 0 && (
-          <section aria-labelledby="titulo-categorias" className="contenedor max-w-6xl pt-12 lg:pt-16">
-            <h2 id="titulo-categorias" className="mb-4 text-sm font-bold text-piedra-texto">¿Qué te gustaría hacer?</h2>
-            <ul className="flex flex-wrap gap-2.5">
+          <section aria-labelledby="titulo-categorias" className={`${ANCHO} pt-12 lg:pt-16`}>
+            <h2 id="titulo-categorias" className="mb-4 text-[15px] font-bold text-noche">¿Qué te gustaría hacer?</h2>
+            <ul className="flex flex-wrap gap-2">
               {categoriasConDestinos.map((categoria) => {
                 const Icono = iconoDeCategoria(categoria.nombre)
                 return (
                   <li key={categoria.id || categoria.nombre}>
                     <Link
                       to={`/destinos?categoria=${encodeURIComponent(categoria.nombre)}`}
-                      className="inline-flex min-h-11 items-center gap-2 rounded-full bg-cielo px-4 py-2 text-sm font-bold text-noche transition duration-150 hover:bg-noche hover:text-white"
+                      className="group inline-flex min-h-11 items-center gap-2 rounded-full border border-borde bg-white py-2 pl-3.5 pr-2 text-sm font-bold text-noche transition-colors duration-150 hover:border-noche hover:bg-noche hover:text-white"
                     >
-                      <Icono aria-hidden="true" size={18} className="shrink-0" />
+                      <Icono aria-hidden="true" size={18} className="shrink-0 text-cielo-700 transition-colors group-hover:text-white" />
                       {categoria.nombre}
-                      <span className="font-medium opacity-70">{categoria.cantidad}</span>
+                      <span className="ml-0.5 rounded-full bg-sal-2 px-2 py-0.5 text-xs font-bold text-piedra-texto transition-colors group-hover:bg-white/15 group-hover:text-white">{categoria.cantidad}</span>
                     </Link>
                   </li>
                 )
@@ -254,7 +312,7 @@ function Inicio() {
         )}
 
         {/* ---------- 2. Destacados del departamento ---------- */}
-        <section id="destacados" aria-labelledby="titulo-destacados" className="contenedor max-w-6xl scroll-mt-24 py-14 lg:py-24">
+        <section id="destacados" aria-labelledby="titulo-destacados" className={`${ANCHO} scroll-mt-24 pb-14 pt-12 lg:pb-24 lg:pt-16`}>
           <EncabezadoSeccion
             id="titulo-destacados"
             antetitulo="Destacados"
@@ -295,13 +353,13 @@ function Inicio() {
               {departamentoActivo && (
                 <Link
                   to={`/departamentos/${departamentoActivo.id}`}
-                  className="flex w-[82%] shrink-0 snap-start flex-col justify-center rounded-tarjeta border-2 border-dashed border-borde bg-sal-2/70 p-8 transition hover:border-cobre sm:w-[300px]"
+                  className="group flex w-[82%] shrink-0 snap-start flex-col justify-center rounded-tarjeta border border-borde bg-sal-2 p-8 transition-colors hover:border-cobre sm:w-[300px]"
                 >
                   <p className="titulo-display text-[32px]">Más sobre {departamentoActivo.nombre}</p>
                   <p className="mt-3 text-sm leading-6 text-piedra-texto">Municipios, dónde comer y dónde dormir en este departamento.</p>
-                  <span className="mt-5 inline-flex items-center gap-1.5 font-bold text-cielo-700">
+                  <span className="mt-6 inline-flex items-center gap-1.5 font-bold text-cielo-700">
                     Ver todos los destinos de {departamentoActivo.nombre}
-                    <ArrowRight aria-hidden="true" size={18} />
+                    <ArrowRight aria-hidden="true" size={18} className="shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
                   </span>
                 </Link>
               )}
@@ -319,14 +377,14 @@ function Inicio() {
         {/* ---------- Recomendado para ti (solo con sesión) ---------- */}
         {usuario && (
           <div className="bg-sal-2 py-14 lg:py-24">
-            <RecomendadoParaTi className="contenedor max-w-6xl" />
+            <RecomendadoParaTi className={ANCHO} />
           </div>
         )}
 
         {/* ---------- 3. Próximos eventos ---------- */}
         {/* Sin "Recomendado para ti" en medio, esta sección sigue a Destacados
             sobre el mismo fondo: no repite el espacio de arriba. */}
-        <section aria-labelledby="titulo-eventos" className={`contenedor max-w-6xl pb-14 lg:pb-24 ${usuario ? 'pt-14 lg:pt-24' : ''}`}>
+        <section aria-labelledby="titulo-eventos" className={`${ANCHO} pb-14 lg:pb-24 ${usuario ? 'pt-14 lg:pt-24' : ''}`}>
           <EncabezadoSeccion
             id="titulo-eventos"
             antetitulo="Agenda"
@@ -361,7 +419,7 @@ function Inicio() {
         {/* ---------- 4. Gastronomía ---------- */}
         {(cargandoExtras || platos.length > 0) && (
           <section aria-labelledby="titulo-gastronomia" className="bg-sal-2 py-14 lg:py-24">
-            <div className="contenedor max-w-6xl">
+            <div className={ANCHO}>
               <EncabezadoSeccion
                 id="titulo-gastronomia"
                 antetitulo="Sabores de Bolivia"
@@ -388,10 +446,10 @@ function Inicio() {
                       indice={indice}
                       className={indice === 0 ? 'col-span-2 aspect-[4/3] lg:row-span-2 lg:aspect-auto' : 'aspect-square lg:aspect-auto'}
                     >
-                      <Link to="/gastronomia" title={plato.credito_imagen || undefined} className="group relative block h-full overflow-hidden rounded-tarjeta bg-noche shadow-suave">
-                        <ImagenSegura src={plato.imagen} alt={plato.nombre} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                      <Link to="/gastronomia" title={plato.credito_imagen || undefined} className="group relative block h-full overflow-hidden rounded-tarjeta bg-noche">
+                        <ImagenSegura src={plato.imagen} alt={plato.nombre} loading="lazy" decoding="async" className="zoom-foto h-full w-full object-cover" />
                         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-noche/85 via-noche/40 to-transparent px-4 pb-4 pt-12 text-white">
-                          <h3 className={`font-bold leading-tight ${indice === 0 ? 'titulo-display text-[32px] text-white sm:text-[40px]' : 'text-base sm:text-lg'}`}>{plato.nombre}</h3>
+                          <h3 className={`font-bold leading-tight ${indice === 0 ? 'text-2xl tracking-tight sm:text-[28px]' : 'text-base sm:text-lg'}`}>{plato.nombre}</h3>
                           {plato.origen && <p className="mt-0.5 text-sm text-white/85">{plato.origen}</p>}
                         </div>
                       </Link>
@@ -404,19 +462,19 @@ function Inicio() {
         )}
 
         {/* ---------- 5. Arma tu viaje ---------- */}
-        <section aria-labelledby="titulo-viaje" className="contenedor max-w-6xl pt-14 lg:pt-24">
-          <div className="grid items-center gap-8 overflow-hidden rounded-tarjeta border border-borde bg-white p-5 shadow-suave sm:p-8 lg:grid-cols-2 lg:gap-12 lg:p-12">
+        <section aria-labelledby="titulo-viaje" className={`${ANCHO} pt-14 lg:pt-24`}>
+          <div className="grid items-center gap-8 overflow-hidden rounded-tarjeta border border-borde bg-white p-5 sm:p-8 lg:grid-cols-2 lg:gap-14 lg:p-12">
             <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Mis viajes</p>
-              <h2 id="titulo-viaje" className="titulo-display text-[36px] sm:text-[48px]">Arma tu viaje</h2>
+              <p className="rotulo mb-3">Mis viajes</p>
+              <h2 id="titulo-viaje" className="titulo-display text-[38px] sm:text-[50px]">Arma tu viaje</h2>
               <p className="texto-lectura mt-3 text-lg text-piedra-texto">Junta en un solo lugar todo lo que quieres conocer y llega con el recorrido listo.</p>
-              <ol className="mt-7 space-y-4">
+              <ol className="mt-8 divide-y divide-borde border-y border-borde">
                 {PASOS_DEL_VIAJE.map(({ icono: Icono, texto }, indice) => (
-                  <li key={texto} className="flex items-start gap-4">
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-cielo text-cielo-700" aria-hidden="true">
-                      <Icono />
+                  <li key={texto} className="flex items-center gap-4 py-4">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cielo text-cielo-700" aria-hidden="true">
+                      <Icono size={18} />
                     </span>
-                    <p className="pt-2.5 text-base text-noche">
+                    <p className="text-base text-noche">
                       <span className="sr-only">Paso {indice + 1}: </span>
                       {texto}
                     </p>
@@ -432,7 +490,7 @@ function Inicio() {
               </div>
             </div>
             <figure className="relative">
-              <img src={FOTO_SALAR} alt="El cielo reflejado en el Salar de Uyuni" loading="lazy" decoding="async" className="aspect-[4/3] w-full rounded-imagen object-cover" />
+              <img src={FOTO_SALAR} alt="El cielo reflejado en el Salar de Uyuni" loading="lazy" decoding="async" className="aspect-[4/3] w-full rounded-imagen object-cover lg:aspect-[4/5]" />
               <figcaption className="mt-2 text-xs text-piedra-texto">{CREDITO_FOTO_SALAR}</figcaption>
             </figure>
           </div>

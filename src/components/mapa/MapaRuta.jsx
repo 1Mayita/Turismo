@@ -10,7 +10,7 @@ function iconoNumerado(numero) {
     iconSize: [34, 34],
     iconAnchor: [17, 17],
     popupAnchor: [0, -16],
-    html: `<div style="width:34px;height:34px;border-radius:9999px;background:#0e2233;color:#fff;border:3px solid #fff;box-shadow:0 6px 14px rgba(14,34,51,.3);display:flex;align-items:center;justify-content:center;font:800 14px/1 'Manrope',sans-serif">${numero}</div>`,
+    html: `<div style="width:34px;height:34px;border-radius:9999px;background:#0e2233;color:#fff;border:3px solid #fff;box-shadow:0 6px 14px rgba(14,34,51,.3);display:flex;align-items:center;justify-content:center;font:800 14px/1 'Hanken Grotesk',sans-serif">${numero}</div>`,
   })
 }
 
@@ -41,7 +41,7 @@ function MapaRuta({ puntos }) {
         />
         <Encuadrar puntos={puntos} />
         {puntos.length > 1 && (
-          <Polyline positions={puntos.map((punto) => punto.posicion)} pathOptions={{ color: '#b4532a', weight: 3, opacity: 0.9, dashArray: '8 10' }} />
+          <Polyline positions={puntos.map((punto) => punto.posicion)} pathOptions={{ color: '#d97c52', weight: 3, opacity: 0.9, dashArray: '8 10' }} />
         )}
         {puntos.map((punto) => (
           <Marker key={`${punto.numero}-${punto.nombre}`} position={punto.posicion} icon={iconoNumerado(punto.numero)} title={`${punto.numero}. ${punto.nombre}`}>

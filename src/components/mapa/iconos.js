@@ -1,15 +1,16 @@
 import L from 'leaflet'
 import { SVG_DE_ICONO } from './iconosSvg.js'
 
-// Color de los marcadores según el TIPO de lugar (no la categoría): son 3
-// colores fáciles de distinguir, también con daltonismo (paleta validada con
-// el validador del skill de visualización). La categoría del destino se
-// reconoce por el ícono Lucide de adentro y por su nombre en la lista.
+// Color de los marcadores según el TIPO de lugar (no la categoría), tomados
+// de la foto del atardecer en el salar. Se distinguen por tono y por claridad
+// (naranja, malva, azul crepúsculo claro y azul noche), y todos dejan leer el
+// ícono blanco. La categoría del destino se reconoce por el ícono Lucide de
+// adentro y por su nombre en la lista.
 export const COLOR_POR_TIPO = {
-  destino: '#b4532a', // atardecer-700
-  restaurante: '#2a78d6',
-  alojamiento: '#008300',
-  evento: '#9333ea',
+  destino: '#cf7a50', // sol del atardecer
+  restaurante: '#8a5a7e', // malva del cielo
+  alojamiento: '#5f78a6', // azul crepúsculo
+  evento: '#1f2a44', // azul noche
 }
 
 // Las categorías de destino usan su nombre; restaurantes y alojamientos

@@ -37,18 +37,18 @@ function Campana() {
         aria-expanded={abierta}
         aria-label={etiqueta}
         title={etiqueta}
-        className={`relative flex h-11 w-11 items-center justify-center rounded-full text-noche transition hover:bg-cielo/70 ${abierta ? 'bg-cielo' : ''}`}
+        className={`relative flex h-11 w-11 items-center justify-center rounded-full text-white transition hover:bg-white/10 ${abierta ? 'bg-white/10' : ''}`}
       >
         <Bell aria-hidden="true" size={22} />
         {noLeidas > 0 && (
-          <span className="absolute right-0.5 top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-atardecer-700 px-1 text-[11px] font-bold text-white ring-2 ring-sal" aria-hidden="true">
+          <span className="absolute right-0.5 top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-atardecer-700 px-1 text-[11px] font-bold text-noche ring-2 ring-noche" aria-hidden="true">
             {noLeidas > 9 ? '9+' : noLeidas}
           </span>
         )}
       </button>
 
       {abierta && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-tarjeta border border-borde bg-white shadow-elevada">
+        <div className="absolute right-0 top-full z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] overflow-hidden animate-desplegar rounded-tarjeta border border-borde bg-white shadow-flotante">
           <div className="flex items-center justify-between gap-3 border-b border-borde px-4 py-3">
             <p className="font-bold text-noche">Notificaciones</p>
             {noLeidas > 0 && (

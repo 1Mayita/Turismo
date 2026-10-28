@@ -190,10 +190,10 @@ function Perfil() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="contenedor max-w-6xl py-10">
+      <main className="contenedor max-w-[1440px] py-10">
         {esBienvenida && (
           <div className="mb-6 rounded-tarjeta border border-borde bg-cielo/60 p-5">
-            <p className="flex items-center gap-2 text-lg font-bold text-noche"><Sparkles aria-hidden="true" size={20} className="text-atardecer-700" /> ¡Tu cuenta está lista!</p>
+            <p className="flex items-center gap-2 text-lg font-bold text-noche"><Sparkles aria-hidden="true" size={20} className="text-atardecer-texto" /> ¡Tu cuenta está lista!</p>
             <p className="mt-1 text-sm text-piedra-texto">
               Marca abajo las categorías que más te interesan y guarda los cambios. Puedes cambiarlas cuando quieras desde tu perfil.
             </p>
@@ -314,7 +314,7 @@ function Perfil() {
                   </button>
                 </div>
 
-                <p className="mt-4 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Mi perfil</p>
+                <p className="mt-4 rotulo">Mi perfil</p>
                 <h1 className="titulo-display mt-1 text-[40px] capitalize sm:text-[48px]">{nombreCompleto}</h1>
 
                 <dl className="mt-4 flex flex-wrap gap-x-8 gap-y-2 text-sm text-piedra-texto">
@@ -373,7 +373,7 @@ function Perfil() {
           <section id="favoritos" className="mt-12 scroll-mt-24">
             <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Guardados</p>
+                <p className="mb-2 rotulo">Guardados</p>
                 <h2 className="titulo-display flex items-center gap-3 text-[40px]"><Heart aria-hidden="true" size={28} className="text-atardecer" /> Mis favoritos</h2>
               </div>
               <Link to="/destinos" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-cielo-700 hover:underline">

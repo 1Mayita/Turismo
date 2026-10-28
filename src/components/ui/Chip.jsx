@@ -8,8 +8,11 @@ const TAMANOS = {
   normal: 'min-h-11 gap-2 px-4 py-2 text-sm',
   pequeno: 'min-h-7 gap-1.5 px-2.5 py-0.5 text-xs',
 }
+// Las etiquetas fijas usan el fondo cielo; los filtros tocables, un contorno
+// sobre blanco para que se lean como botones.
 const INACTIVO = 'bg-cielo text-noche'
-const ACTIVO = 'bg-noche text-white'
+const INACTIVO_TOCABLE = 'border border-borde bg-white text-noche'
+const ACTIVO = 'border border-noche bg-noche text-white'
 
 // Píldora para categorías y filtros.
 //  - Con onClick es un botón que se activa/desactiva (aria-pressed).
@@ -42,7 +45,7 @@ function Chip({ activo = false, icono: Icono, onClick, onQuitar, etiquetaQuitar,
         type="button"
         onClick={onClick}
         aria-pressed={activo}
-        className={`${BASE} ${colores} ${activo ? '' : 'hover:bg-cielo-600/25'} focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-cielo-600 ${className}`}
+        className={`${BASE} ${activo ? ACTIVO : `${INACTIVO_TOCABLE} hover:border-noche/40 hover:bg-sal`} ${TAMANOS[tamano] || TAMANOS.normal} active:scale-[0.97] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-cielo-600 ${className}`}
       >
         {icono}
         {children}

@@ -1,32 +1,68 @@
 @import "tailwindcss";
 
-/* Sistema de diseño de "Rutas de Bolivia". Está en transición al rediseño
-   "Salar cálido" (DESIGN.md): los tokens nuevos están más abajo y las páginas
-   se van pasando a ellos fase por fase.
-   Cambiar el look del sitio entero pasa por aquí: las páginas usan estos
-   nombres (brand, accent, cristal...), no colores sueltos.
+/* Sistema de diseño de "Rutas de Bolivia" — dirección "Salar editorial"
+   (DESIGN.md). Cambiar el look del sitio entero pasa por aquí: las páginas
+   usan estos nombres (brand, slate, cristal...), no colores sueltos.
 
-   - brand  = turquesa del estilo anterior. Todavía lo usan enlaces y detalles
-              de algunas páginas hasta su fase del rediseño.
+   - brand  = azul "laguna", apagado. Reemplaza al turquesa del estilo
+              anterior para que enlaces y botones heredados combinen con la
+              paleta del salar sin tocar cada página.
+   - slate / sky / neutral se redefinen con grises teñidos de "noche" y del
+     salar: así los textos y bordes que aún usan clases de Tailwind quedan
+     dentro de la misma familia de color.
    - accent = café de la tierra y la madera. Se usa poco: rótulos y detalles.
-   - El verde esmeralda (naturaleza) y el ámbar (cultura) quedan solo en las
+   - El verde esmeralda y el ámbar quedan para estados (éxito, aviso) y las
      insignias de categoría. */
 @theme {
-  --font-sans: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
-  --color-brand-50: #ecfeff;
-  --color-brand-100: #cffafe;
-  --color-brand-200: #a5f3fc;
-  --color-brand-300: #67e8f9;
-  --color-brand-400: #22d3ee;
-  --color-brand-500: #06b6d4;
-  --color-brand-600: #0891b2;
-  --color-brand-700: #0e7490;
-  --color-brand-800: #155e75;
-  --color-brand-900: #164e63;
-  --color-brand-950: #083344;
+  --color-brand-50: #eff0f6;
+  --color-brand-100: #e1e4ef;
+  --color-brand-200: #c6cbe0;
+  --color-brand-300: #a3abca;
+  --color-brand-400: #7f89b0;
+  --color-brand-500: #626d96;
+  --color-brand-600: #4f5a82;
+  --color-brand-700: #414b6e;
+  --color-brand-800: #353e5b;
+  --color-brand-900: #2a3149;
+  --color-brand-950: #1c2133;
 
-  --color-accent-50: #fbf6f1;
+  --color-slate-50: #f6f7f8;
+  --color-slate-100: #eef1f3;
+  --color-slate-200: #e1e5e8;
+  --color-slate-300: #c8d0d6;
+  --color-slate-400: #8f9ca6;
+  --color-slate-500: #5f6e79;
+  --color-slate-600: #4b5964;
+  --color-slate-700: #36444f;
+  --color-slate-800: #22313c;
+  --color-slate-900: #0e2233;
+  --color-slate-950: #08161f;
+
+  --color-sky-50: #f5f7f8;
+  --color-sky-100: #ebeff2;
+  --color-sky-200: #dde3e7;
+  --color-sky-300: #c3ced6;
+  --color-sky-400: #7f89b0;
+  --color-sky-500: #626d96;
+  --color-sky-600: #4f5a82;
+  --color-sky-700: #414b6e;
+  --color-sky-800: #353e5b;
+  --color-sky-900: #2a3149;
+
+  --color-neutral-50: #fafaf7;
+  --color-neutral-100: #f2f0ea;
+  --color-neutral-200: #e4e2dc;
+  --color-neutral-300: #d4d1c9;
+  --color-neutral-400: #a8a49b;
+  --color-neutral-500: #77736b;
+  --color-neutral-600: #5c5952;
+  --color-neutral-700: #45423d;
+  --color-neutral-800: #2e2c29;
+  --color-neutral-900: #1c1b19;
+
+  --color-accent-50: #f2f4f9;
   --color-accent-100: #f3e6d8;
   --color-accent-200: #e6ccb0;
   --color-accent-300: #d6ab82;
@@ -35,25 +71,24 @@
   --color-accent-600: #8b5a2b;
   --color-accent-700: #6f4722;
 
-  /* ---------- Rediseño "Salar cálido" (DESIGN.md) ----------
-     Tokens nuevos. Conviven con brand/accent/cristal mientras cada página se
-     pasa al estilo nuevo en su fase; no reemplazan nada todavía. */
+  /* Tipografía: Newsreader (serif editorial con tamaños ópticos) para los
+     títulos del sitio público; Hanken Grotesk para toda la interfaz y el
+     panel de administración. */
+  --font-titulo: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-ui: 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
-  /* Tipografía: Cormorant solo para títulos grandes (>= 32px); Manrope para
-     toda la interfaz. */
-  --font-titulo: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  --font-ui: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-
-  /* Sitio público (modo claro). Valores exactos de la guía. */
-  --color-sal: #fafaf7;
-  --color-sal-2: #f2f0ea;
-  --color-cielo: #e8eef2;
-  --color-cielo-600: #6f8ba1;
+  /* Sitio público (modo claro). */
+  --color-sal: #f8f9fb;
+  --color-sal-2: #eef1f7;
+  --color-cielo: #e9ebf3;
+  --color-cielo-600: #7d87a6;
   --color-piedra: #7a8b99;
   --color-noche: #0e2233;
-  --color-cobre: #b88a5a;
-  --color-atardecer: #e07a4f;
-  --color-atardecer-hover: #c9653b;
+  /* Azul del logo. */
+  --color-marca: #1a3c62;
+  --color-cobre: #c98f62;
+  --color-atardecer: #eb9e74;
+  --color-atardecer-hover: #df8a60;
   --color-borde: #e4e2dc;
 
   /* Variantes para TEXTO con contraste AA (>= 4.5:1). Los tonos de la guía
@@ -62,19 +97,22 @@
        piedra-texto  5.1:1 sobre sal   cielo-700  5.5:1 sobre sal
        cobre-texto   5.1:1 sobre sal   atardecer-700 + texto blanco 5.0:1 */
   --color-piedra-texto: #5d6d7a;
-  --color-cielo-700: #3f6a8f;
-  --color-cobre-texto: #8a6339;
-  --color-atardecer-700: #b4532a;
-  --color-atardecer-800: #9a4523;
+  --color-cielo-700: #4a5680;
+  --color-cobre-texto: #9a5b35;
+  --color-atardecer-700: #e48f66;
+  --color-atardecer-800: #d97c52;
+  /* Atardecer para letras sobre blanco (5.2:1). */
+  --color-atardecer-texto: #a8552f;
+  --color-atardecer-50: #eef2fa;
 
   /* Superficies profesionales del panel de administración. */
-  --color-panel-fondo: #f5f6f5;
+  --color-panel-fondo: #f3f5f8;
   --color-panel-superficie: #ffffff;
-  --color-panel-borde: #e1e5e7;
-  --color-panel-texto: #26343d;
-  --color-panel-muted: #667680;
-  --color-panel-azul: #486c86;
-  --color-panel-azul-suave: #edf3f6;
+  --color-panel-borde: #e2e5e7;
+  --color-panel-texto: #1d2c37;
+  --color-panel-muted: #5f6e79;
+  --color-panel-azul: #414b6e;
+  --color-panel-azul-suave: #eceef5;
 
   /* Colores para superficies oscuras existentes, como el pie de página. */
   --color-admin-bg: #0b1a27;
@@ -89,20 +127,39 @@
   --radius-tarjeta: 16px;
   --radius-imagen: 12px;
   --radius-control: 10px;
-  --shadow-suave: 0 4px 18px rgb(14 34 51 / 0.05);
-  --shadow-elevada: 0 8px 24px rgb(14 34 51 / 0.08);
+  --shadow-suave: 0 1px 2px rgb(14 34 51 / 0.04), 0 4px 16px rgb(14 34 51 / 0.04);
+  --shadow-elevada: 0 2px 6px rgb(14 34 51 / 0.05), 0 14px 32px rgb(14 34 51 / 0.09);
+  --shadow-flotante: 0 12px 40px rgb(14 34 51 / 0.16);
   --ease-salida: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Animaciones de entrada: cortas y sin rebotes. */
+  --animate-entrar: entrar 0.34s var(--ease-salida) both;
+  --animate-desplegar: desplegar 0.18s var(--ease-salida) both;
+  --animate-fundido: fundido 0.2s ease-out both;
+  --animate-subir: subir 0.3s var(--ease-salida) both;
 }
 
 /* Título grande del sitio público (hero y títulos de sección). */
 @utility titulo-display {
   font-family: var(--font-titulo);
-  font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
-  /* Números de altura pareja (Cormorant trae por defecto los "antiguos"). */
+  font-weight: 500;
+  font-optical-sizing: auto;
+  line-height: 1.08;
+  letter-spacing: -0.022em;
   font-variant-numeric: lining-nums;
+  text-wrap: balance;
   color: var(--color-noche);
+}
+
+/* Rótulo pequeño en mayúsculas sobre los títulos (antetítulo). */
+@utility rotulo {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-cobre-texto);
 }
 
 /* Párrafo de lectura cómoda: interlineado 1.6 y ~70 caracteres por línea. */
@@ -123,23 +180,21 @@
   border: 1px solid var(--color-panel-borde);
 }
 
-/* Superficie de tarjetas, formularios y tablas. Antes era un vidrio
-   translúcido sobre el fondo celeste; con el fondo "sal" del rediseño pasa a
-   ser una tarjeta blanca con borde y sombra suaves (DESIGN.md §3.4). El
-   nombre se mantiene para no tocar las ~80 piezas que la usan. */
+/* Superficie de tarjetas, formularios y tablas: blanca con borde y sombra
+   suaves. El nombre se mantiene para no tocar las piezas que la usan. */
 @utility cristal {
   background-color: #fff;
   border: 1px solid var(--color-borde);
   box-shadow: var(--shadow-suave);
 }
 
-/* Botón de acción principal: relleno atardecer con texto blanco
-   (atardecer-700 para que el texto cumpla contraste AA). */
+/* Botón de acción principal: relleno atardecer suave (el de la foto del
+   inicio) con texto azul noche, que cumple contraste AA (6.4:1). */
 @utility boton-principal {
   background-color: var(--color-atardecer-700);
-  color: #fff;
-  box-shadow: var(--shadow-suave);
-  transition: background-color 0.18s, box-shadow 0.18s;
+  color: var(--color-noche);
+  box-shadow: 0 1px 2px rgb(168 85 47 / 0.22), inset 0 1px 0 rgb(255 255 255 / 0.25);
+  transition: background-color 0.18s, box-shadow 0.18s, transform 0.12s;
 
   &:hover {
     background-color: var(--color-atardecer-800);
@@ -147,6 +202,30 @@
 
   &:active {
     background-color: var(--color-atardecer-800);
+    transform: scale(0.98);
+  }
+}
+
+/* Tarjetas que responden al cursor: suben 2px y se refuerza la sombra. */
+@utility tarjeta-hover {
+  transition: box-shadow 0.25s var(--ease-salida), transform 0.25s var(--ease-salida), border-color 0.25s;
+
+  @media (hover: hover) {
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-elevada);
+    }
+  }
+}
+
+/* Zoom lento de la foto cuando se pasa el cursor por su tarjeta (.group). */
+@utility zoom-foto {
+  transition: transform 0.7s var(--ease-salida);
+
+  @media (hover: hover) {
+    :where(.group):hover & {
+      transform: scale(1.045);
+    }
   }
 }
 
@@ -163,7 +242,11 @@
   }
 
   @media (width >= 64rem) {
-    padding-inline: 2rem;
+    padding-inline: 2.5rem;
+  }
+
+  @media (width >= 80rem) {
+    padding-inline: 3.5rem;
   }
 }
 
@@ -178,6 +261,7 @@ body {
   font-family: var(--font-sans);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   /* Fondo "sal": blanco cálido, como el salar. */
   background-color: var(--color-sal);
@@ -186,7 +270,17 @@ body {
 h1,
 h2,
 h3 {
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+button:not(:disabled),
+[role='button'] {
+  cursor: pointer;
 }
 
 ::selection {
@@ -206,13 +300,23 @@ h3 {
   border-radius: 0.5rem;
 }
 
-/* Presentación compartida del panel de administración. */
+/* Mensajes de éxito y error: entran con un desplazamiento corto para que se
+   note que algo cambió tras guardar o fallar. */
+:where(p, div)[role='status'],
+:where(p, div)[role='alert'] {
+  animation: subir 0.28s var(--ease-salida) both;
+}
+
+/* ---------- Panel de administración ----------
+   Las páginas de gestión comparten estas reglas para que formularios,
+   tablas y acciones se vean iguales sin repetir clases en cada archivo. */
 .admin-layout {
   color: var(--color-panel-texto);
 }
 
 .admin-layout :is(h1, h2, h3) {
   color: var(--color-panel-texto);
+  letter-spacing: -0.01em;
 }
 
 .admin-layout :is(.text-slate-900, .text-slate-800, .text-slate-700) {
@@ -228,9 +332,12 @@ h3 {
   color: var(--color-panel-azul);
 }
 
-.admin-layout .bg-brand-700,
-.admin-layout .bg-brand-800 {
-  background-color: var(--color-panel-azul);
+.admin-layout :is(.bg-brand-700, .bg-brand-800) {
+  background-color: var(--color-panel-texto);
+}
+
+.admin-layout :is(.hover\:bg-brand-800, .hover\:bg-brand-700):hover {
+  background-color: #000;
 }
 
 .admin-layout .bg-brand-50,
@@ -241,22 +348,82 @@ h3 {
 .admin-layout .cristal {
   border-color: var(--color-panel-borde);
   border-radius: 12px;
-  box-shadow: none;
+  box-shadow: 0 1px 2px rgb(14 34 51 / 0.04);
 }
 
-.admin-layout .rounded-2xl,
-.admin-layout .rounded-3xl {
+.admin-layout :is(.rounded-2xl, .rounded-3xl) {
   border-radius: 12px;
 }
 
-.admin-layout :is(input, select, textarea) {
+/* Botones heredados del panel: mismo radio, alto mínimo y transición. */
+.admin-layout button:not([role='tab']),
+.admin-layout a.boton-principal {
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.12s;
+}
+
+.admin-layout :is(button, a).rounded-xl {
+  border-radius: 8px;
+}
+
+.admin-layout :is(button, a).py-3 {
+  padding-block: 0.625rem;
+}
+
+.admin-layout button:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+.admin-layout :is(input:not([type='checkbox'], [type='radio'], [type='range'], [type='file']), select, textarea) {
   border-color: var(--color-panel-borde);
   border-radius: 8px;
+  background-color: #fff;
+  color: var(--color-panel-texto);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.admin-layout :is(input:not([type='checkbox'], [type='radio'], [type='range'], [type='file']), select, textarea):hover:not(:disabled, :focus) {
+  border-color: #c8d0d6;
 }
 
 .admin-layout :is(input, select, textarea):focus {
   border-color: var(--color-panel-azul);
-  outline-color: var(--color-panel-azul);
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(65 75 110 / 0.16);
+}
+
+.admin-layout :is(input[type='checkbox'], input[type='radio']) {
+  accent-color: var(--color-panel-azul);
+}
+
+/* Formularios del panel: una sección clara con un filete arriba en el color
+   de la acción, para distinguir "estoy editando" de las listas. */
+.admin-layout form.cristal {
+  border-top: 3px solid var(--color-panel-azul);
+  animation: entrar 0.3s var(--ease-salida) both;
+}
+
+.admin-layout form.cristal > h2:first-child {
+  font-size: 1.125rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-panel-borde);
+}
+
+.admin-layout form {
+  scroll-margin-top: 96px;
+}
+
+/* Avisos de éxito y error del panel: filete lateral del mismo color. */
+.admin-layout p:is([role='status'], [role='alert']) {
+  border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+  border-left: 3px solid currentColor;
+  border-radius: 8px;
+}
+
+.admin-layout fieldset {
+  border-color: var(--color-panel-borde);
+  border-radius: 10px;
 }
 
 .admin-layout table {
@@ -265,22 +432,103 @@ h3 {
 }
 
 .admin-layout thead {
-  background-color: var(--color-panel-fondo);
+  background-color: #f8f9f9;
   color: var(--color-panel-muted);
+  border-bottom: 1px solid var(--color-panel-borde);
 }
 
 .admin-layout th {
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
-  padding-block: 0.8rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding-block: 0.75rem;
+  white-space: nowrap;
 }
 
 .admin-layout td {
   border-color: var(--color-panel-borde);
+  vertical-align: middle;
+}
+
+.admin-layout tbody tr {
+  transition: background-color 0.12s;
 }
 
 .admin-layout tbody tr:hover {
+  background-color: #f8f9f9;
+}
+
+.admin-layout td button.hover\:underline,
+.admin-layout td a.hover\:underline {
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+  text-decoration: none;
+}
+
+.admin-layout td button.hover\:underline:hover,
+.admin-layout td a.hover\:underline:hover {
   background-color: var(--color-panel-fondo);
+  text-decoration: none;
+}
+
+.admin-layout td button.text-red-700:hover {
+  background-color: rgb(254 242 242);
+}
+
+/* ---------- Animaciones ---------- */
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes subir {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes desplegar {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fundido {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Foto del hero: se acerca una sola vez al cargar. */
+@keyframes acercar {
+  from {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* Barra de la pantalla de carga: un tramo atardecer que cruza de lado a lado. */

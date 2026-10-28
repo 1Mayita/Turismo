@@ -55,7 +55,7 @@ export function obtenerUbicacionDelUsuario() {
       ({ coords }) => resolve({ latitud: coords.latitude, longitud: coords.longitude }),
       (errorGeolocalizacion) => {
         const mensajes = {
-          1: 'No se autorizó el acceso a la ubicación. Puedes permitirlo en los ajustes del navegador.',
+          1: 'No se autorizó el acceso a la ubicación. Puedes permitirlo en los permisos de la app o del navegador.',
           2: 'No se pudo determinar tu ubicación. Inténtalo de nuevo.',
           3: 'La consulta de ubicación tardó demasiado. Inténtalo de nuevo.',
         }

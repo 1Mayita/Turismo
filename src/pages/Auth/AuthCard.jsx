@@ -246,8 +246,8 @@ function AuthCard({ modoInicial = 'login' }) {
         >
           {/* Cara frontal: iniciar sesión. "inert" saca del foco de teclado y de
               los lectores de pantalla a la cara que está oculta. */}
-          <section inert={mostrarRegistro} className="absolute inset-0 flex flex-col justify-center overflow-y-auto rounded-tarjeta border border-borde bg-white p-6 shadow-elevada [backface-visibility:hidden] sm:p-10">
-            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Explora Bolivia</p>
+          <section inert={mostrarRegistro} className="absolute inset-0 flex flex-col justify-start overflow-y-auto px-1 pt-2 sm:justify-center sm:rounded-tarjeta sm:border sm:border-borde sm:bg-white sm:shadow-elevada [backface-visibility:hidden] sm:p-10">
+            <p className="mb-3 rotulo">Explora Bolivia</p>
             <h1 className="titulo-display mb-2 text-[40px]">Bienvenido de vuelta</h1>
             <p className="mb-8 text-piedra-texto">Ingresa para descubrir tu próximo destino.</p>
             {origen.aviso && !loginError && !loginMensaje && <p className="mb-5 rounded-control bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{origen.aviso}</p>}
@@ -289,10 +289,10 @@ function AuthCard({ modoInicial = 'login' }) {
           {/* Cara trasera: crear cuenta */}
           <section
             inert={!mostrarRegistro}
-            className="absolute inset-0 flex flex-col justify-center overflow-y-auto rounded-tarjeta border border-borde bg-white p-6 shadow-elevada [backface-visibility:hidden] sm:p-10"
+            className="absolute inset-0 flex flex-col justify-start overflow-y-auto px-1 pt-2 sm:justify-center sm:rounded-tarjeta sm:border sm:border-borde sm:bg-white sm:shadow-elevada [backface-visibility:hidden] sm:p-10"
             style={{ transform: 'rotateY(180deg)' }}
           >
-            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Rutas de Bolivia</p>
+            <p className="mb-3 rotulo">Rutas de Bolivia</p>
             <h1 className="titulo-display mb-2 text-[40px]">Crea tu cuenta</h1>
             <p className="mb-6 text-piedra-texto">Guarda la inspiración para tu próxima aventura.</p>
             {registroError && <p className="mb-5 rounded-control bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{registroError}</p>}

@@ -120,7 +120,7 @@ function ViajeDetalle() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="contenedor max-w-6xl py-10">
+      <main className="contenedor max-w-[1440px] py-10">
         <Migas pasos={migas} />
 
         {cargando ? (
@@ -134,7 +134,7 @@ function ViajeDetalle() {
           <>
             <header className="mb-10 flex flex-wrap items-start justify-between gap-5 rounded-tarjeta border border-borde bg-white p-6 shadow-suave sm:p-8">
               <div className="min-w-0">
-                <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em] text-cobre-texto">
+                <p className="flex items-center gap-1.5 rotulo">
                   <CalendarRange aria-hidden="true" size={15} /> Mi viaje · {textoDeFechas(viaje)}
                 </p>
                 <h1 className="titulo-display mt-1 break-words text-[40px] sm:text-[52px]">{viaje.nombre}</h1>

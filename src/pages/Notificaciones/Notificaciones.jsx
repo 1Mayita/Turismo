@@ -13,7 +13,7 @@ function Notificaciones() {
       <main className="contenedor max-w-3xl py-12">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Mi cuenta</p>
+            <p className="mb-3 rotulo">Mi cuenta</p>
             <h1 className="titulo-display text-[44px] sm:text-[52px]">Notificaciones</h1>
             <p className="mt-2 text-piedra-texto">{noLeidas > 0 ? `Tienes ${noLeidas} sin leer.` : 'Estás al día.'}</p>
           </div>

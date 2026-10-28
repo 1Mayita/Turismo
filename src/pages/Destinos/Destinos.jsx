@@ -11,7 +11,7 @@ import { getMunicipios, municipiosDeEjemplo } from '../../services/municipiosSer
 import { getRegiones, regionesDeEjemplo } from '../../services/regionesService.js'
 import { sembrarCatalogoDeEjemplo } from '../../services/sembradoService.js'
 import { useResumenCalificaciones } from '../../hooks/useResumenCalificaciones.js'
-import { distanciaEnKm } from '../../utils/geo.js'
+import { distanciaEnKm, obtenerUbicacionDelUsuario } from '../../utils/geo.js'
 
 // Cada filtro se guarda en la URL con este nombre (ej. ?categoria=Naturaleza):
 // así sobreviven al entrar a un destino y volver, y el enlace se puede compartir.
@@ -180,30 +180,17 @@ function Destinos() {
     setParametros(sinBusqueda, { replace: true })
   }
 
-  function obtenerUbicacion() {
+  async function obtenerUbicacion() {
     setErrorUbicacion('')
-    if (!navigator.geolocation) {
-      setErrorUbicacion('Tu navegador no permite consultar la ubicación. Puedes seguir usando los demás filtros.')
-      return
-    }
-
     setCargandoUbicacion(true)
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setUbicacionUsuario({ latitud: coords.latitude, longitud: coords.longitude })
-        setCargandoUbicacion(false)
-      },
-      (errorGeolocalizacion) => {
-        const mensajes = {
-          1: 'No se autorizó el acceso a la ubicación. Puedes permitirlo en los ajustes del navegador.',
-          2: 'No se pudo determinar tu ubicación. Inténtalo de nuevo o continúa sin el filtro de distancia.',
-          3: 'La consulta de ubicación tardó demasiado. Inténtalo de nuevo.',
-        }
-        setErrorUbicacion(mensajes[errorGeolocalizacion.code] || 'No se pudo obtener tu ubicación.')
-        setCargandoUbicacion(false)
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
-    )
+    try {
+      setUbicacionUsuario(await obtenerUbicacionDelUsuario())
+    } catch (errorUbicacion) {
+      console.error('No se pudo obtener la ubicación del usuario:', errorUbicacion)
+      setErrorUbicacion(`${errorUbicacion.message} Puedes seguir usando los demás filtros.`)
+    } finally {
+      setCargandoUbicacion(false)
+    }
   }
 
   let mensajeVacio = 'No hay destinos que coincidan con estos filtros.'
@@ -315,9 +302,9 @@ function Destinos() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="contenedor max-w-6xl py-12">
+      <main className="contenedor max-w-[1440px] py-12">
         <div className="mb-10 max-w-2xl">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Catálogo de experiencias</p>
+          <p className="mb-3 rotulo">Catálogo de experiencias</p>
           <h1 className="titulo-display text-[44px] sm:text-[56px]">Encuentra tu próximo paisaje</h1>
           <p className="texto-lectura mt-3 text-lg text-piedra-texto">Desde el altiplano hasta la Amazonía, Bolivia te espera.</p>
         </div>
@@ -372,7 +359,7 @@ function Destinos() {
             )}
 
             {cargando ? (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 {Array.from({ length: 6 }).map((_, indice) => <EsqueletoTarjetaBase key={indice} className={indice > 1 ? 'hidden sm:block' : ''} />)}
               </div>
             ) : destinosFiltrados.length === 0 ? (
@@ -393,7 +380,7 @@ function Destinos() {
                 <p className="mb-4 text-sm text-piedra-texto" aria-live="polite">
                   {destinosFiltrados.length} {destinosFiltrados.length === 1 ? 'destino encontrado' : 'destinos encontrados'}
                 </p>
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   {destinosFiltrados.map((destino) => (
                     <TarjetaDestino
                       key={destino.id || destino.nombre}

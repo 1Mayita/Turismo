@@ -4,7 +4,7 @@ import Logo from './Logo.jsx'
 function PantallaCarga() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-sal" role="status" aria-live="polite">
-      <Logo className="animate-pulse" />
+      <Logo className="animate-entrar" />
       <div className="h-1 w-28 overflow-hidden rounded-full bg-sal-2" aria-hidden="true">
         <div className="h-full w-1/2 animate-[cargando_1.1s_ease-in-out_infinite] rounded-full bg-atardecer" />
       </div>

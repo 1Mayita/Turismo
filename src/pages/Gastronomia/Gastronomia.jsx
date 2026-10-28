@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, MapPin, Search, SearchX, Soup } from 'lucide-react'
 import Navbar from '../../components/Navbar.jsx'
-import { Aparecer, EstadoVacio, claseBoton, claseControl, claseEtiqueta } from '../../components/ui'
+import { Aparecer, EstadoVacio, FondoTarjetaFoto, claseBoton, claseBotonFoto, claseControl, claseEtiqueta, claseEtiquetaFoto, claseTarjetaFoto } from '../../components/ui'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
 import Modal from '../../components/Modal.jsx'
 import { GrillaEsqueleto } from '../../components/EsqueletoTarjeta.jsx'
@@ -73,9 +73,9 @@ function Gastronomia() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="contenedor max-w-6xl py-12">
+      <main className="contenedor max-w-[1440px] py-12">
         <div className="mb-8 max-w-3xl">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Sabores de Bolivia</p>
+          <p className="mb-3 rotulo">Sabores de Bolivia</p>
           <h1 className="titulo-display text-[44px] sm:text-[56px]">Gastronomía típica</h1>
           <p className="texto-lectura mt-3 text-lg text-piedra-texto">Los platos que hay que probar en cada región y dónde encontrarlos.</p>
         </div>
@@ -117,23 +117,19 @@ function Gastronomia() {
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {visibles.map((plato, indice) => (
-              <Aparecer key={plato.id || plato.nombre} indice={indice % 3} como="article" className="group flex flex-col rounded-tarjeta border border-borde bg-white p-3 shadow-suave">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-imagen bg-sal-2">
-                  <ImagenSegura src={plato.imagen} alt={plato.nombre} loading="lazy" decoding="async" className="h-full w-full object-cover" />
-                  <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-2.5 py-1 text-xs font-bold text-noche shadow-suave">
-                    <MapPin aria-hidden="true" size={13} className="text-atardecer-700" />
-                    {plato.origen || nombreDepartamento(plato.id_departamento) || 'Bolivia'}
-                  </span>
-                </div>
-                <div className="flex flex-1 flex-col px-2 pb-1 pt-4">
-                  <h2 className="titulo-display text-[32px] leading-tight">{plato.nombre}</h2>
-                  {plato.descripcion && <p className="mt-2 line-clamp-3 text-sm leading-6 text-piedra-texto">{plato.descripcion}</p>}
-                  <div className="mt-auto pt-4">
-                    <button type="button" onClick={() => setPlatoAbierto(plato)} className={claseBoton('secundario', 'pequeno')}>
-                      Ver más
-                      <ArrowRight aria-hidden="true" size={16} />
-                    </button>
-                  </div>
+              <Aparecer key={plato.id || plato.nombre} indice={indice % 3} como="article" className={`group shadow-suave ${claseTarjetaFoto}`}>
+                <FondoTarjetaFoto src={plato.imagen} alt={plato.nombre} />
+                <span className={`absolute left-4 top-4 ${claseEtiquetaFoto}`}>
+                  <MapPin aria-hidden="true" size={13} className="text-atardecer-texto" />
+                  {plato.origen || nombreDepartamento(plato.id_departamento) || 'Bolivia'}
+                </span>
+                <div className="relative p-5">
+                  <h2 className="titulo-display text-[34px] leading-tight text-white">{plato.nombre}</h2>
+                  {plato.descripcion && <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/80">{plato.descripcion}</p>}
+                  <button type="button" onClick={() => setPlatoAbierto(plato)} className={`mt-4 ${claseBotonFoto}`}>
+                    Ver más
+                    <ArrowRight aria-hidden="true" size={16} />
+                  </button>
                 </div>
               </Aparecer>
             ))}

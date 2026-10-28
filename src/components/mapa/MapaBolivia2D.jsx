@@ -4,22 +4,22 @@ import { ALTO_MAPA, ANCHO_MAPA, DEPARTAMENTOS_MAPA, proyectar } from './boliviaS
 // Color de cada departamento según su región (DESIGN.md §6.1): altiplano en
 // tonos sal y cielo, valles en arena y tierras bajas en verde suave.
 const COLOR_REGION = {
-  'la-paz': '#e9eff4',
-  oruro: '#eef2f5',
-  potosi: '#f1f3f4',
-  cochabamba: '#e8e2d3',
-  chuquisaca: '#ebe5d7',
-  tarija: '#e6e0d0',
-  beni: '#d7e2d2',
-  pando: '#d2ddcb',
-  'santa-cruz': '#dbe4d5',
+  'la-paz': '#e9e7ef',
+  oruro: '#eeecf2',
+  potosi: '#f2f0f4',
+  cochabamba: '#f1dccb',
+  chuquisaca: '#f4e3d4',
+  tarija: '#efd7c3',
+  beni: '#cbd5e2',
+  pando: '#c6d1df',
+  'santa-cruz': '#d0d9e5',
 }
 
-const ACTIVO = '#6f8ba1'
+const ACTIVO = '#7d93c8'
 const RELIEVE = 5
 
 // Mapa 2D de Bolivia por departamentos. Al pasar el mouse un departamento se
-// eleva y se pinta de atardecer con su nombre y cantidad de destinos; al
+// eleva y se pinta de azul crepúsculo con su nombre y cantidad de destinos; al
 // tocarlo llama a alElegir(id). Para teclado, quien lo usa debe ofrecer una
 // lista de departamentos que haga lo mismo (el mapa es un apoyo visual).
 function MapaBolivia2D({ cantidades = {}, idActivo = '', alElegir, pines = [], className = '' }) {
@@ -63,7 +63,7 @@ function MapaBolivia2D({ cantidades = {}, idActivo = '', alElegir, pines = [], c
               data-departamento={departamento.id}
               d={departamento.d}
               fill={esResaltado ? ACTIVO : COLOR_REGION[departamento.id]}
-              stroke="#fafaf7"
+              stroke="#f8f9fb"
               strokeWidth="3"
               strokeLinejoin="round"
               transform={esResaltado ? 'translate(0 -4)' : undefined}
@@ -84,7 +84,7 @@ function MapaBolivia2D({ cantidades = {}, idActivo = '', alElegir, pines = [], c
           return (
             <g key={pin.id} pointerEvents="none">
               <circle cx={x} cy={y} r="11" fill="#ffffff" />
-              <circle cx={x} cy={y} r="6.5" fill="#b4532a" />
+              <circle cx={x} cy={y} r="6.5" fill="#1a3c62" />
             </g>
           )
         })}
@@ -92,7 +92,7 @@ function MapaBolivia2D({ cantidades = {}, idActivo = '', alElegir, pines = [], c
 
       {resaltado && (
         <div
-          className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-control bg-noche px-3 py-2 text-center text-white shadow-elevada"
+          className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-control bg-noche px-3 py-2 text-center text-white shadow-elevada ring-1 ring-white/20"
           style={{
             left: `${((resaltado.centro[0] + 20) / (ANCHO_MAPA + 40)) * 100}%`,
             top: `${((resaltado.centro[1] + 20 - 24) / (ALTO_MAPA + 50)) * 100}%`,

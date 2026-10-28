@@ -50,9 +50,9 @@ function Departamentos() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="contenedor max-w-6xl py-12">
+      <main className="contenedor max-w-[1440px] py-12">
         <div className="mb-10 max-w-2xl">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Los nueve departamentos</p>
+          <p className="mb-3 rotulo">Los nueve departamentos</p>
           <h1 className="titulo-display text-[44px] sm:text-[56px]">Explora por departamento</h1>
           <p className="texto-lectura mt-3 text-lg text-piedra-texto">Del altiplano a la Amazonía: elige un departamento y descubre sus municipios, destinos y sabores.</p>
         </div>
@@ -74,7 +74,7 @@ function Departamentos() {
                 <Aparecer key={departamento.id || departamento.nombre} indice={indice % 3} className={`h-80 ${ANCHOS_EN_MOSAICO.includes(indice) ? 'xl:col-span-2' : ''}`}>
                 <Contenedor
                   {...props}
-                  className="group relative flex h-full flex-col justify-end overflow-hidden rounded-tarjeta shadow-suave transition-shadow duration-150 hover:shadow-elevada"
+                  className="group relative flex h-full flex-col justify-end overflow-hidden rounded-tarjeta tarjeta-hover"
                 >
                   <ImagenSegura
                     src={departamento.imagen_portada}
@@ -87,7 +87,7 @@ function Departamentos() {
                   <div className="absolute inset-0 bg-gradient-to-t from-noche/90 via-noche/35 to-transparent" />
                   <div className="relative p-6 text-white">
                     <h2 className="titulo-display text-[38px] text-white">{departamento.nombre}</h2>
-                    {departamento.eslogan && <p className="font-titulo text-xl italic text-white/90">“{departamento.eslogan}”</p>}
+                    {departamento.eslogan && <p className="text-base font-medium text-white/90">“{departamento.eslogan}”</p>}
                     {departamento.descripcion && <p className="mt-2 line-clamp-2 max-w-xl text-sm text-white/85">{departamento.descripcion}</p>}
                     <span className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-control bg-white px-4 text-sm font-bold text-noche transition-[gap] group-hover:gap-3">
                       Ver más <ArrowRight aria-hidden="true" size={16} />

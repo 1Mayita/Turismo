@@ -33,7 +33,7 @@ function Modal({ titulo, onCerrar, children }) {
   }, [])
 
   return createPortal(
-    <div className="fixed inset-0 z-[1000] flex items-end justify-center bg-noche/50 p-0 sm:items-center sm:p-6" onClick={onCerrar}>
+    <div className="fixed inset-0 z-[1000] flex animate-fundido items-end justify-center bg-noche/45 p-0 sm:items-center sm:p-6" onClick={onCerrar}>
       <div
         ref={panel}
         role="dialog"
@@ -41,13 +41,13 @@ function Modal({ titulo, onCerrar, children }) {
         aria-label={titulo}
         tabIndex={-1}
         onClick={(evento) => evento.stopPropagation()}
-        className="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-t-tarjeta bg-white shadow-elevada outline-none sm:rounded-tarjeta"
+        className="relative max-h-[92vh] w-full max-w-2xl animate-subir overflow-y-auto rounded-t-tarjeta bg-white shadow-flotante outline-none sm:rounded-tarjeta"
       >
         <button
           type="button"
           onClick={onCerrar}
           aria-label="Cerrar"
-          className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-noche shadow-suave transition hover:bg-sal-2"
+          className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-noche shadow-suave transition hover:rotate-90 hover:bg-sal-2"
         >
           <X aria-hidden="true" />
         </button>

@@ -14,7 +14,7 @@ function Carrusel({ etiqueta, children, className = '' }) {
     elemento.scrollBy({ left: direccion * elemento.clientWidth * 0.85, behavior: reducir ? 'auto' : 'smooth' })
   }
 
-  const claseFlecha = 'flex h-11 w-11 items-center justify-center rounded-full border border-borde bg-white text-noche shadow-suave transition hover:bg-cielo'
+  const claseFlecha = 'flex h-11 w-11 items-center justify-center rounded-full border border-borde bg-white text-noche transition hover:border-noche hover:bg-noche hover:text-white active:scale-95'
 
   return (
     <div className={className}>

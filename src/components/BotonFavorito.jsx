@@ -48,7 +48,7 @@ function BotonFavorito({ idDestino, idElemento = idDestino, tipo = 'destino', co
           disabled={guardando}
           aria-pressed={activo}
           className={`inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-control border px-4 text-sm font-bold transition duration-150 disabled:opacity-60 ${
-            activo ? 'border-atardecer/40 bg-atardecer/10 text-atardecer-700' : 'border-borde bg-white text-noche hover:bg-cielo'
+            activo ? 'border-atardecer/40 bg-atardecer/10 text-atardecer-texto' : 'border-borde bg-white text-noche hover:bg-cielo'
           }`}
         >
           <span className={activo ? 'text-atardecer' : 'text-piedra-texto'}><IconoCorazon relleno={activo} /></span>

@@ -68,7 +68,7 @@ function ViajeCompartido() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="contenedor max-w-6xl py-10">
+      <main className="contenedor max-w-[1440px] py-10">
         {cargando ? (
           <div className="space-y-4">
             <div className="h-28 animate-pulse rounded-tarjeta bg-sal-2" />
@@ -85,7 +85,7 @@ function ViajeCompartido() {
           <>
             <header className="mb-10 flex flex-wrap items-start justify-between gap-5 rounded-tarjeta border border-borde bg-white p-6 shadow-suave sm:p-8">
               <div className="min-w-0">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-cobre-texto">Viaje compartido · {textoDeFechas(viaje)}</p>
+                <p className="rotulo">Viaje compartido · {textoDeFechas(viaje)}</p>
                 <h1 className="titulo-display mt-1 break-words text-[40px] sm:text-[52px]">{viaje.nombre}</h1>
                 <p className="mt-1 text-sm text-piedra-texto">Armado por {viaje.nombre_autor || 'un viajero'} · {items.length} {items.length === 1 ? 'destino' : 'destinos'} · Solo lectura</p>
                 {viaje.notas && <p className="texto-lectura mt-3 whitespace-pre-line text-noche/85">{viaje.notas}</p>}

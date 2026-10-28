@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import Navbar from '../../components/Navbar.jsx'
-import AdminNav from '../../components/AdminNav.jsx'
+import PanelAdmin from '../../components/PanelAdmin.jsx'
 import Grafico from './estadisticas/Grafico.jsx'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
 import { getDestinos } from '../../services/destinosService.js'
@@ -83,10 +82,10 @@ function porPeriodo(fechas, desde, hasta) {
 
 function Tarjeta({ titulo, valor, detalle }) {
   return (
-    <div className="rounded-tarjeta border border-panel-borde bg-white p-5">
-      <p className="text-sm font-semibold text-slate-500">{titulo}</p>
-      <p className="mt-1 text-3xl font-extrabold tabular-nums text-slate-900">{valor}</p>
-      {detalle && <p className="mt-1 text-xs font-semibold text-slate-500">{detalle}</p>}
+    <div className="rounded-xl border border-panel-borde bg-white p-5">
+      <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-500">{titulo}</p>
+      <p className="mt-2 text-[30px] font-bold leading-none tracking-[-0.02em] tabular-nums text-slate-900">{valor}</p>
+      {detalle && <p className="mt-2 text-xs font-medium text-slate-500">{detalle}</p>}
     </div>
   )
 }
@@ -146,20 +145,15 @@ function AdminEstadisticas() {
 
   if (error || !datos) {
     return (
-      <div className="min-h-screen">
-        <Navbar />
-        <main className="admin-layout contenedor max-w-6xl py-12">
-          <h1 className="mb-6 text-3xl font-bold text-slate-900">Estadísticas</h1>
-          <AdminNav />
-          {error ? (
-            <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              {Array.from({ length: 5 }).map((_, indice) => <div key={indice} className="h-28 animate-pulse rounded-3xl bg-sal-2" />)}
-            </div>
-          )}
-        </main>
-      </div>
+      <PanelAdmin titulo="Estadísticas">
+        {error ? (
+          <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {Array.from({ length: 5 }).map((_, indice) => <div key={indice} className="h-28 animate-pulse rounded-xl border border-panel-borde bg-white" />)}
+          </div>
+        )}
+      </PanelAdmin>
     )
   }
 
@@ -207,63 +201,57 @@ function AdminEstadisticas() {
   }
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <main className="admin-layout contenedor max-w-6xl py-12">
-        <h1 className="mb-6 text-3xl font-bold text-slate-900">Estadísticas</h1>
-        <AdminNav />
-
-        {/* Filtros en una sola fila sobre los gráficos. */}
-        <div className="mb-6 flex flex-wrap items-end gap-3 rounded-2xl p-4 cristal">
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Período rápido">
-            {PRESETS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                aria-pressed={preset === item.id}
-                onClick={() => elegirPreset(item)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${preset === item.id ? 'bg-brand-700 text-white' : 'bg-white/70 text-brand-800 ring-1 ring-white/80 hover:bg-white'}`}
-              >
-                {item.etiqueta}
-              </button>
-            ))}
-          </div>
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-            Desde
-            <input type="date" value={rango.desde} max={rango.hasta} onChange={(evento) => cambiarFecha('desde', evento.target.value)} className="mt-1 block rounded-xl border border-sky-200 bg-white px-3 py-2 text-sm font-normal text-slate-800" />
-          </label>
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
-            Hasta
-            <input type="date" value={rango.hasta} min={rango.desde} onChange={(evento) => cambiarFecha('hasta', evento.target.value)} className="mt-1 block rounded-xl border border-sky-200 bg-white px-3 py-2 text-sm font-normal text-slate-800" />
-          </label>
-          <button type="button" onClick={exportarResumen} className="ml-auto rounded-xl bg-brand-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-brand-800">Exportar resumen (CSV)</button>
+    <PanelAdmin titulo="Estadísticas">
+      {/* Filtros en una sola fila sobre los gráficos. */}
+      <div className="mb-6 flex flex-wrap items-end gap-3 rounded-2xl p-4 cristal">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Período rápido">
+          {PRESETS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              aria-pressed={preset === item.id}
+              onClick={() => elegirPreset(item)}
+              className={`rounded-lg border px-3.5 py-2 text-sm font-semibold transition-colors ${preset === item.id ? 'border-panel-texto bg-panel-texto text-white' : 'border-panel-borde bg-white text-panel-texto hover:border-slate-300'}`}
+            >
+              {item.etiqueta}
+            </button>
+          ))}
         </div>
+        <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+          Desde
+          <input type="date" value={rango.desde} max={rango.hasta} onChange={(evento) => cambiarFecha('desde', evento.target.value)} className="mt-1 block rounded-xl border border-sky-200 bg-white px-3 py-2 text-sm font-normal text-slate-800" />
+        </label>
+        <label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+          Hasta
+          <input type="date" value={rango.hasta} min={rango.desde} onChange={(evento) => cambiarFecha('hasta', evento.target.value)} className="mt-1 block rounded-xl border border-sky-200 bg-white px-3 py-2 text-sm font-normal text-slate-800" />
+        </label>
+        <button type="button" onClick={exportarResumen} className="ml-auto rounded-lg border border-panel-borde bg-white px-4 py-2.5 text-sm font-bold text-panel-texto transition-colors hover:border-slate-300 hover:bg-panel-fondo">Exportar resumen (CSV)</button>
+      </div>
 
-        <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          <Tarjeta titulo="Usuarios" valor={datos.usuarios.length.toLocaleString('es-BO')} detalle={`+${nuevosUsuarios.length} nuevos en el período`} />
-          <Tarjeta titulo="Destinos" valor={datos.destinos.length.toLocaleString('es-BO')} detalle="publicados" />
-          <Tarjeta titulo="Visitas" valor={visitas.length.toLocaleString('es-BO')} detalle="a fichas de destinos" />
-          <Tarjeta titulo="Reseñas" valor={resenas.length.toLocaleString('es-BO')} detalle={promedio ? `★ ${promedio.toFixed(1)} de promedio` : 'sin calificaciones'} />
-          <Tarjeta titulo="Favoritos" valor={favoritosDestino.length.toLocaleString('es-BO')} detalle="destinos guardados" />
-        </div>
+      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <Tarjeta titulo="Usuarios" valor={datos.usuarios.length.toLocaleString('es-BO')} detalle={`+${nuevosUsuarios.length} nuevos en el período`} />
+        <Tarjeta titulo="Destinos" valor={datos.destinos.length.toLocaleString('es-BO')} detalle="publicados" />
+        <Tarjeta titulo="Visitas" valor={visitas.length.toLocaleString('es-BO')} detalle="a fichas de destinos" />
+        <Tarjeta titulo="Reseñas" valor={resenas.length.toLocaleString('es-BO')} detalle={promedio ? `★ ${promedio.toFixed(1)} de promedio` : 'sin calificaciones'} />
+        <Tarjeta titulo="Favoritos" valor={favoritosDestino.length.toLocaleString('es-BO')} detalle="destinos guardados" />
+      </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Grafico titulo="Destinos más visitados" descripcion="Visitas a la ficha de cada destino" datos={masVisitados} unidad="visitas" archivo="destinos-mas-visitados" vacio="Aún no hay visitas registradas en este período. Se cuentan desde que se activó el Sprint 3." />
-          <Grafico titulo="Departamentos más populares" descripcion="Visitas, favoritos y reseñas de sus destinos" datos={departamentosPopulares} unidad="interacciones" archivo="departamentos-populares" />
-          <Grafico titulo="Destinos más guardados en favoritos" datos={masGuardados} unidad="favoritos" archivo="destinos-mas-guardados" />
-          <Grafico titulo={`Reseñas ${etiquetaUnidad}`} descripcion="Reseñas de destinos publicadas" datos={resenasPorPeriodo.datos} unidad="reseñas" orientacion="vertical" archivo="resenas-por-periodo" />
-          <div className="lg:col-span-2">
-            <Grafico
-              titulo={promedio ? `Calificaciones: ★ ${promedio.toFixed(2)} de promedio` : 'Calificaciones'}
-              descripcion="Cuántas reseñas recibió cada puntuación"
-              datos={distribucion}
-              unidad="reseñas"
-              archivo="distribucion-calificaciones"
-            />
-          </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Grafico titulo="Destinos más visitados" descripcion="Visitas a la ficha de cada destino" datos={masVisitados} unidad="visitas" archivo="destinos-mas-visitados" vacio="Aún no hay visitas registradas en este período. Se cuentan desde que se activó el Sprint 3." />
+        <Grafico titulo="Departamentos más populares" descripcion="Visitas, favoritos y reseñas de sus destinos" datos={departamentosPopulares} unidad="interacciones" archivo="departamentos-populares" />
+        <Grafico titulo="Destinos más guardados en favoritos" datos={masGuardados} unidad="favoritos" archivo="destinos-mas-guardados" />
+        <Grafico titulo={`Reseñas ${etiquetaUnidad}`} descripcion="Reseñas de destinos publicadas" datos={resenasPorPeriodo.datos} unidad="reseñas" orientacion="vertical" archivo="resenas-por-periodo" />
+        <div className="lg:col-span-2">
+          <Grafico
+            titulo={promedio ? `Calificaciones: ★ ${promedio.toFixed(2)} de promedio` : 'Calificaciones'}
+            descripcion="Cuántas reseñas recibió cada puntuación"
+            datos={distribucion}
+            unidad="reseñas"
+            archivo="distribucion-calificaciones"
+          />
         </div>
-      </main>
-    </div>
+      </div>
+    </PanelAdmin>
   )
 }
 

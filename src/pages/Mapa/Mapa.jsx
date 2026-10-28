@@ -287,7 +287,7 @@ function Mapa() {
               <ZoomControl position="topright" />
               <Enfocar objetivo={objetivo} />
               {ubicacionUsuario && (
-                <CircleMarker center={[ubicacionUsuario.latitud, ubicacionUsuario.longitud]} radius={9} pathOptions={{ color: '#fff', weight: 3, fillColor: '#3f6a8f', fillOpacity: 1 }}>
+                <CircleMarker center={[ubicacionUsuario.latitud, ubicacionUsuario.longitud]} radius={9} pathOptions={{ color: '#fff', weight: 3, fillColor: '#4a5680', fillOpacity: 1 }}>
                   <Popup>Estás aquí</Popup>
                 </CircleMarker>
               )}
@@ -319,7 +319,7 @@ function Mapa() {
         {/* Escritorio: panel flotante con filtros y resultados. */}
         <aside aria-label="Filtros y lugares" className="absolute bottom-4 left-4 top-4 z-[500] hidden w-[22.5rem] flex-col overflow-hidden rounded-tarjeta border border-borde bg-white shadow-elevada lg:flex">
           <div className="border-b border-borde px-5 pb-4 pt-5">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Mapa turístico</p>
+            <p className="rotulo">Mapa turístico</p>
             <h1 className="titulo-display text-[34px]">Bolivia en el mapa</h1>
           </div>
           <div className="flex-1 overflow-y-auto px-5 py-4">{contenido}</div>

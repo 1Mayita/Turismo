@@ -94,7 +94,7 @@ function RecomendadoParaTi({ titulo = 'Recomendado para ti', cantidad = 3, class
           {visibles.map(({ destino, motivo }) => (
             <div key={destino.id} className="flex flex-col gap-2">
               <p className="inline-flex w-fit items-center gap-1.5 rounded-full bg-cielo px-3 py-1 text-xs font-bold text-noche">
-                <Sparkles aria-hidden="true" size={14} className="text-atardecer-700" /> {motivo}
+                <Sparkles aria-hidden="true" size={14} className="text-atardecer-texto" /> {motivo}
               </p>
               <TarjetaDestino destino={destino} nivelTitulo="h3" />
             </div>

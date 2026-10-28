@@ -41,7 +41,16 @@ export function SelectorEstrellas({ valor, onCambiar }) {
 
 // Texto corto tipo "★ 4.3 (12 reseñas)".
 // "compacto" muestra solo "★ 4.3" (o "Nuevo" si aún no tiene reseñas).
-export function ResumenCalificacion({ promedio = 0, total = 0, compacto = false, className = '' }) {
+// "sobreFoto": versión compacta en una etiqueta blanca, para las tarjetas a foto completa.
+export function ResumenCalificacion({ promedio = 0, total = 0, compacto = false, sobreFoto = false, className = '' }) {
+  if (sobreFoto) {
+    return (
+      <span className={`inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-xs font-bold text-noche shadow-suave ${className}`} aria-label={total ? `${promedio.toFixed(1)} de 5, ${total} ${total === 1 ? 'reseña' : 'reseñas'}` : undefined}>
+        {total ? <><span className="text-atardecer-texto" aria-hidden="true">★</span>{promedio.toFixed(1)}</> : 'Nuevo'}
+      </span>
+    )
+  }
+
   if (compacto) {
     return total ? (
       <span className={`inline-flex items-center gap-1 text-sm font-bold text-noche ${className}`} aria-label={`${promedio.toFixed(1)} de 5, ${total} ${total === 1 ? 'reseña' : 'reseñas'}`}>

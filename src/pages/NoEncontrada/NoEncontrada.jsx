@@ -9,7 +9,7 @@ function NoEncontrada() {
       <Navbar />
       <main className="contenedor max-w-2xl py-24 text-center">
         <span className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-cielo text-cielo-700" aria-hidden="true"><Compass size={32} /></span>
-        <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Error 404</p>
+        <p className="mb-3 rotulo">Error 404</p>
         <h1 className="titulo-display text-[44px] sm:text-[56px]">No encontramos esta página</h1>
         <p className="mt-3 text-lg text-piedra-texto">
           El enlace puede estar mal escrito o la página ya no existe.

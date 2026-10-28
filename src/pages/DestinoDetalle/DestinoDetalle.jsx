@@ -107,7 +107,7 @@ function DestinoDetalle() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="contenedor max-w-6xl pb-32 pt-8 lg:pb-12">
+      <main className="contenedor max-w-[1440px] pb-32 pt-8 lg:pb-12">
         <Migas pasos={migas} />
 
         {cargando ? (
@@ -182,7 +182,7 @@ function DestinoDetalle() {
               {/* Escritorio: acciones siempre a la vista mientras se baja. */}
               <aside className="hidden lg:block" aria-label="Acciones">
                 <div className="sticky top-24 rounded-tarjeta border border-borde bg-white p-5 shadow-suave">
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-cobre-texto">Entrada</p>
+                  <p className="rotulo">Entrada</p>
                   <p className="titulo-display text-[36px] leading-tight">{precio}</p>
                   {calificacion?.total > 0 && <ResumenCalificacion promedio={calificacion.promedio} total={calificacion.total} className="mt-1" />}
                   <div className="mt-5 space-y-2.5">

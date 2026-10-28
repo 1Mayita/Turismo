@@ -24,6 +24,12 @@ Familias, viajeros y turistas extranjeros. La página debe sentirse **acogedora,
 
 ## 2. Dirección visual: "Salar cálido"
 
+> **Actualización:** los colores existentes se alinean, en versión suave, a la foto del atardecer en el Salar del hero: azul crepúsculo (`brand`, `cielo`), ámbar del sol (`cobre`), durazno tenue (`sal-2`) y naranja `atardecer` para la selección del mapa y las acciones. Los fondos blancos se mantienen. La barra de navegación va en `noche`.
+>
+> **Logo:** `src/assets/logo.png` (azul `--marca #1a3c62`, fondo transparente). Sobre fondos oscuros va dentro de un círculo blanco. Favicon, íconos de la PWA, ícono de iPhone e íconos y splash de Android se generan a partir del mismo dibujo.
+
+> **Actualización:** la paleta se toma de la foto del atardecer en el Salar (hero del inicio). Fondos claros en arena cálida (`--sal #F7F3EE`, `--sal-2 #EFE7DE`, `--borde #E6DCD0`), barra de navegación y pie en `--noche`, bandas oscuras del inicio en `--crepusculo #1B3048` y `--noche`, y el naranja `--atardecer` como único acento. El hero ocupa toda la pantalla y el inicio usa el ancho completo (1440px).
+
 Base inspirada en el Salar de Uyuni (blancos, azul noche y azul cielo muy suave) con un acento cálido de atardecer.
 Elegante pero cercana. Las fotos son protagonistas. Mucho espacio en blanco, jerarquía visual clara y detalles sobrios.
 
@@ -72,8 +78,10 @@ Los tokens `--admin-texto` y `--admin-muted` se conservan para superficies oscur
 
 ### 3.3 Tipografía
 
-- **Títulos grandes del sitio público** (hero, títulos de sección): `Cormorant Garamond`, peso 500–600. Solo en tamaños grandes (≥ 32px).
-- **Todo lo demás** (UI, cuerpo, botones, panel admin completo): `Manrope`, pesos 400 / 500 / 700.
+- **Títulos del sitio público** (hero, títulos de sección y de página) y el logo: `Newsreader` (serif editorial con tamaños ópticos), peso 500, siempre en redonda (sin cursivas). Desde 26px.
+- No mezclar más estilos: cifras, fechas, eslóganes y nombres en tarjetas van en la fuente de interfaz.
+- **Todo lo demás** (UI, cuerpo, botones, panel admin completo): `Hanken Grotesk`, pesos 400 / 500 / 700.
+- Rótulos (antetítulos) con la utilidad `rotulo`: 12px, mayúsculas, espaciado 0.14em, color `cobre-texto`.
 - Escala: 14 · 16 (cuerpo) · 18 · 22 · 28 · 40 · 56 (hero desktop). En móvil el hero baja a 36–40.
 - Interlineado del cuerpo: 1.6. Ancho máximo de párrafos: ~70 caracteres.
 
@@ -161,7 +169,8 @@ Aplica los mismos tokens y componentes a **todas** las páginas existentes, sin 
 Usar superficies claras, tipografía legible, divisores nítidos y acentos azules discretos. Mantener el ambiente cálido del sitio mediante el fondo neutro y reservar el color atardecer para acciones importantes. Evitar vidrio, desenfoque, brillo decorativo y tarjetas innecesariamente grandes.
 
 **Layout:**
-- **Navegación:** conservar la navegación de administración existente, hacerla fácil de recorrer y distinguir claramente la sección activa. En móvil, permitir desplazamiento horizontal sin ocultar opciones.
+- **Navegación:** barra lateral fija (`PanelAdmin` + `AdminNav`) con las secciones agrupadas (General, Catálogo, Comer y dormir, Comunidad), todas visibles sin desplazamiento horizontal. En celular y tablet, un selector con la sección actual que despliega todas las secciones en una cuadrícula.
+- **Acción principal:** cada página pasa su botón "Nuevo …" al encabezado del panel (`acciones`), en color atardecer; las acciones secundarias van en blanco con borde.
 - **Encabezado:** título de sección claro y acciones de contexto alineadas, sin repetir controles que ya existen.
 - **Fondo:** neutral y uniforme; azul muy suave solo en estados activos o informativos.
 

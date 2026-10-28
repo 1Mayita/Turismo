@@ -35,8 +35,9 @@ const COLUMNAS = [
 function PieDePagina() {
   return (
     <footer className="mt-24 bg-noche text-admin-texto">
-      <div className="contenedor grid max-w-6xl gap-12 py-16 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:py-20">
-        <div>
+      <div aria-hidden="true" className="h-1 bg-[linear-gradient(90deg,#e48f66_0_33%,#c98f62_33%_66%,#626d96_66%)]" />
+      <div className="contenedor grid max-w-[1440px] grid-cols-2 gap-x-6 gap-y-10 py-14 sm:gap-12 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:py-20">
+        <div className="col-span-2 lg:col-span-1">
           <Link to="/" className="inline-block rounded-full" aria-label="Rutas de Bolivia, ir al inicio">
             <Logo claro />
           </Link>
@@ -53,7 +54,7 @@ function PieDePagina() {
         </div>
         {COLUMNAS.map((columna) => (
           <nav key={columna.titulo} aria-label={columna.titulo}>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-cobre">{columna.titulo}</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-cobre">{columna.titulo}</p>
             <ul className="mt-4 space-y-1">
               {columna.enlaces.map((enlace) => (
                 <li key={enlace.to}>
@@ -67,7 +68,7 @@ function PieDePagina() {
         ))}
       </div>
       <div className="border-t border-white/10">
-        <p className="contenedor max-w-6xl py-6 text-sm text-admin-muted">
+        <p className="contenedor max-w-[1440px] py-6 text-sm text-admin-muted">
           Proyecto académico · Fotos de Wikimedia Commons bajo licencias Creative Commons.
         </p>
       </div>

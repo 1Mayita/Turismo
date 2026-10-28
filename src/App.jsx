@@ -8,6 +8,7 @@ import LimiteDeErrores from './components/LimiteDeErrores.jsx'
 import PantallaCarga from './components/PantallaCarga.jsx'
 import PieDePagina from './components/PieDePagina.jsx'
 import Inicio from './pages/Inicio/Inicio.jsx'
+import InstalacionApp from './components/InstalacionApp.jsx'
 
 // Cada página se descarga recién cuando se visita (el Inicio va incluido para
 // que la primera pantalla aparezca de inmediato).
@@ -128,7 +129,10 @@ function App() {
           {GuiaDeEstilo && <Route path="/guia-de-estilo" element={<GuiaDeEstilo />} />}
           <Route path="*" element={<NoEncontrada />} />
         </Routes>
-        {!['/login', '/registro'].includes(pathname) && <PieDePagina />}
+        {/* El panel de administración tiene su propia barra lateral: el pie
+            público solo se muestra en el sitio. */}
+        {!['/login', '/registro'].includes(pathname) && !pathname.startsWith('/admin') && <PieDePagina />}
+        <InstalacionApp />
       </Suspense>
     </LimiteDeErrores>
   )

@@ -117,9 +117,9 @@ function Busqueda() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="contenedor max-w-6xl py-12">
+      <main className="contenedor max-w-[1440px] py-12">
         <div className="mb-8 max-w-3xl">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-cobre-texto">Explora Bolivia</p>
+          <p className="mb-3 rotulo">Explora Bolivia</p>
           <h1 className="titulo-display text-[44px] sm:text-[56px]">Resultados de búsqueda</h1>
           {consulta ? (
             <p className="texto-lectura mt-3 text-lg text-piedra-texto">
@@ -159,7 +159,7 @@ function Busqueda() {
             <p className="mb-4 text-sm font-medium text-piedra-texto">{resultados.length} {resultados.length === 1 ? 'resultado' : 'resultados'}</p>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {resultados.map((resultado) => (
-                <article key={resultado.id} className="flex flex-col rounded-tarjeta border border-borde bg-white p-5 shadow-suave transition-shadow duration-150 hover:shadow-elevada">
+                <article key={resultado.id} className="flex flex-col rounded-tarjeta border border-borde bg-white p-5 tarjeta-hover">
                   <span className="mb-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-cielo px-2.5 py-1 text-xs font-bold text-noche">
                     {(() => {
                       const tipo = TIPOS.find((item) => item.id === resultado.tipo)
