@@ -10,10 +10,6 @@ function esIOS() {
   return /iphone|ipad|ipod/i.test(navigator.userAgent)
 }
 
-function esAndroid() {
-  return /android/i.test(navigator.userAgent)
-}
-
 // Si se cerró hace menos de 14 días no vuelve a aparecer solo (sí desde el menú).
 function descartadoRecientemente() {
   try {
@@ -103,15 +99,6 @@ function InstalacionApp() {
               <button type="button" onClick={instalar} className="min-h-11 rounded-control boton-principal px-4 text-sm font-bold">
                 Instalar app
               </button>
-            )}
-            {esAndroid() && (
-              <a
-                href="/downloads/rutas-de-bolivia.apk"
-                download
-                className="inline-flex min-h-11 items-center rounded-control border border-borde px-4 text-sm font-bold text-noche transition-colors hover:bg-sal"
-              >
-                Descargar APK (prueba)
-              </a>
             )}
           </div>
           {error && <p className="mt-2 text-sm font-semibold text-red-700" role="alert">{error}</p>}
