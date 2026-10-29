@@ -6,6 +6,8 @@ import { getAlojamientos } from '../../services/alojamientosService.js'
 import { getDestinos } from '../../services/destinosService.js'
 import { getRestaurantes } from '../../services/restaurantesService.js'
 import { actualizarEstadoResena, eliminarResena, getTodasLasResenas } from '../../services/resenasService.js'
+import { AccionesFila, BotonAccion } from '../../components/admin/AccionesFila.jsx'
+import { useConfirmar } from '../../components/admin/confirmacionContext.js'
 
 function fechaLegible(fecha) {
   const valor = typeof fecha?.toDate === 'function' ? fecha.toDate() : fecha ? new Date(fecha) : null
@@ -18,6 +20,7 @@ const ETIQUETA_DE_TIPO = { destino: 'Destino', restaurante: 'Restaurante', aloja
 const RUTA_DE_TIPO = { destino: '/destinos', restaurante: '/restaurantes', alojamiento: '/alojamientos' }
 
 function AdminResenas() {
+  const confirmar = useConfirmar()
   const [resenas, setResenas] = useState([])
   // Nombres de los lugares reseñados: { 'destino:id': 'Nombre', 'restaurante:id': ... }
   const [nombres, setNombres] = useState({})
@@ -85,7 +88,7 @@ function AdminResenas() {
   }
 
   async function eliminar(resena) {
-    if (!window.confirm('¿Eliminar esta reseña definitivamente? Esta acción no se puede deshacer.')) return
+    if (!await confirmar({ titulo: '¿Eliminar esta reseña definitivamente?' })) return
     setError('')
     setMensaje('')
     try {
@@ -158,7 +161,7 @@ function AdminResenas() {
                     <button type="button" onClick={() => cambiarVisibilidad(resena)} className="text-sm font-semibold text-brand-700 hover:underline">
                       {oculta ? 'Publicar' : 'Ocultar'}
                     </button>
-                    <button type="button" onClick={() => eliminar(resena)} className="text-sm font-semibold text-red-700 hover:underline">Eliminar</button>
+                    <AccionesFila><BotonAccion tipo="eliminar" onClick={() => eliminar(resena)} nombre="esta reseña" /></AccionesFila>
                   </div>
                 </div>
               </li>

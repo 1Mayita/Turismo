@@ -1,5 +1,4 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
 import PanelAdmin, { BotonNuevo } from '../../components/PanelAdmin.jsx'
 import AdminZonaCampos from '../../components/AdminZonaCampos.jsx'
@@ -7,6 +6,8 @@ import SelectorImagen from '../../components/SelectorImagen.jsx'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
 import { municipiosDeEjemplo, getMunicipios } from '../../services/municipiosService.js'
 import { regionesDeEjemplo, getRegiones } from '../../services/regionesService.js'
+import { AccionesFila, BotonAccion } from '../../components/admin/AccionesFila.jsx'
+import { useConfirmar } from '../../components/admin/confirmacionContext.js'
 
 // El mapa para marcar la ubicación (Leaflet) se descarga solo al abrir el formulario.
 const SelectorUbicacion = lazy(() => import('../../components/mapa/SelectorUbicacion.jsx'))
@@ -26,6 +27,7 @@ function crearFormularioVacio(campos) {
 }
 
 function AdminEstablecimientos({ configuracion }) {
+  const confirmar = useConfirmar()
   const formularioVacio = crearFormularioVacio(configuracion.campos)
   const [elementos, setElementos] = useState([])
   const [departamentos, setDepartamentos] = useState([])
@@ -156,7 +158,7 @@ function AdminEstablecimientos({ configuracion }) {
   }
 
   async function eliminar(elemento) {
-    if (!window.confirm(`¿Eliminar "${elemento.nombre}"? Esta acción no se puede deshacer.`)) return
+    if (!await confirmar({ titulo: `¿Eliminar "${elemento.nombre}"?` })) return
     setError('')
     try {
       await configuracion.eliminar(elemento.id)
@@ -272,9 +274,7 @@ function AdminEstablecimientos({ configuracion }) {
                   {configuracion.columnas.map((columna) => <td key={columna.titulo} className="px-5 py-3 text-slate-600">{columna.mostrar(elemento)}</td>)}
                   <td className="px-5 py-3 text-slate-600">{elemento.ubicacion || elemento.direccion || '—'}</td>
                   <td className="whitespace-nowrap px-5 py-3 text-right">
-                    {configuracion.rutaPublica && <Link to={`${configuracion.rutaPublica}/${elemento.id}`} className="mr-3 font-semibold text-slate-700 hover:underline">Ver publicado</Link>}
-                    <button type="button" onClick={() => abrirEditar(elemento)} className="mr-3 font-semibold text-brand-700 hover:underline">Editar</button>
-                    <button type="button" onClick={() => eliminar(elemento)} className="font-semibold text-red-700 hover:underline">Eliminar</button>
+                    <AccionesFila>{configuracion.rutaPublica && <BotonAccion tipo="ver" a={`${configuracion.rutaPublica}/${elemento.id}`} nombre={elemento.nombre} />}<BotonAccion tipo="editar" onClick={() => abrirEditar(elemento)} nombre={elemento.nombre} /><BotonAccion tipo="eliminar" onClick={() => eliminar(elemento)} nombre={elemento.nombre} /></AccionesFila>
                   </td>
                 </tr>
               ))}

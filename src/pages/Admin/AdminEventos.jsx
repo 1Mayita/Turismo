@@ -8,6 +8,8 @@ import SelectorImagen from '../../components/SelectorImagen.jsx'
 import { actualizarEvento, crearEvento, eliminarEvento, fechaHoyISO, formatearFechaEvento, getAsistentesEvento, getEventos } from '../../services/eventosService.js'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
 import { getUsuarioPorId } from '../../services/usuariosService.js'
+import { AccionesFila, BotonAccion } from '../../components/admin/AccionesFila.jsx'
+import { useConfirmar } from '../../components/admin/confirmacionContext.js'
 
 const SelectorUbicacion = lazy(() => import('../../components/mapa/SelectorUbicacion.jsx'))
 
@@ -28,6 +30,7 @@ const FORMULARIO_VACIO = {
 const CLASE_CAMPO = 'mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30'
 
 function AdminEventos() {
+  const confirmar = useConfirmar()
   const [eventos, setEventos] = useState([])
   const [departamentos, setDepartamentos] = useState([])
   const [cargando, setCargando] = useState(true)
@@ -151,7 +154,7 @@ function AdminEventos() {
   }
 
   async function eliminar(evento) {
-    if (!window.confirm(`¿Eliminar el evento "${evento.nombre}"?`)) return
+    if (!await confirmar({ titulo: `¿Eliminar el evento "${evento.nombre}"?` })) return
     setError('')
     try {
       await eliminarEvento(evento.id)
@@ -302,8 +305,7 @@ function AdminEventos() {
                       </button>
                     </td>
                     <td className="whitespace-nowrap px-5 py-3 text-right">
-                      <button type="button" onClick={() => abrirEditar(evento)} className="mr-3 font-semibold text-brand-700 hover:underline">Editar</button>
-                      <button type="button" onClick={() => eliminar(evento)} className="font-semibold text-red-700 hover:underline">Eliminar</button>
+                      <AccionesFila><BotonAccion tipo="editar" onClick={() => abrirEditar(evento)} nombre={evento.nombre} /><BotonAccion tipo="eliminar" onClick={() => eliminar(evento)} nombre={evento.nombre} /></AccionesFila>
                     </td>
                   </tr>
                 )

@@ -1,5 +1,4 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
 import SelectorImagen from '../../components/SelectorImagen.jsx'
 import { publicarNovedad } from '../../services/notificacionesService.js'
@@ -10,6 +9,8 @@ import { departamentosDeEjemplo, getDepartamentos } from '../../services/departa
 import { getMunicipios, municipiosDeEjemplo } from '../../services/municipiosService.js'
 import { getRegiones, regionesDeEjemplo } from '../../services/regionesService.js'
 import { actualizarDatosDeEjemplo, indexarAdministradoresPorCorreo } from '../../services/sembradoService.js'
+import { AccionesFila, BotonAccion } from '../../components/admin/AccionesFila.jsx'
+import { useConfirmar } from '../../components/admin/confirmacionContext.js'
 
 // El mapa para marcar la ubicación (Leaflet) se descarga solo al abrir el formulario.
 const SelectorUbicacion = lazy(() => import('../../components/mapa/SelectorUbicacion.jsx'))
@@ -63,6 +64,7 @@ const FORMULARIO_VACIO = {
 }
 
 function AdminDestinos() {
+  const confirmar = useConfirmar()
   const [destinos, setDestinos] = useState([])
   const [categorias, setCategorias] = useState([])
   const [departamentos, setDepartamentos] = useState([])
@@ -233,7 +235,7 @@ function AdminDestinos() {
   }
 
   async function eliminar(destino) {
-    if (!window.confirm(`¿Eliminar el destino "${destino.nombre}"? Sus actividades, reseñas y favoritos quedarán sin destino. Esta acción no se puede deshacer.`)) return
+    if (!await confirmar({ titulo: `¿Eliminar el destino "${destino.nombre}"?`, mensaje: 'Sus actividades, reseñas y favoritos quedarán sin destino. Esta acción no se puede deshacer.' })) return
     setError('')
     try {
       await eliminarDestino(destino.id)
@@ -434,9 +436,7 @@ function AdminDestinos() {
                   <td className="px-5 py-3 text-slate-600">{destino.categoria}</td>
                   <td className="px-5 py-3 text-slate-600">{destino.ubicacion}</td>
                   <td className="whitespace-nowrap px-5 py-3 text-right">
-                    <Link to={`/destinos/${destino.id}`} className="mr-3 font-semibold text-slate-700 hover:underline">Ver publicado</Link>
-                    <button type="button" onClick={() => abrirEditar(destino)} className="mr-3 font-semibold text-brand-700 hover:underline">Editar</button>
-                    <button type="button" onClick={() => eliminar(destino)} className="font-semibold text-red-700 hover:underline">Eliminar</button>
+                    <AccionesFila><BotonAccion tipo="ver" a={`/destinos/${destino.id}`} nombre={destino.nombre} /><BotonAccion tipo="editar" onClick={() => abrirEditar(destino)} nombre={destino.nombre} /><BotonAccion tipo="eliminar" onClick={() => eliminar(destino)} nombre={destino.nombre} /></AccionesFila>
                   </td>
                 </tr>
               ))}

@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
 import PanelAdmin, { BotonNuevo } from '../../components/PanelAdmin.jsx'
 import { actualizarCategoria, crearCategoria, eliminarCategoria, getCategorias } from '../../services/categoriasService.js'
+import { AccionesFila, BotonAccion } from '../../components/admin/AccionesFila.jsx'
+import { useConfirmar } from '../../components/admin/confirmacionContext.js'
 
 const FORMULARIO_VACIO = { nombre: '', descripcion: '' }
 
 function AdminCategorias() {
+  const confirmar = useConfirmar()
   const [categorias, setCategorias] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
@@ -79,7 +82,7 @@ function AdminCategorias() {
   }
 
   async function eliminar(categoria) {
-    if (!window.confirm(`¿Eliminar la categoría "${categoria.nombre}"?`)) return
+    if (!await confirmar({ titulo: `¿Eliminar la categoría "${categoria.nombre}"?` })) return
     setError('')
     try {
       await eliminarCategoria(categoria.id)
@@ -139,8 +142,7 @@ function AdminCategorias() {
                   <td className="px-5 py-3 font-semibold text-slate-900">{categoria.nombre}</td>
                   <td className="px-5 py-3 text-slate-600">{categoria.descripcion}</td>
                   <td className="px-5 py-3 text-right">
-                    <button type="button" onClick={() => abrirEditar(categoria)} className="mr-3 font-semibold text-brand-700 hover:underline">Editar</button>
-                    <button type="button" onClick={() => eliminar(categoria)} className="font-semibold text-red-700 hover:underline">Eliminar</button>
+                    <AccionesFila><BotonAccion tipo="editar" onClick={() => abrirEditar(categoria)} nombre={categoria.nombre} /><BotonAccion tipo="eliminar" onClick={() => eliminar(categoria)} nombre={categoria.nombre} /></AccionesFila>
                   </td>
                 </tr>
               ))}

@@ -5,6 +5,8 @@ import SelectorImagen from '../../components/SelectorImagen.jsx'
 import { actualizarDepartamento, crearDepartamento, eliminarDepartamento, getDepartamentos } from '../../services/departamentosService.js'
 import { actualizarMunicipio, crearMunicipio, eliminarMunicipio, getMunicipiosPorDepartamento } from '../../services/municipiosService.js'
 import { actualizarRegion, crearRegion, eliminarRegion, getRegionesPorMunicipio } from '../../services/regionesService.js'
+import { AccionesFila, BotonAccion } from '../../components/admin/AccionesFila.jsx'
+import { useConfirmar } from '../../components/admin/confirmacionContext.js'
 
 const FORMULARIO_VACIO = { nombre: '', descripcion: '' }
 
@@ -82,8 +84,7 @@ function ListaZonas({ titulo, textoNuevo, textoVacio, textoCargando, elementos, 
               </div>
               <div className="whitespace-nowrap">
                 {accionExtra?.(elemento)}
-                <button type="button" onClick={() => abrirEditar(elemento)} className="mr-3 text-sm font-semibold text-brand-700 hover:underline">Editar</button>
-                <button type="button" onClick={() => onEliminar(elemento)} className="text-sm font-semibold text-red-700 hover:underline">Eliminar</button>
+                <AccionesFila><BotonAccion tipo="editar" onClick={() => abrirEditar(elemento)} nombre={elemento.nombre} /><BotonAccion tipo="eliminar" onClick={() => onEliminar(elemento)} nombre={elemento.nombre} /></AccionesFila>
               </div>
             </li>
           ))}
@@ -94,6 +95,7 @@ function ListaZonas({ titulo, textoNuevo, textoVacio, textoCargando, elementos, 
 }
 
 function AdminDepartamentos() {
+  const confirmar = useConfirmar()
   const [departamentos, setDepartamentos] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
@@ -185,7 +187,7 @@ function AdminDepartamentos() {
   }
 
   async function eliminarDepartamentoActual(departamento) {
-    if (!window.confirm(`¿Eliminar el departamento "${departamento.nombre}"? Esto no elimina sus municipios ya guardados.`)) return
+    if (!await confirmar({ titulo: `¿Eliminar el departamento "${departamento.nombre}"?`, mensaje: 'Esto no elimina sus municipios ya guardados. Esta acción no se puede deshacer.' })) return
     setError('')
     try {
       await eliminarDepartamento(departamento.id)
@@ -245,7 +247,7 @@ function AdminDepartamentos() {
   }
 
   async function eliminarMunicipioActual(municipio) {
-    if (!window.confirm(`¿Eliminar el municipio "${municipio.nombre}"? Esto no elimina sus regiones ya guardadas.`)) return
+    if (!await confirmar({ titulo: `¿Eliminar el municipio "${municipio.nombre}"?`, mensaje: 'Esto no elimina sus regiones ya guardadas. Esta acción no se puede deshacer.' })) return
     setError('')
     try {
       await eliminarMunicipio(municipio.id)
@@ -290,7 +292,7 @@ function AdminDepartamentos() {
   }
 
   async function eliminarRegionActual(region) {
-    if (!window.confirm(`¿Eliminar la región "${region.nombre}"?`)) return
+    if (!await confirmar({ titulo: `¿Eliminar la región "${region.nombre}"?` })) return
     setError('')
     try {
       await eliminarRegion(region.id)
@@ -364,8 +366,7 @@ function AdminDepartamentos() {
                     <button type="button" onClick={() => alternarMunicipios(departamento)} className="mr-3 font-semibold text-slate-700 hover:underline">
                       {departamentoSeleccionado?.id === departamento.id ? 'Ocultar municipios' : 'Municipios'}
                     </button>
-                    <button type="button" onClick={() => abrirEditarDepartamento(departamento)} className="mr-3 font-semibold text-brand-700 hover:underline">Editar</button>
-                    <button type="button" onClick={() => eliminarDepartamentoActual(departamento)} className="font-semibold text-red-700 hover:underline">Eliminar</button>
+                    <AccionesFila><BotonAccion tipo="editar" onClick={() => abrirEditarDepartamento(departamento)} nombre={departamento.nombre} /><BotonAccion tipo="eliminar" onClick={() => eliminarDepartamentoActual(departamento)} nombre={departamento.nombre} /></AccionesFila>
                   </td>
                 </tr>
               ))}

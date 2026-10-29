@@ -4,6 +4,8 @@ import ImagenSegura from '../../components/ImagenSegura.jsx'
 import SelectorImagen from '../../components/SelectorImagen.jsx'
 import { actualizarPlato, crearPlato, eliminarPlato, getPlatos } from '../../services/platosService.js'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
+import { AccionesFila, BotonAccion } from '../../components/admin/AccionesFila.jsx'
+import { useConfirmar } from '../../components/admin/confirmacionContext.js'
 
 const FORMULARIO_VACIO = {
   nombre: '',
@@ -18,6 +20,7 @@ const FORMULARIO_VACIO = {
 const CLASE_CAMPO = 'mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30'
 
 function AdminPlatos() {
+  const confirmar = useConfirmar()
   const [platos, setPlatos] = useState([])
   const [departamentos, setDepartamentos] = useState([])
   const [cargando, setCargando] = useState(true)
@@ -122,7 +125,7 @@ function AdminPlatos() {
   }
 
   async function eliminar(plato) {
-    if (!window.confirm(`¿Eliminar el plato "${plato.nombre}"? Esta acción no se puede deshacer.`)) return
+    if (!await confirmar({ titulo: `¿Eliminar el plato "${plato.nombre}"?` })) return
     setError('')
     try {
       await eliminarPlato(plato.id)
@@ -223,8 +226,7 @@ function AdminPlatos() {
                   <td className="px-5 py-3 text-slate-600">{plato.origen || nombreDepartamento(plato.id_departamento)}</td>
                   <td className="max-w-xs px-5 py-3 text-slate-600"><span className="line-clamp-2">{plato.descripcion}</span></td>
                   <td className="whitespace-nowrap px-5 py-3 text-right">
-                    <button type="button" onClick={() => abrirEditar(plato)} className="mr-3 font-semibold text-brand-700 hover:underline">Editar</button>
-                    <button type="button" onClick={() => eliminar(plato)} className="font-semibold text-red-700 hover:underline">Eliminar</button>
+                    <AccionesFila><BotonAccion tipo="editar" onClick={() => abrirEditar(plato)} nombre={plato.nombre} /><BotonAccion tipo="eliminar" onClick={() => eliminar(plato)} nombre={plato.nombre} /></AccionesFila>
                   </td>
                 </tr>
               ))}

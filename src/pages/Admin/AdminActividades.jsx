@@ -3,12 +3,15 @@ import PanelAdmin, { BotonNuevo } from '../../components/PanelAdmin.jsx'
 import { actualizarActividad, crearActividad, eliminarActividad, getActividades } from '../../services/actividadesService.js'
 import { getDestinos } from '../../services/destinosService.js'
 import { sembrarCatalogoDeEjemplo } from '../../services/sembradoService.js'
+import { AccionesFila, BotonAccion } from '../../components/admin/AccionesFila.jsx'
+import { useConfirmar } from '../../components/admin/confirmacionContext.js'
 
 const FORMULARIO_VACIO = { nombre: '', descripcion: '', id_destino: '' }
 
 const CLASE_CAMPO = 'mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30'
 
 function AdminActividades() {
+  const confirmar = useConfirmar()
   const [actividades, setActividades] = useState([])
   const [destinos, setDestinos] = useState([])
   const [filtroDestino, setFiltroDestino] = useState('')
@@ -104,7 +107,7 @@ function AdminActividades() {
   }
 
   async function eliminar(actividad) {
-    if (!window.confirm(`¿Eliminar la actividad "${actividad.nombre}"?`)) return
+    if (!await confirmar({ titulo: `¿Eliminar la actividad "${actividad.nombre}"?` })) return
     setError('')
     try {
       await eliminarActividad(actividad.id)
@@ -192,8 +195,7 @@ function AdminActividades() {
                   <td className="px-5 py-3 text-slate-600">{nombreDestino(actividad.id_destino)}</td>
                   <td className="px-5 py-3 text-slate-600">{actividad.descripcion}</td>
                   <td className="whitespace-nowrap px-5 py-3 text-right">
-                    <button type="button" onClick={() => abrirEditar(actividad)} className="mr-3 font-semibold text-brand-700 hover:underline">Editar</button>
-                    <button type="button" onClick={() => eliminar(actividad)} className="font-semibold text-red-700 hover:underline">Eliminar</button>
+                    <AccionesFila><BotonAccion tipo="editar" onClick={() => abrirEditar(actividad)} nombre={actividad.nombre} /><BotonAccion tipo="eliminar" onClick={() => eliminar(actividad)} nombre={actividad.nombre} /></AccionesFila>
                   </td>
                 </tr>
               ))}
