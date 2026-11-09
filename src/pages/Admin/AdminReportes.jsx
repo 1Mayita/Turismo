@@ -74,7 +74,7 @@ function AdminReportes() {
   const motivo = (id) => MOTIVOS.find((item) => item.id === id)?.etiqueta || id
 
   return (
-    <PanelAdmin titulo="Reportes de información">
+    <PanelAdmin titulo="Avisos de errores">
       {error && <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
       {mensaje && <p className="mb-5 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800" role="status">{mensaje}</p>}
 

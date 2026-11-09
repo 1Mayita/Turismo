@@ -69,7 +69,7 @@ function BotonReportar({ tipo, elemento, enlace, className = '' }) {
                 <button type="button" onClick={() => setAbierto(false)} className="mt-2 min-h-11 text-sm font-bold underline">Cerrar</button>
               </div>
             ) : (
-              <form onSubmit={enviar} className="mt-6 space-y-5">
+              <form noValidate onSubmit={enviar} className="mt-6 space-y-5">
                 {error && <p className="rounded-control bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
                 <fieldset>
                   <legend className={claseEtiqueta}>¿Qué problema encontraste?</legend>

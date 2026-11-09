@@ -26,10 +26,12 @@ const RestauranteDetalle = lazy(() => import('./pages/Restaurantes/RestauranteDe
 const Alojamientos = lazy(() => import('./pages/Alojamientos/Alojamientos.jsx'))
 const AlojamientoDetalle = lazy(() => import('./pages/Alojamientos/AlojamientoDetalle.jsx'))
 const Busqueda = lazy(() => import('./pages/Busqueda/Busqueda.jsx'))
+const Populares = lazy(() => import('./pages/Populares/Populares.jsx'))
 const Favoritos = lazy(() => import('./pages/Favoritos/Favoritos.jsx'))
 const Perfil = lazy(() => import('./pages/Perfil/Perfil.jsx'))
 const MisViajes = lazy(() => import('./pages/Viajes/MisViajes.jsx'))
 const ViajeDetalle = lazy(() => import('./pages/Viajes/ViajeDetalle.jsx'))
+const ViajesRealizados = lazy(() => import('./pages/Viajes/ViajesRealizados.jsx'))
 const ViajeCompartido = lazy(() => import('./pages/Viajes/ViajeCompartido.jsx'))
 const Notificaciones = lazy(() => import('./pages/Notificaciones/Notificaciones.jsx'))
 const AdminReportes = lazy(() => import('./pages/Admin/AdminReportes.jsx'))
@@ -60,7 +62,9 @@ const TITULOS = [
   ['/restaurantes', 'Restaurantes'],
   ['/alojamientos', 'Alojamientos'],
   ['/buscar', 'Búsqueda'],
+  ['/populares', 'Lo más popular'],
   ['/favoritos', 'Mis favoritos'],
+  ['/viajes/realizados', 'Mis viajes realizados'],
   ['/viajes', 'Mis viajes'],
   ['/viaje-compartido', 'Viaje compartido'],
   ['/notificaciones', 'Notificaciones'],
@@ -104,11 +108,13 @@ function App() {
           <Route path="/alojamientos" element={<Alojamientos />} />
           <Route path="/alojamientos/:id" element={<AlojamientoDetalle />} />
           <Route path="/buscar" element={<Busqueda />} />
+          <Route path="/populares" element={<Populares />} />
 
           <Route path="/viaje-compartido/:token" element={<ViajeCompartido />} />
 
           <Route path="/favoritos" element={<RutaPrivada><Favoritos /></RutaPrivada>} />
           <Route path="/viajes" element={<RutaPrivada><MisViajes /></RutaPrivada>} />
+          <Route path="/viajes/realizados" element={<RutaPrivada><ViajesRealizados /></RutaPrivada>} />
           <Route path="/viajes/:id" element={<RutaPrivada><ViajeDetalle /></RutaPrivada>} />
           <Route path="/notificaciones" element={<RutaPrivada><Notificaciones /></RutaPrivada>} />
           <Route path="/perfil" element={<RutaPrivada><Perfil /></RutaPrivada>} />

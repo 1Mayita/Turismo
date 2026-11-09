@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { TriangleAlert } from 'lucide-react'
+import { CircleHelp, TriangleAlert } from 'lucide-react'
 import { ConfirmacionContext } from './confirmacionContext.js'
 
-// Diálogo de confirmación con el estilo del panel (superficie blanca, borde y
-// textos del panel). Se abre con confirmar() desde cualquier página de admin.
+// Diálogo de confirmación propio (nunca el "localhost dice..." del navegador).
+// Se abre con confirmar() desde cualquier página del sitio o del panel.
+// tono "peligro" (eliminar, desactivar) pinta el botón en rojo; "normal", en azul noche.
 // Esc o "Cancelar" cancelan; el foco empieza en "Cancelar" (la opción segura)
 // y vuelve al botón que lo abrió al cerrarse.
-function DialogoConfirmacion({ titulo, mensaje, textoConfirmar, alResponder }) {
+function DialogoConfirmacion({ titulo, mensaje, textoConfirmar, tono, alResponder }) {
+  const peligro = tono !== 'normal'
   const idTitulo = useId()
   const idMensaje = useId()
   const cancelar = useRef(null)
@@ -49,8 +51,8 @@ function DialogoConfirmacion({ titulo, mensaje, textoConfirmar, alResponder }) {
         className="w-full max-w-md rounded-xl border border-panel-borde bg-panel-superficie p-6 shadow-[0_18px_48px_rgb(14_34_51/0.18)]"
       >
         <div className="flex gap-4">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-700" aria-hidden="true">
-            <TriangleAlert size={20} />
+          <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${peligro ? 'bg-red-50 text-red-700' : 'bg-cielo text-cielo-700'}`} aria-hidden="true">
+            {peligro ? <TriangleAlert size={20} /> : <CircleHelp size={20} />}
           </span>
           <div className="min-w-0">
             <h2 id={idTitulo} className="text-lg font-bold text-panel-texto">{titulo}</h2>
@@ -70,7 +72,7 @@ function DialogoConfirmacion({ titulo, mensaje, textoConfirmar, alResponder }) {
             ref={aceptar}
             type="button"
             onClick={() => alResponder(true)}
-            className="inline-flex min-h-10 items-center justify-center rounded-lg bg-red-700 px-4 text-sm font-bold text-white transition-colors duration-150 hover:bg-red-800"
+            className={`inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-sm font-bold text-white transition-colors duration-150 ${peligro ? 'bg-red-700 hover:bg-red-800' : 'bg-noche hover:bg-[#1b3448]'}`}
           >
             {textoConfirmar}
           </button>
@@ -81,13 +83,13 @@ function DialogoConfirmacion({ titulo, mensaje, textoConfirmar, alResponder }) {
   )
 }
 
-// Envuelve las páginas del panel (ver RutaAdmin) y les da confirmar().
+// Envuelve toda la app (ver main.jsx) y le da confirmar().
 function ConfirmacionProvider({ children }) {
   const [pedido, setPedido] = useState(null)
 
-  const confirmar = useCallback(({ titulo, mensaje = 'Esta acción no se puede deshacer.', textoConfirmar = 'Eliminar' }) => (
+  const confirmar = useCallback(({ titulo, mensaje = 'Esta acción no se puede deshacer.', textoConfirmar = 'Eliminar', tono = 'peligro' }) => (
     new Promise((resolver) => {
-      setPedido({ titulo, mensaje, textoConfirmar, resolver })
+      setPedido({ titulo, mensaje, textoConfirmar, tono, resolver })
     })
   ), [])
 
@@ -104,6 +106,7 @@ function ConfirmacionProvider({ children }) {
           titulo={pedido.titulo}
           mensaje={pedido.mensaje}
           textoConfirmar={pedido.textoConfirmar}
+          tono={pedido.tono}
           alResponder={responder}
         />
       )}

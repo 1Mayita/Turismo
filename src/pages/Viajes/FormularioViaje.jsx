@@ -39,7 +39,7 @@ function FormularioViaje({ inicial = {}, textoBoton, onGuardar, onCancelar }) {
   }
 
   return (
-    <form onSubmit={enviar} className="space-y-4">
+    <form noValidate onSubmit={enviar} className="space-y-4">
       {error && <p className="rounded-control bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
       <label className={claseEtiqueta}>
         Nombre del viaje

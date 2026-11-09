@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { ArrowLeft, UtensilsCrossed } from 'lucide-react'
 import PanelAdmin, { BotonNuevo } from '../../components/PanelAdmin.jsx'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
 import SelectorImagen from '../../components/SelectorImagen.jsx'
-import { actualizarPlato, crearPlato, eliminarPlato, getPlatos } from '../../services/platosService.js'
+import { actualizarPlato, buscarPlatoDuplicado, crearPlato, eliminarPlato, getPlatos } from '../../services/platosService.js'
 import { departamentosDeEjemplo, getDepartamentos } from '../../services/departamentosService.js'
 import { AccionesFila, BotonAccion } from '../../components/admin/AccionesFila.jsx'
 import { useConfirmar } from '../../components/admin/confirmacionContext.js'
@@ -17,18 +19,29 @@ const FORMULARIO_VACIO = {
   imagen: '',
 }
 
+// Secciones que pueden mandar a registrar un plato y esperar a que se vuelva
+// (lista cerrada: el parámetro "volver" no puede llevar a cualquier ruta).
+const VUELTAS = {
+  restaurantes: { ruta: '/admin/restaurantes', nombre: 'el restaurante' },
+}
+
 const CLASE_CAMPO = 'mt-2 w-full rounded-xl border border-sky-200 bg-white/70 px-4 py-2.5 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30'
 
 function AdminPlatos() {
   const confirmar = useConfirmar()
+  const navegar = useNavigate()
+  const [parametros] = useSearchParams()
+  // "?nuevo=1&volver=restaurantes&nombre=...": se llegó desde el formulario de
+  // un restaurante para registrar un plato que faltaba.
+  const vuelta = VUELTAS[parametros.get('volver')] || null
   const [platos, setPlatos] = useState([])
   const [departamentos, setDepartamentos] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
   const [mensaje, setMensaje] = useState('')
-  const [formularioAbierto, setFormularioAbierto] = useState(false)
+  const [formularioAbierto, setFormularioAbierto] = useState(() => parametros.get('nuevo') === '1')
   const [platoEditando, setPlatoEditando] = useState(null)
-  const [formulario, setFormulario] = useState(FORMULARIO_VACIO)
+  const [formulario, setFormulario] = useState(() => ({ ...FORMULARIO_VACIO, nombre: (parametros.get('nombre') || '').slice(0, 80) }))
   const [guardando, setGuardando] = useState(false)
   const [subidasPendientes, setSubidasPendientes] = useState(0)
   const [version, setVersion] = useState(0)
@@ -91,6 +104,11 @@ function AdminPlatos() {
       setError('El nombre y el departamento de origen son obligatorios.')
       return
     }
+    const repetido = buscarPlatoDuplicado(formulario.nombre, platos.filter((plato) => plato.id !== platoEditando?.id))
+    if (repetido) {
+      setError(`Ya existe “${repetido.nombre}” en el catálogo. Edítalo en la lista en lugar de crear otro.`)
+      return
+    }
 
     const departamento = departamentos.find((item) => item.id === formulario.id_departamento)
     const imagenCambio = platoEditando && formulario.imagen.trim() !== (platoEditando.imagen || '')
@@ -111,7 +129,12 @@ function AdminPlatos() {
         await actualizarPlato(platoEditando.id, datos)
         setMensaje('Plato actualizado.')
       } else {
-        await crearPlato(datos)
+        const idNuevo = await crearPlato(datos)
+        if (vuelta) {
+          // Vuelve al formulario del restaurante con este plato ya elegido.
+          navegar(`${vuelta.ruta}?retomar=1&plato=${encodeURIComponent(idNuevo)}`)
+          return
+        }
         setMensaje('Plato creado.')
       }
       setFormularioAbierto(false)
@@ -148,8 +171,16 @@ function AdminPlatos() {
       {mensaje && <p className="mb-5 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800" role="status">{mensaje}</p>}
 
       {formularioAbierto && (
-        <form onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
+        <form noValidate onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
           <h2 className="text-xl font-bold text-slate-900">{platoEditando ? 'Editar plato' : 'Nuevo plato'}</h2>
+          {vuelta && !platoEditando && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-slate-700">
+              <p className="flex items-center gap-2"><UtensilsCrossed aria-hidden="true" size={16} className="shrink-0 text-brand-700" /> Al guardar volverás a {vuelta.nombre} que estabas registrando, con este plato ya seleccionado.</p>
+              <button type="button" onClick={() => navegar(`${vuelta.ruta}?retomar=1`)} className="inline-flex items-center gap-1.5 font-bold text-brand-700 hover:underline">
+                <ArrowLeft aria-hidden="true" size={15} /> Volver sin registrar
+              </button>
+            </div>
+          )}
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-sm font-semibold text-slate-700">
               Nombre
@@ -192,12 +223,12 @@ function AdminPlatos() {
               <textarea name="lugares_tradicionales" value={formulario.lugares_tradicionales} onChange={actualizarCampo} rows={4} placeholder="Mercados, barrios o pueblos donde es típico" className={CLASE_CAMPO} />
             </label>
           </div>
-          <p className="text-xs text-slate-500">Los restaurantes que tengan este plato en su menú aparecen solos en “Dónde probarlo”: el nombre debe coincidir.</p>
+          <p className="text-xs text-slate-500">Los restaurantes que lo seleccionen en “Platos típicos que ofrece” aparecen solos en “¿Dónde puedes probarlo?”.</p>
           <div className="flex gap-3">
             <button disabled={guardando || subidasPendientes > 0} className="rounded-xl bg-brand-700 px-5 py-2.5 font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60">
               {guardando ? 'Guardando...' : subidasPendientes > 0 ? 'Subiendo imágenes...' : 'Guardar'}
             </button>
-            <button type="button" onClick={() => setFormularioAbierto(false)} className="rounded-xl border border-sky-200 bg-white/70 px-5 py-2.5 font-bold text-slate-700 transition hover:bg-white">
+            <button type="button" onClick={() => (vuelta && !platoEditando ? navegar(`${vuelta.ruta}?retomar=1`) : setFormularioAbierto(false))} className="rounded-xl border border-sky-200 bg-white/70 px-5 py-2.5 font-bold text-slate-700 transition hover:bg-white">
               Cancelar
             </button>
           </div>

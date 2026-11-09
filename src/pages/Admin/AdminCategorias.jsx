@@ -103,7 +103,7 @@ function AdminCategorias() {
       {mensaje && <p className="mb-5 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800" role="status">{mensaje}</p>}
 
       {formularioAbierto && (
-        <form onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
+        <form noValidate onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
           <h2 className="text-xl font-bold text-slate-900">{categoriaEditando ? 'Editar categoría' : 'Nueva categoría'}</h2>
           <label className="block text-sm font-semibold text-slate-700">
             Nombre

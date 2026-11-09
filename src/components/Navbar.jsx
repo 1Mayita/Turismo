@@ -4,6 +4,7 @@ import { NavLink, useLocation, useNavigate, useSearchParams } from 'react-router
 import {
   BedDouble,
   Bell,
+  BookOpenCheck,
   CalendarDays,
   ChevronDown,
   Compass,
@@ -19,6 +20,7 @@ import {
   Plus,
   Route,
   Soup,
+  Trophy,
   User,
   UtensilsCrossed,
   X,
@@ -37,6 +39,7 @@ const GRUPO_EXPLORAR = {
     { to: '/departamentos', etiqueta: 'Departamentos', icono: MapPinned, detalle: 'Los nueve departamentos' },
     { to: '/mapa', etiqueta: 'Mapa turístico', icono: IconoMapa, detalle: 'Todo en un mapa' },
     { to: '/eventos', etiqueta: 'Eventos', icono: CalendarDays, detalle: 'Fiestas y festivales' },
+    { to: '/populares', etiqueta: 'Lo más popular', icono: Trophy, detalle: 'Lo más visitado y mejor calificado' },
   ],
 }
 
@@ -147,6 +150,7 @@ function Navbar({ anchoCompleto = false }) {
 
   const enlacesCuenta = [
     { to: '/viajes', etiqueta: 'Mis viajes', icono: Route },
+    { to: '/viajes/realizados', etiqueta: 'Mis viajes realizados', icono: BookOpenCheck },
     { to: '/perfil#favoritos', etiqueta: 'Mis favoritos', icono: Heart },
     { to: '/notificaciones', etiqueta: 'Notificaciones', icono: Bell },
     { to: '/perfil', etiqueta: 'Mi perfil', icono: User },
@@ -187,7 +191,7 @@ function Navbar({ anchoCompleto = false }) {
         Saltar al contenido
       </a>
       <nav aria-label="Principal" className={`contenedor flex h-[72px] items-center justify-between gap-4 ${anchoCompleto ? 'max-w-[1440px] lg:px-6' : 'max-w-[1440px]'}`}>
-        <NavLink to="/" className="shrink-0 rounded-full" aria-label="Rutas de Bolivia, ir al inicio">
+        <NavLink to="/" className="shrink-0 rounded-full" aria-label="Kuntur, ir al inicio">
           <Logo claro />
         </NavLink>
 

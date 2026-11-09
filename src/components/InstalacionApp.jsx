@@ -84,7 +84,7 @@ function InstalacionApp() {
 
   return (
     <aside
-      aria-label="Instalar Rutas de Bolivia"
+      aria-label="Instalar Kuntur"
       className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-[1100] mx-auto max-w-md animate-subir rounded-tarjeta border border-borde bg-white p-4 shadow-flotante sm:inset-x-auto sm:right-5 sm:bottom-5"
     >
       <div className="flex items-start gap-3">
@@ -92,7 +92,7 @@ function InstalacionApp() {
           <img src={marca} alt="" className="h-10 w-10" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="font-bold text-noche">Instala Rutas de Bolivia</p>
+          <p className="font-bold text-noche">Instala Kuntur</p>
           <p className="mt-1 text-sm leading-5 text-piedra-texto">{instrucciones}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {instalador && (

@@ -176,6 +176,10 @@ function AdminDestinos() {
       setError('Nombre, categoría, departamento y municipio son obligatorios.')
       return
     }
+    if (formulario.precio_ingreso !== '' && formulario.precio_ingreso != null && !(Number(formulario.precio_ingreso) >= 0)) {
+      setError('El precio de ingreso debe ser un número igual o mayor que 0.')
+      return
+    }
 
     const departamento = departamentos.find((item) => item.id === formulario.id_departamento)
     const municipio = municipios.find((item) => item.id === formulario.id_municipio)
@@ -248,7 +252,13 @@ function AdminDestinos() {
   }
 
   async function cargarDatosDeEjemplo() {
-    if (!window.confirm('Se cargarán los datos de ejemplo: departamentos (eslogan y portada), destinos, actividades, eventos, platos típicos, restaurantes y alojamientos, con sus fotos. Los registros de ejemplo se actualizan; lo que tú creaste no se toca. ¿Continuar?')) return
+    const confirmado = await confirmar({
+      titulo: '¿Cargar los datos de ejemplo?',
+      mensaje: 'Se cargarán departamentos, destinos, actividades, eventos, platos típicos, restaurantes y alojamientos con sus fotos. Los registros de ejemplo se actualizan; lo que tú creaste no se toca.',
+      textoConfirmar: 'Cargar datos',
+      tono: 'normal',
+    })
+    if (!confirmado) return
     setError('')
     setMensaje('')
     try {
@@ -280,7 +290,7 @@ function AdminDestinos() {
       {mensaje && <p className="mb-5 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800" role="status">{mensaje}</p>}
 
       {formularioAbierto && (
-        <form onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
+        <form noValidate onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
           <h2 className="text-xl font-bold text-slate-900">{destinoEditando ? 'Editar destino' : 'Nuevo destino'}</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-sm font-semibold text-slate-700">

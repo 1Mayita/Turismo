@@ -8,6 +8,7 @@ import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import { FavoritosProvider } from './context/FavoritosContext.jsx'
 import { NotificacionesProvider } from './context/NotificacionesContext.jsx'
+import ConfirmacionProvider from './components/admin/ConfirmacionProvider.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -19,7 +20,9 @@ createRoot(document.getElementById('root')).render(
           <AuthProvider>
             <FavoritosProvider>
               <NotificacionesProvider>
-                <App />
+                <ConfirmacionProvider>
+                  <App />
+                </ConfirmacionProvider>
               </NotificacionesProvider>
             </FavoritosProvider>
           </AuthProvider>

@@ -89,7 +89,7 @@ function ResenasDestino({ idDestino, tipo = 'destino', idElemento = idDestino, o
       ) : yaReseno ? (
         <p className="mb-6 rounded-control bg-cielo px-4 py-3 text-sm font-bold text-noche">Ya dejaste tu reseña de este lugar. ¡Gracias!</p>
       ) : (
-        <form onSubmit={enviar} className="mb-8 space-y-4 rounded-tarjeta border border-borde bg-white p-5 shadow-suave sm:p-6">
+        <form noValidate onSubmit={enviar} className="mb-8 space-y-4 rounded-tarjeta border border-borde bg-white p-5 shadow-suave sm:p-6">
           <h3 className="text-lg font-bold text-noche">Deja tu reseña</h3>
           {errorFormulario && <p className="rounded-control bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{errorFormulario}</p>}
           <SelectorEstrellas valor={calificacion} onCambiar={setCalificacion} />

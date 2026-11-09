@@ -1,31 +1,39 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { CalendarRange, Compass, Link2, Map as IconoMapa, Pencil, Plus, Share2, Trash2 } from 'lucide-react'
+import { ArrowRight, Ban, BookOpenCheck, CalendarRange, CheckCircle2, Compass, Link2, Map as IconoMapa, Pencil, Plus, RotateCcw, Share2, Trash2 } from 'lucide-react'
 import Navbar from '../../components/Navbar.jsx'
 import { EstadoVacio, claseBoton } from '../../components/ui'
 import Migas from '../../components/Migas.jsx'
 import Modal from '../../components/Modal.jsx'
 import { OpcionesCompartir } from '../../components/BotonCompartir.jsx'
 import { useAuth } from '../../context/useAuth.js'
+import { useConfirmar } from '../../components/admin/confirmacionContext.js'
 import { useTituloPagina } from '../../hooks/useTituloPagina.js'
 import { getDestinos } from '../../services/destinosService.js'
 import {
+  ESTADOS_DE_VIAJE,
   activarEnlaceCompartido,
+  cancelarViaje,
   desactivarEnlaceCompartido,
   editarDatosDeViaje,
   eliminarViaje,
   enlaceDeViajeCompartido,
+  estadoDeViaje,
+  marcarViajeComoRealizado,
+  reactivarViaje,
   getViaje,
   guardarParadas,
   quitarDestinoDeViaje,
 } from '../../services/viajesService.js'
 import FormularioViaje from './FormularioViaje.jsx'
+import FormularioRecuerdo from './FormularioRecuerdo.jsx'
 import Itinerario from './Itinerario.jsx'
 import { paradasConDestino, textoDeFechas } from './utilidades.js'
 
 function ViajeDetalle() {
   const { id } = useParams()
   const { usuario } = useAuth()
+  const confirmar = useConfirmar()
   const navegar = useNavigate()
   const [viaje, setViaje] = useState(null)
   const [destinos, setDestinos] = useState([])
@@ -85,8 +93,8 @@ function ViajeDetalle() {
     guardarConRespaldo(() => guardarParadas(viaje, paradas))
   }
 
-  function quitar(idDestino, nombre) {
-    if (!window.confirm(`¿Quitar "${nombre}" de este viaje?`)) return
+  async function quitar(idDestino, nombre) {
+    if (!await confirmar({ titulo: `¿Quitar “${nombre}” de este viaje?`, mensaje: 'Puedes volver a agregarlo cuando quieras desde el catálogo.', textoConfirmar: 'Quitar' })) return
     setError('')
     guardarConRespaldo(() => quitarDestinoDeViaje(viaje, idDestino))
   }
@@ -110,7 +118,15 @@ function ViajeDetalle() {
     }
   }
 
+  async function marcarRealizado(datos) {
+    const actualizado = await marcarViajeComoRealizado(viaje, datos)
+    setViaje(actualizado)
+    setVentana(null)
+  }
+
   const items = viaje ? paradasConDestino(viaje.paradas, destinos) : []
+  const estado = estadoDeViaje(viaje)
+  const planificado = estado === 'planificado'
   const migas = [
     { etiqueta: 'Inicio', to: '/' },
     { etiqueta: 'Mis viajes', to: '/viajes' },
@@ -134,8 +150,9 @@ function ViajeDetalle() {
           <>
             <header className="mb-10 flex flex-wrap items-start justify-between gap-5 rounded-tarjeta border border-borde bg-white p-6 shadow-suave sm:p-8">
               <div className="min-w-0">
-                <p className="flex items-center gap-1.5 rotulo">
+                <p className="flex flex-wrap items-center gap-1.5 rotulo">
                   <CalendarRange aria-hidden="true" size={15} /> Mi viaje · {textoDeFechas(viaje)}
+                  <span className={`ml-1 rounded-full px-2.5 py-0.5 text-xs normal-case tracking-normal ${ESTADOS_DE_VIAJE[estado].clase}`}>{ESTADOS_DE_VIAJE[estado].etiqueta}</span>
                 </p>
                 <h1 className="titulo-display mt-1 break-words text-[40px] sm:text-[52px]">{viaje.nombre}</h1>
                 <p className="mt-1 flex items-center gap-1.5 text-sm text-piedra-texto">
@@ -145,6 +162,16 @@ function ViajeDetalle() {
                 {viaje.notas && <p className="texto-lectura mt-3 whitespace-pre-line text-noche/85">{viaje.notas}</p>}
               </div>
               <div className="flex flex-wrap gap-2">
+                {planificado && items.some((item) => item.destino) && (
+                  <button type="button" onClick={() => setVentana('realizado')} className={claseBoton('oscuro', 'pequeno')}>
+                    <CheckCircle2 aria-hidden="true" size={16} /> Marcar como realizado
+                  </button>
+                )}
+                {planificado && (
+                  <button type="button" onClick={() => { setErrorVentana(''); setVentana('cancelar') }} className={claseBoton('fantasma', 'pequeno')}>
+                    <Ban aria-hidden="true" size={16} /> Cancelar viaje
+                  </button>
+                )}
                 <button type="button" onClick={() => { setErrorVentana(''); setVentana('compartir') }} className={claseBoton('primario', 'pequeno')}>
                   <Share2 aria-hidden="true" size={16} /> Compartir
                 </button>
@@ -157,15 +184,30 @@ function ViajeDetalle() {
               </div>
             </header>
 
+            {estado === 'realizado' && (
+              <div className="mb-8 flex animate-entrar flex-wrap items-center justify-between gap-4 rounded-tarjeta border border-emerald-200 bg-emerald-50 px-5 py-4">
+                <p className="flex items-center gap-2 font-bold text-emerald-900"><BookOpenCheck aria-hidden="true" size={20} /> ¡Viaje realizado! Ya forma parte de tu historial.</p>
+                <Link to="/viajes/realizados" className={claseBoton('secundario', 'pequeno')}>Ver mis recuerdos <ArrowRight aria-hidden="true" size={16} /></Link>
+              </div>
+            )}
+            {estado === 'cancelado' && (
+              <div className="mb-8 flex animate-entrar flex-wrap items-center justify-between gap-4 rounded-tarjeta border border-borde bg-sal-2 px-5 py-4">
+                <p className="flex items-center gap-2 font-bold text-noche"><Ban aria-hidden="true" size={20} /> Este viaje está cancelado.</p>
+                <button type="button" onClick={() => guardarConRespaldo(() => reactivarViaje(viaje))} className={claseBoton('secundario', 'pequeno')}><RotateCcw aria-hidden="true" size={16} /> Volver a planificarlo</button>
+              </div>
+            )}
+
             {error && <p className="mb-4 rounded-control bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
 
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <h2 className="titulo-display text-[36px]">Itinerario</h2>
               <div className="flex items-center gap-4">
                 <span className="text-sm font-bold text-emerald-700" aria-live="polite">{estadoGuardado}</span>
-                <Link to="/destinos" className={claseBoton('secundario', 'pequeno', 'bg-white')}>
-                  <Plus aria-hidden="true" size={16} /> Agregar destinos
-                </Link>
+                {planificado && (
+                  <Link to="/destinos" className={claseBoton('secundario', 'pequeno', 'bg-white')}>
+                    <Plus aria-hidden="true" size={16} /> Agregar destinos
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -183,8 +225,8 @@ function ViajeDetalle() {
               />
             ) : (
               <>
-                <p className="mb-4 text-sm text-piedra-texto">Arrastra cada parada desde su asa (los seis puntos) o usa las flechas para ordenarlas. Los cambios se guardan solos.</p>
-                <Itinerario items={items} editable onReordenar={reordenar} onQuitar={quitar} />
+                {planificado && <p className="mb-4 text-sm text-piedra-texto">Arrastra cada parada desde su asa (los seis puntos) o usa las flechas para ordenarlas. Los cambios se guardan solos.</p>}
+                <Itinerario items={items} editable={planificado} onReordenar={reordenar} onQuitar={quitar} />
               </>
             )}
           </>
@@ -210,7 +252,7 @@ function ViajeDetalle() {
                 <p className="text-sm text-piedra-texto">Quien tenga este enlace verá el itinerario en modo solo lectura y podrá copiarlo a su cuenta. Los cambios que hagas se verán en el enlace.</p>
                 <OpcionesCompartir
                   titulo={viaje.nombre}
-                  texto={`Mira mi viaje "${viaje.nombre}" en Rutas de Bolivia:`}
+                  texto={`Mira mi viaje "${viaje.nombre}" en Kuntur:`}
                   url={enlaceDeViajeCompartido(viaje.token_compartido)}
                 />
                 <button
@@ -235,6 +277,32 @@ function ViajeDetalle() {
                 </button>
               </>
             )}
+          </div>
+        </Modal>
+      )}
+
+      {ventana === 'realizado' && (
+        <Modal titulo="Marcar como realizado" onCerrar={() => setVentana(null)}>
+          <div className="p-6 sm:p-8">
+            <h2 className="titulo-display mb-1 pr-12 text-[32px]">¿Cómo te fue en “{viaje.nombre}”?</h2>
+            <p className="mb-5 text-sm text-piedra-texto">Se conserva todo tu itinerario: el viaje pasa a tu historial con la fecha, las fotos y el recuerdo que agregues.</p>
+            <FormularioRecuerdo modo="convertir" viaje={viaje} destinos={destinos} itemsDelViaje={items} textoBoton="Guardar en mi historial" onGuardar={marcarRealizado} onCancelar={() => setVentana(null)} />
+          </div>
+        </Modal>
+      )}
+
+      {ventana === 'cancelar' && (
+        <Modal titulo="Cancelar viaje" onCerrar={() => setVentana(null)}>
+          <div className="space-y-4 p-6 sm:p-8">
+            <h2 className="titulo-display pr-12 text-[32px]">¿Cancelar este viaje?</h2>
+            <p className="text-piedra-texto">“{viaje.nombre}” quedará como cancelado: no se borra y podrás volver a planificarlo cuando quieras.</p>
+            {errorVentana && <p className="rounded-control bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{errorVentana}</p>}
+            <div className="flex flex-wrap gap-3">
+              <button type="button" disabled={procesando} onClick={() => ejecutar(async () => { setViaje(await cancelarViaje(viaje)); setVentana(null) })} className={claseBoton('oscuro', 'normal', 'flex-1')}>
+                {procesando ? 'Cancelando...' : 'Sí, cancelar el viaje'}
+              </button>
+              <button type="button" onClick={() => setVentana(null)} className={claseBoton('secundario')}>Volver</button>
+            </div>
           </div>
         </Modal>
       )}

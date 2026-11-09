@@ -217,7 +217,7 @@ function Perfil() {
         ) : modoEdicion ? (
           <section className="mx-auto max-w-3xl rounded-tarjeta border border-borde bg-white p-6 shadow-suave sm:p-8">
             <h1 className="titulo-display mb-6 text-[40px]">Editar perfil</h1>
-            <form onSubmit={guardarPerfil} className="space-y-6">
+            <form noValidate onSubmit={guardarPerfil} className="space-y-6">
               <div className="flex flex-wrap items-center gap-5">
                 <Avatar
                   key={formulario.fotoUrl}

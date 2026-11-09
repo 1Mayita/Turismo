@@ -53,7 +53,7 @@ function ListaZonas({ titulo, textoNuevo, textoVacio, textoCargando, elementos, 
       </div>
 
       {formularioAbierto && (
-        <form onSubmit={guardar} className="mb-6 space-y-3 rounded-xl border border-neutral-200 p-4">
+        <form noValidate onSubmit={guardar} className="mb-6 space-y-3 rounded-xl border border-neutral-200 p-4">
           {errorFormulario && <p className="text-sm font-semibold text-red-700" role="alert">{errorFormulario}</p>}
           <label className="block text-sm font-semibold text-slate-700">
             Nombre
@@ -312,7 +312,7 @@ function AdminDepartamentos() {
       {mensaje && <p className="mb-5 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800" role="status">{mensaje}</p>}
 
       {formularioAbierto && (
-        <form onSubmit={guardarDepartamento} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
+        <form noValidate onSubmit={guardarDepartamento} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
           <h2 className="text-xl font-bold text-slate-900">{departamentoEditando ? 'Editar departamento' : 'Nuevo departamento'}</h2>
           <label className="block text-sm font-semibold text-slate-700">
             Nombre

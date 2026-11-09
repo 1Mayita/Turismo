@@ -486,13 +486,14 @@ export const platosDeEjemplo = [
   { id: 'kalapurka', nombre: "K'alapurka", id_departamento: 'potosi', origen: 'Potosí', descripcion: 'Sopa de maíz molido con charque y ají que llega a la mesa hirviendo, con una piedra volcánica caliente dentro del plato.', ingredientes: ['Harina de maíz', 'Charque', 'Ají colorado', 'Papa', 'Chicharrón'], lugares_tradicionales: 'Se desayuna en los comedores del centro histórico de Potosí.' },
 ].map((plato) => ({ ...plato, ...FOTOS_PLATOS[plato.id] }))
 
-// menu: [nombre, precio en Bs, clave de la foto del plato si existe]
+// menu: [nombre, precio en Bs, id del plato típico del catálogo si lo es]
 function restaurante({ menu, fotoRespaldo, ...datos }, indice) {
   const fotos = [...new Set(menu.map(([, , clave]) => FOTOS_PLATOS[clave]?.imagen).filter(Boolean))]
   const imagenes = fotos.length > 0 ? fotos : FOTOS[fotoRespaldo].imagenes.slice(0, 2)
   return completarNegocio({
     ...datos,
-    platos_tipicos: menu.map(([nombre]) => nombre),
+    // Relación con el catálogo por id (la clave de la foto es el id del plato).
+    platos_ids: [...new Set(menu.map(([, , clave]) => clave).filter((clave) => platosDeEjemplo.some((plato) => plato.id === clave)))],
     menu: menu.map(([nombre, precio]) => ({ nombre, precio })),
     imagen_principal: imagenes[0],
     imagenes,

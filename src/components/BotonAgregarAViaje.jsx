@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Luggage } from 'lucide-react'
 import Modal from './Modal.jsx'
 import { useAuth } from '../context/useAuth.js'
-import { MAXIMO_PARADAS, agregarDestinoAViaje, crearViaje, getViajesDeUsuario, validarDatosDeViaje } from '../services/viajesService.js'
+import { MAXIMO_PARADAS, agregarDestinoAViaje, crearViaje, estadoDeViaje, getViajesDeUsuario, validarDatosDeViaje } from '../services/viajesService.js'
 
 function IconoMaleta() {
   return <Luggage aria-hidden="true" className="shrink-0" />
@@ -34,7 +34,8 @@ function BotonAgregarAViaje({ destino, variante = 'boton', className = '' }) {
     setNombreNuevo('')
     setCargando(true)
     try {
-      setViajes(await getViajesDeUsuario(usuario.uid))
+      // Solo se agregan paradas a viajes que todavía están planificados.
+      setViajes((await getViajesDeUsuario(usuario.uid)).filter((viaje) => estadoDeViaje(viaje) === 'planificado'))
     } catch (errorLectura) {
       console.error('Error al cargar los viajes:', errorLectura)
       setError('No pudimos cargar tus viajes. Inténtalo de nuevo.')
@@ -125,7 +126,7 @@ function BotonAgregarAViaje({ destino, variante = 'boton', className = '' }) {
                 <div className="h-14 animate-pulse rounded-xl bg-sal-2" />
               </div>
             ) : viajes.length === 0 ? (
-              <p className="rounded-xl bg-sal px-4 py-3 text-sm text-piedra-texto">Aún no tienes viajes. Crea el primero aquí abajo.</p>
+              <p className="rounded-xl bg-sal px-4 py-3 text-sm text-piedra-texto">No tienes viajes planificados. Crea uno aquí abajo.</p>
             ) : (
               <ul className="max-h-64 space-y-2 overflow-y-auto">
                 {viajes.map((viaje) => {
@@ -156,7 +157,7 @@ function BotonAgregarAViaje({ destino, variante = 'boton', className = '' }) {
               </ul>
             )}
 
-            <form onSubmit={crearYAgregar} className="mt-6 rounded-2xl border border-dashed border-borde p-4">
+            <form noValidate onSubmit={crearYAgregar} className="mt-6 rounded-2xl border border-dashed border-borde p-4">
               <label className="block text-sm font-semibold text-noche/80">
                 O crea un viaje nuevo con este destino
                 <span className="mt-2 flex flex-wrap gap-2">

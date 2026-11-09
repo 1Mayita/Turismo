@@ -12,7 +12,8 @@
     "android:apk": "npm run android:sync && .\\android\\gradlew.bat -p android assembleDebug",
     "sembrar": "node scripts/sembrarFirestore.js",
     "emuladores": "npx firebase-tools emulators:start --only auth,firestore --project turismo-e0465",
-    "probar:sprint3": "node scripts/probarSprint3.js"
+    "probar:sprint3": "node scripts/probarSprint3.js",
+    "probar:mejoras": "node scripts/probarMejoras.js"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.3",

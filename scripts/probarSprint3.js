@@ -150,7 +150,7 @@ await debeFallar(reportes.getReportesDeUsuario(ana.uid), 'Luis lista los reporte
 
 console.log('\n7. Visitas y estadísticas (HU-36)')
 await signOut(auth)
-await estadisticas.registrarVisita('salar-de-uyuni', null)
+await estadisticas.registrarVisita('destino', 'salar-de-uyuni', null)
 await addDoc(collection(db, 'visitas'), { id_destino: 'laguna-colorada', id_usuario: null, fecha: serverTimestamp() })
 comprobar(true, 'una visita sin sesión se registra')
 await debeFallar(addDoc(collection(db, 'visitas'), { id_destino: 'x', id_usuario: null, fecha: serverTimestamp(), extra: 'basura' }), 'una visita con campos de más')

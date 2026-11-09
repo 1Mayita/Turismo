@@ -22,6 +22,7 @@ function Buscador({
 
   return (
     <form
+      noValidate
       role="search"
       onSubmit={enviar}
       className={`flex items-center gap-2 rounded-full border border-borde bg-white p-1.5 pl-5 shadow-suave transition focus-within:border-cielo-600 focus-within:ring-3 focus-within:ring-cielo-600/30 ${className}`}

@@ -35,7 +35,7 @@ function AdminNav() {
     <nav aria-label="Navegación de administración" className="flex h-full flex-col gap-6 px-3 py-6">
       <div className="px-3">
         <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-panel-muted">Administración</p>
-        <p className="mt-0.5 text-base font-bold text-panel-texto">Rutas de Bolivia</p>
+        <p className="mt-0.5 text-base font-bold text-panel-texto">Kuntur</p>
       </div>
       <div className="space-y-5">
         <ListaDeGrupos />

@@ -15,7 +15,7 @@ function BarraBusqueda({ onBuscar, valorInicial = '', placeholder = 'Buscar dest
   }
 
   return (
-    <form onSubmit={enviar} role="search" className={`group relative ${className}`}>
+    <form noValidate onSubmit={enviar} role="search" className={`group relative ${className}`}>
       <span className={`pointer-events-none absolute top-1/2 z-10 -translate-y-1/2 ${oscura ? 'text-white/60 group-focus-within:text-piedra' : 'text-piedra'} ${grande ? 'left-4 sm:left-5' : 'left-4'}`}>
         <Search aria-hidden="true" size={grande ? 20 : 18} />
       </span>

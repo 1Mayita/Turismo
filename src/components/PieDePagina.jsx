@@ -38,7 +38,7 @@ function PieDePagina() {
       <div aria-hidden="true" className="h-1 bg-[linear-gradient(90deg,#e48f66_0_33%,#c98f62_33%_66%,#626d96_66%)]" />
       <div className="contenedor grid max-w-[1440px] grid-cols-2 gap-x-6 gap-y-10 py-14 sm:gap-12 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:py-20">
         <div className="col-span-2 lg:col-span-1">
-          <Link to="/" className="inline-block rounded-full" aria-label="Rutas de Bolivia, ir al inicio">
+          <Link to="/" className="inline-block rounded-full" aria-label="Kuntur, ir al inicio">
             <Logo claro />
           </Link>
           <p className="mt-5 max-w-xs text-[15px] leading-relaxed text-admin-muted">

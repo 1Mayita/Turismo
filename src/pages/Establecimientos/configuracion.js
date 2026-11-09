@@ -22,6 +22,7 @@ export const ESTABLECIMIENTOS = {
       restaurante.direccion,
       restaurante.especialidad,
       Array.isArray(restaurante.platos_tipicos) ? restaurante.platos_tipicos : [],
+      Array.isArray(restaurante.menu) ? restaurante.menu.map((plato) => plato.nombre) : [],
     ],
   },
   alojamiento: {

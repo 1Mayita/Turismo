@@ -143,6 +143,10 @@ function AuthCard({ modoInicial = 'login' }) {
       setLoginError('Completa tu correo electrónico y contraseña.')
       return
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginForm.email.trim())) {
+      setLoginError('Escribe un correo electrónico válido, por ejemplo nombre@correo.com.')
+      return
+    }
 
     try {
       setLoginEnviando(true)
@@ -219,7 +223,7 @@ function AuthCard({ modoInicial = 'login' }) {
         <img src={FOTOS['portada-acceso'].imagen_principal} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-noche/80 via-noche/10 to-noche/30" />
         <div className="relative flex h-full flex-col justify-between p-10 text-white">
-          <Link to="/" className="w-fit rounded-full bg-noche/55 py-1.5 pl-1.5 pr-4 backdrop-blur" aria-label="Rutas de Bolivia, ir al inicio">
+          <Link to="/" className="w-fit rounded-full bg-noche/55 py-1.5 pl-1.5 pr-4 backdrop-blur" aria-label="Kuntur, ir al inicio">
             <Logo claro />
           </Link>
           <div>
@@ -253,7 +257,7 @@ function AuthCard({ modoInicial = 'login' }) {
             {origen.aviso && !loginError && !loginMensaje && <p className="mb-5 rounded-control bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800" role="status">{origen.aviso}</p>}
             {loginError && <p className="mb-5 rounded-control bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{loginError}</p>}
             {loginMensaje && <p className="mb-5 rounded-control bg-cielo px-4 py-3 text-sm font-semibold text-noche" role="status">{loginMensaje}</p>}
-            <form onSubmit={iniciarSesion} className="space-y-5">
+            <form noValidate onSubmit={iniciarSesion} className="space-y-5">
               <label className={claseEtiqueta}>
                 Correo electrónico
                 <input
@@ -292,11 +296,11 @@ function AuthCard({ modoInicial = 'login' }) {
             className="absolute inset-0 flex flex-col justify-start overflow-y-auto px-1 pt-2 sm:justify-center sm:rounded-tarjeta sm:border sm:border-borde sm:bg-white sm:shadow-elevada [backface-visibility:hidden] sm:p-10"
             style={{ transform: 'rotateY(180deg)' }}
           >
-            <p className="mb-3 rotulo">Rutas de Bolivia</p>
+            <p className="mb-3 rotulo">Kuntur</p>
             <h1 className="titulo-display mb-2 text-[40px]">Crea tu cuenta</h1>
             <p className="mb-6 text-piedra-texto">Guarda la inspiración para tu próxima aventura.</p>
             {registroError && <p className="mb-5 rounded-control bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{registroError}</p>}
-            <form onSubmit={registrarUsuario} className="space-y-4">
+            <form noValidate onSubmit={registrarUsuario} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className={claseEtiqueta}>
                   Nombre

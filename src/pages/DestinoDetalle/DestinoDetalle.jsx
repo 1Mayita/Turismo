@@ -92,7 +92,7 @@ function DestinoDetalle() {
   const idDestinoCargado = destino?.id
   const idUsuario = usuario?.uid || null
   useEffect(() => {
-    if (idDestinoCargado) registrarVisita(idDestinoCargado, idUsuario)
+    if (idDestinoCargado) registrarVisita('destino', idDestinoCargado, idUsuario)
   }, [idDestinoCargado, idUsuario])
 
   const migas = [
@@ -138,7 +138,7 @@ function DestinoDetalle() {
                     </p>
                   </div>
                   {/* En celular, compartir va aquí; guardar y agregar van en la barra de abajo. */}
-                  <BotonCompartir titulo={destino.nombre} texto={`Mira ${destino.nombre} en Rutas de Bolivia:`} className="mt-4 lg:hidden" />
+                  <BotonCompartir titulo={destino.nombre} texto={`Mira ${destino.nombre} en Kuntur:`} className="mt-4 lg:hidden" />
                 </header>
 
                 <p className="texto-lectura mb-8 text-lg text-noche/85">{destino.descripcion}</p>
@@ -188,7 +188,7 @@ function DestinoDetalle() {
                   <div className="mt-5 space-y-2.5">
                     <BotonAgregarAViaje destino={destino} className="w-full" />
                     <BotonFavorito idDestino={destino.id} conTexto />
-                    <BotonCompartir titulo={destino.nombre} texto={`Mira ${destino.nombre} en Rutas de Bolivia:`} className="w-full" />
+                    <BotonCompartir titulo={destino.nombre} texto={`Mira ${destino.nombre} en Kuntur:`} className="w-full" />
                   </div>
                   {destino.horario && (
                     <p className="mt-5 flex gap-2 border-t border-borde pt-4 text-sm text-piedra-texto">

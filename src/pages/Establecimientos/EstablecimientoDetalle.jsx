@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { BedDouble, Check, Clock, ExternalLink, Globe, MapPin, Phone, UtensilsCrossed, Wallet } from 'lucide-react'
+import { Link, useParams } from 'react-router-dom'
+import { ArrowRight, BedDouble, Check, Clock, ExternalLink, Globe, MapPin, Phone, Soup, UtensilsCrossed, Wallet } from 'lucide-react'
 import Navbar from '../../components/Navbar.jsx'
 import BotonCompartir from '../../components/BotonCompartir.jsx'
 import BotonFavorito from '../../components/BotonFavorito.jsx'
@@ -14,7 +14,12 @@ import VisorImagenes from '../../components/VisorImagenes.jsx'
 import { ResumenCalificacion } from '../../components/Estrellas.jsx'
 import ResenasDestino from '../DestinoDetalle/ResenasDestino.jsx'
 import { getPromedioDe } from '../../services/resenasService.js'
+import { getPlatos } from '../../services/platosService.js'
+import { idsDePlatos } from '../../services/restaurantesService.js'
+import ImagenSegura from '../../components/ImagenSegura.jsx'
 import { useTituloPagina } from '../../hooks/useTituloPagina.js'
+import { useAuth } from '../../context/useAuth.js'
+import { registrarVisita } from '../../services/estadisticasService.js'
 import { coordenadasValidas } from '../../utils/geo.js'
 import { ESTABLECIMIENTOS } from './configuracion.js'
 
@@ -39,6 +44,21 @@ function EstablecimientoDetalle({ tipo }) {
   const [indiceVisor, setIndiceVisor] = useState(null)
   const [calificacion, setCalificacion] = useState(null)
   const [versionCalificacion, setVersionCalificacion] = useState(0)
+  const [catalogoPlatos, setCatalogoPlatos] = useState([])
+
+  // Catálogo de platos típicos, para mostrar los que ofrece el restaurante.
+  useEffect(() => {
+    if (!esRestaurante) return undefined
+    let activo = true
+    getPlatos()
+      .then((lista) => {
+        if (activo) setCatalogoPlatos(lista)
+      })
+      .catch((errorLectura) => console.error('Error al cargar los platos típicos:', errorLectura))
+    return () => {
+      activo = false
+    }
+  }, [esRestaurante])
 
   useEffect(() => {
     let activo = true
@@ -78,10 +98,19 @@ function EstablecimientoDetalle({ tipo }) {
 
   useTituloPagina(establecimiento?.nombre || configuracion.titulo)
 
+  // Cuenta la visita para los reportes de "más visitados" (una vez cada 30 min por navegador).
+  const { usuario } = useAuth()
+  const idCargado = establecimiento?.id
+  const idUsuario = usuario?.uid || null
+  useEffect(() => {
+    if (idCargado) registrarVisita(tipo, idCargado, idUsuario)
+  }, [tipo, idCargado, idUsuario])
+
   const lugar = establecimiento || {}
   const galeria = (lugar.imagenes?.length > 0 ? lugar.imagenes : [lugar.imagen_principal]).filter(Boolean)
   const menu = Array.isArray(lugar.menu) ? lugar.menu : []
-  const platos = Array.isArray(lugar.platos_tipicos) ? lugar.platos_tipicos : []
+  const idsOfrecidos = esRestaurante ? new Set(idsDePlatos(lugar, catalogoPlatos)) : new Set()
+  const platosOfrecidos = catalogoPlatos.filter((plato) => idsOfrecidos.has(plato.id))
   const servicios = Array.isArray(lugar.servicios) ? lugar.servicios : []
   const redes = REDES.filter((red) => lugar[red.campo])
   const tieneMapa = coordenadasValidas(lugar.latitud, lugar.longitud)
@@ -139,7 +168,7 @@ function EstablecimientoDetalle({ tipo }) {
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2 lg:hidden">
                     <BotonFavorito idElemento={lugar.id} tipo={tipo} conTexto />
-                    <BotonCompartir titulo={lugar.nombre} texto={`Mira ${lugar.nombre} en Rutas de Bolivia:`} />
+                    <BotonCompartir titulo={lugar.nombre} texto={`Mira ${lugar.nombre} en Kuntur:`} />
                   </div>
                 </header>
 
@@ -175,23 +204,40 @@ function EstablecimientoDetalle({ tipo }) {
                   )}
                 </div>
 
-                {esRestaurante && (menu.length > 0 || platos.length > 0) && (
+                {esRestaurante && platosOfrecidos.length > 0 && (
+                  <section className="mb-14" aria-labelledby="titulo-platos">
+                    <TituloSeccion id="titulo-platos">Platos típicos que ofrece</TituloSeccion>
+                    <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      {platosOfrecidos.map((plato) => (
+                        <li key={plato.id}>
+                          <Link to={`/gastronomia?plato=${plato.id}`} className="group block overflow-hidden rounded-control border border-borde bg-white transition hover:shadow-suave">
+                            <span className="block h-28 overflow-hidden bg-sal-2">
+                              {plato.imagen
+                                ? <ImagenSegura src={plato.imagen} alt="" loading="lazy" className="zoom-foto h-full w-full object-cover" />
+                                : <span className="flex h-full items-center justify-center text-piedra" aria-hidden="true"><Soup size={26} /></span>}
+                            </span>
+                            <span className="flex items-center justify-between gap-2 px-3 py-2.5">
+                              <span className="text-sm font-bold text-noche">{plato.nombre}</span>
+                              <ArrowRight aria-hidden="true" size={15} className="shrink-0 text-cielo-700 transition-transform group-hover:translate-x-0.5" />
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
+
+                {esRestaurante && menu.length > 0 && (
                   <section className="mb-14" aria-labelledby="titulo-menu">
                     <TituloSeccion id="titulo-menu">Menú</TituloSeccion>
-                    {menu.length > 0 ? (
-                      <ul className="divide-y divide-borde rounded-tarjeta border border-borde bg-white px-5 shadow-suave">
-                        {menu.map((plato) => (
-                          <li key={plato.nombre} className="flex items-center justify-between gap-4 py-3.5">
-                            <span className="font-bold text-noche">{plato.nombre}</span>
-                            {plato.precio != null && plato.precio !== '' && <span className="whitespace-nowrap font-bold text-atardecer-texto">Bs {plato.precio}</span>}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <ul className="flex flex-wrap gap-2">
-                        {platos.map((plato) => <li key={plato} className="rounded-full bg-cielo px-4 py-1.5 text-sm font-bold text-noche">{plato}</li>)}
-                      </ul>
-                    )}
+                    <ul className="divide-y divide-borde rounded-tarjeta border border-borde bg-white px-5 shadow-suave">
+                      {menu.map((plato) => (
+                        <li key={plato.nombre} className="flex items-center justify-between gap-4 py-3.5">
+                          <span className="font-bold text-noche">{plato.nombre}</span>
+                          {plato.precio != null && plato.precio !== '' && <span className="whitespace-nowrap font-bold text-atardecer-texto">Bs {plato.precio}</span>}
+                        </li>
+                      ))}
+                    </ul>
                   </section>
                 )}
 
@@ -244,7 +290,7 @@ function EstablecimientoDetalle({ tipo }) {
                   {calificacion?.total > 0 && <ResumenCalificacion promedio={calificacion.promedio} total={calificacion.total} className="mt-1" />}
                   <div className="mt-5 space-y-2.5">
                     <BotonFavorito idElemento={lugar.id} tipo={tipo} conTexto />
-                    <BotonCompartir titulo={lugar.nombre} texto={`Mira ${lugar.nombre} en Rutas de Bolivia:`} className="w-full" />
+                    <BotonCompartir titulo={lugar.nombre} texto={`Mira ${lugar.nombre} en Kuntur:`} className="w-full" />
                     {lugar.telefono && (
                       <a href={`tel:${String(lugar.telefono).replace(/\s+/g, '')}`} className={claseBoton('fantasma', 'pequeno', 'w-full')}>
                         <Phone aria-hidden="true" size={16} /> Llamar

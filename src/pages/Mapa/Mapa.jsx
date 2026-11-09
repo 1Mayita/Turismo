@@ -48,7 +48,7 @@ function aPuntos({ destinos, restaurantes, alojamientos }) {
   })
   return [
     ...destinos.map((destino) => punto('destino', destino, { estilo: destino.categoria, categoria: destino.categoria, enlace: destino.id ? `/destinos/${destino.id}` : null, texto: [destino.nombre, destino.ubicacion, destino.categoria] })),
-    ...restaurantes.map((restaurante) => punto('restaurante', restaurante, { estilo: 'restaurante', enlace: `/restaurantes/${restaurante.id}`, texto: [restaurante.nombre, restaurante.ubicacion, restaurante.especialidad, restaurante.platos_tipicos] })),
+    ...restaurantes.map((restaurante) => punto('restaurante', restaurante, { estilo: 'restaurante', enlace: `/restaurantes/${restaurante.id}`, texto: [restaurante.nombre, restaurante.ubicacion, restaurante.especialidad, restaurante.platos_tipicos, (restaurante.menu || []).map((plato) => plato.nombre)] })),
     ...alojamientos.map((alojamiento) => punto('alojamiento', alojamiento, { estilo: 'alojamiento', enlace: `/alojamientos/${alojamiento.id}`, texto: [alojamiento.nombre, alojamiento.ubicacion, alojamiento.tipo] })),
   ].filter((item) => coordenadasValidas(item.latitud, item.longitud))
 }

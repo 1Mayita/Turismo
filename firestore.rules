@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// Reglas de seguridad de "Rutas de Bolivia".
+// Reglas de seguridad de "Kuntur".
 // Se pegan en: consola de Firebase > Firestore Database > Reglas > Publicar.
 //
 // Idea general:
@@ -117,14 +117,25 @@ service cloud.firestore {
     }
 
     // ---------- Sprint 3: viajes ----------
+    // estado: planificado | realizado | cancelado (sin campo = planificado).
+    // Un viaje realizado necesita fecha de visita y al menos un destino visitado.
+    function recuerdoValido(d) {
+      return d.fecha_visita is string && d.fecha_visita.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && d.destinos_visitados is list && d.destinos_visitados.size() > 0 && d.destinos_visitados.size() <= 30
+        && d.get('fotos', []) is list && d.get('fotos', []).size() <= 10
+        && d.get('recuerdo', '') is string && d.get('recuerdo', '').size() <= 2000;
+    }
+
     function viajeValido() {
       let d = request.resource.data;
       return d.nombre is string && d.nombre.size() > 0 && d.nombre.size() <= 80
         && d.paradas is list && d.paradas.size() <= 30
-        && (!('notas' in d) || (d.notas is string && d.notas.size() <= 1000));
+        && (!('notas' in d) || (d.notas is string && d.notas.size() <= 1000))
+        && d.get('estado', 'planificado') in ['planificado', 'realizado', 'cancelado']
+        && (d.get('estado', 'planificado') != 'realizado' || recuerdoValido(d));
     }
 
-    // Cada usuario solo ve, crea y modifica SUS viajes.
+    // Cada usuario solo ve, crea y modifica SUS viajes (también los realizados).
     match /viajes/{id} {
       allow read, delete: if conSesion() && resource.data.id_usuario == request.auth.uid;
       allow create: if conSesion() && request.resource.data.id_usuario == request.auth.uid && viajeValido();
@@ -173,16 +184,38 @@ service cloud.firestore {
       allow delete: if esAdmin();
     }
 
-    // ---------- Sprint 3: visitas (estadísticas) ----------
-    // Cualquiera puede registrar una visita con estos tres campos; solo el
-    // administrador puede leerlas.
+    // ---------- Visitas (reportes de "más visitados") ----------
+    // Cualquiera puede registrar una visita a la ficha de un destino,
+    // restaurante o alojamiento; solo el administrador puede leerlas.
+    // Se acepta el formato antiguo { id_destino } y el nuevo { tipo_elemento, id_elemento }.
+    function tipoVisitable(tipo) {
+      return tipo in ['destino', 'restaurante', 'alojamiento'];
+    }
+
     match /visitas/{id} {
-      allow create: if request.resource.data.keys().hasOnly(['id_destino', 'id_usuario', 'fecha'])
-        && request.resource.data.id_destino is string && request.resource.data.id_destino.size() <= 120
-        && request.resource.data.fecha == request.time
-        && (request.resource.data.id_usuario == null || (conSesion() && request.resource.data.id_usuario == request.auth.uid));
+      allow create: if request.resource.data.fecha == request.time
+        && (request.resource.data.id_usuario == null || (conSesion() && request.resource.data.id_usuario == request.auth.uid))
+        && ((request.resource.data.keys().hasOnly(['id_destino', 'id_usuario', 'fecha'])
+            && request.resource.data.id_destino is string && request.resource.data.id_destino.size() <= 120)
+          || (request.resource.data.keys().hasOnly(['tipo_elemento', 'id_elemento', 'id_usuario', 'fecha'])
+            && tipoVisitable(request.resource.data.tipo_elemento)
+            && request.resource.data.id_elemento is string && request.resource.data.id_elemento.size() <= 120));
       allow read: if esAdmin();
       allow update, delete: if false;
+    }
+
+    // Total de visitas por lugar, público para el ranking "Lo más popular".
+    // Cada visita solo puede sumar 1; el administrador puede recalcularlos.
+    match /contadores_visitas/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['tipo_elemento', 'id_elemento', 'total'])
+        && tipoVisitable(request.resource.data.tipo_elemento)
+        && request.resource.data.id_elemento is string && request.resource.data.id_elemento.size() <= 120
+        && id == request.resource.data.tipo_elemento + '_' + request.resource.data.id_elemento
+        && request.resource.data.total == 1;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['total'])
+        && request.resource.data.total == resource.data.total + 1;
+      allow write: if esAdmin();
     }
 
     // ---------- Administradores ----------

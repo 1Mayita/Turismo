@@ -11,8 +11,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       manifest: {
         id: '/',
-        name: 'Rutas de Bolivia',
-        short_name: 'Rutas Bolivia',
+        name: 'Kuntur',
+        short_name: 'Kuntur',
         description: 'Destinos, eventos, gastronomía y alojamientos para recorrer Bolivia.',
         lang: 'es-BO',
         start_url: '/',

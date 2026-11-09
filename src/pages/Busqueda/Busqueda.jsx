@@ -19,9 +19,11 @@ const TIPOS = [
 
 function crearResultados({ destinos, actividades, restaurantes, alojamientos }) {
   const nombreDestino = new Map(destinos.map((destino) => [destino.id, destino.nombre]))
-  const textoPlatos = (restaurante) => Array.isArray(restaurante.platos_tipicos)
-    ? restaurante.platos_tipicos.join(' ')
-    : restaurante.platos_tipicos || ''
+  // Nombres de los platos del menú (y los platos típicos de los datos antiguos).
+  const textoPlatos = (restaurante) => [
+    ...(Array.isArray(restaurante.platos_tipicos) ? restaurante.platos_tipicos : []),
+    ...(Array.isArray(restaurante.menu) ? restaurante.menu.map((plato) => plato.nombre) : []),
+  ].join(' ')
   return [
     ...destinos.map((destino) => ({
       id: `destino-${destino.id}`,

@@ -143,7 +143,7 @@ function AdminActividades() {
       </div>
 
       {formularioAbierto && (
-        <form onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
+        <form noValidate onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
           <h2 className="text-xl font-bold text-slate-900">{actividadEditando ? 'Editar actividad' : 'Nueva actividad'}</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-sm font-semibold text-slate-700">

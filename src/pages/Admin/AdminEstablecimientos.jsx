@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
 import PanelAdmin, { BotonNuevo } from '../../components/PanelAdmin.jsx'
 import AdminZonaCampos from '../../components/AdminZonaCampos.jsx'
@@ -22,12 +23,39 @@ const FORMULARIO_BASE = {
   telefono: '',
 }
 
+// Borrador del formulario abierto, para poder ir a otra sección del panel
+// (ej. registrar un plato típico que falta) y volver sin perder lo escrito.
+// Se guarda en memoria y, por si se recarga la página, en sessionStorage.
+const borradores = new Map()
+
+function guardarBorrador(clave, datos) {
+  borradores.set(clave, datos)
+  try {
+    sessionStorage.setItem(`borrador-admin:${clave}`, JSON.stringify(datos))
+  } catch {
+    // Sin sessionStorage queda el de memoria (suficiente sin recargar).
+  }
+}
+
+function tomarBorrador(clave) {
+  let datos = borradores.get(clave) || null
+  try {
+    if (!datos) datos = JSON.parse(sessionStorage.getItem(`borrador-admin:${clave}`) || 'null')
+    sessionStorage.removeItem(`borrador-admin:${clave}`)
+  } catch {
+    // Se usa el de memoria.
+  }
+  borradores.delete(clave)
+  return datos
+}
+
 function crearFormularioVacio(campos) {
-  return { ...FORMULARIO_BASE, ...Object.fromEntries(campos.map((campo) => [campo.nombre, ''])) }
+  return { ...FORMULARIO_BASE, ...Object.fromEntries(campos.map((campo) => [campo.nombre, campo.vacio ?? ''])) }
 }
 
 function AdminEstablecimientos({ configuracion }) {
   const confirmar = useConfirmar()
+  const navegar = useNavigate()
   const formularioVacio = crearFormularioVacio(configuracion.campos)
   const [elementos, setElementos] = useState([])
   const [departamentos, setDepartamentos] = useState([])
@@ -60,6 +88,21 @@ function AdminEstablecimientos({ configuracion }) {
         setDepartamentos(listaDepartamentos.length ? listaDepartamentos : departamentosDeEjemplo)
         setMunicipios(listaMunicipios.length ? listaMunicipios : municipiosDeEjemplo)
         setRegiones(listaRegiones.length ? listaRegiones : regionesDeEjemplo)
+
+        // "?retomar=1": se vuelve de otra sección; se reabre el formulario
+        // tal como estaba (ej. con el plato recién registrado ya elegido).
+        const parametros = new URLSearchParams(window.location.search)
+        if (parametros.get('retomar') === '1') {
+          navegar(window.location.pathname, { replace: true })
+          const borrador = tomarBorrador(configuracion.plural)
+          if (borrador) {
+            const base = { ...crearFormularioVacio(configuracion.campos), ...borrador.formulario }
+            setElementoEditando(borrador.idEditando ? lista.find((elemento) => elemento.id === borrador.idEditando) || null : null)
+            setFormulario(configuracion.alRetomar ? configuracion.alRetomar(base, parametros) : base)
+            setFormularioAbierto(true)
+            setMensaje(configuracion.mensajeAlRetomar?.(parametros) || 'Volviste al formulario donde lo dejaste.')
+          }
+        }
       } catch (errorLectura) {
         console.error(`Error al cargar ${configuracion.plural}:`, errorLectura)
         if (activo) setError(`No se pudieron cargar ${configuracion.plural.toLocaleLowerCase('es')}.`)
@@ -70,7 +113,13 @@ function AdminEstablecimientos({ configuracion }) {
 
     cargarDatos()
     return () => { activo = false }
-  }, [configuracion, version])
+  }, [configuracion, version, navegar])
+
+  // Guarda el formulario abierto y va a otra página del panel.
+  function salirConBorrador(ruta) {
+    guardarBorrador(configuracion.plural, { formulario, idEditando: elementoEditando?.id || null })
+    navegar(ruta)
+  }
 
   function refrescar() {
     setVersion((valorAnterior) => valorAnterior + 1)
@@ -130,6 +179,17 @@ function AdminEstablecimientos({ configuracion }) {
       setError('El nombre, el departamento y el municipio son obligatorios.')
       return
     }
+    // Enlaces (Facebook, Instagram, sitio web): deben empezar con http(s)://.
+    const enlaceInvalido = configuracion.campos.find((campo) => campo.tipo === 'url' && String(formulario[campo.nombre] || '').trim() && !/^https?:\/\/\S+\.\S+/.test(String(formulario[campo.nombre]).trim()))
+    if (enlaceInvalido) {
+      setError(`Revisa el enlace de “${enlaceInvalido.etiqueta.replace(/ \(.*\)$/, '')}”: debe empezar con https:// (por ejemplo https://facebook.com/mi-restaurante).`)
+      return
+    }
+    const errorPropio = configuracion.validar?.(formulario)
+    if (errorPropio) {
+      setError(errorPropio)
+      return
+    }
 
     const datos = {
       ...formulario,
@@ -179,7 +239,7 @@ function AdminEstablecimientos({ configuracion }) {
       {mensaje && <p className="mb-5 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800" role="status">{mensaje}</p>}
 
       {formularioAbierto && (
-        <form onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
+        <form noValidate onSubmit={guardar} className="mb-8 space-y-4 rounded-2xl p-6 cristal">
           <h2 className="text-xl font-bold text-slate-900">{elementoEditando ? `Editar ${configuracion.singular.toLocaleLowerCase('es')}` : `Nuevo ${configuracion.singular.toLocaleLowerCase('es')}`}</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-sm font-semibold text-slate-700">
@@ -188,6 +248,21 @@ function AdminEstablecimientos({ configuracion }) {
             </label>
             {configuracion.campos.map((campo) => {
               if (['latitud', 'longitud'].includes(campo.nombre)) return null
+              // Campo con su propio control (ej. selector de platos típicos).
+              if (campo.tipo === 'personalizado') {
+                return (
+                  <div key={campo.nombre} className="sm:col-span-2">
+                    {campo.render({
+                      valor: formulario[campo.nombre],
+                      onChange: (valor) => setFormulario((actual) => ({ ...actual, [campo.nombre]: valor })),
+                      elemento: elementoEditando,
+                      formulario,
+                      departamentos,
+                      salirConBorrador,
+                    })}
+                  </div>
+                )
+              }
               if (campo.tipo === 'image' || campo.tipo === 'images') {
                 return (
                   <SelectorImagen

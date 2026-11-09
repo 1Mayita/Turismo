@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import ImagenSegura from '../../components/ImagenSegura.jsx'
 import PanelAdmin from '../../components/PanelAdmin.jsx'
 import { cambiarEstadoUsuario, getUsuarios } from '../../services/usuariosService.js'
+import { useConfirmar } from '../../components/admin/confirmacionContext.js'
 
 // Firestore devuelve un Timestamp; se convierte a Date antes de formatear.
 function formatearFecha(fechaRegistro) {
@@ -11,6 +12,7 @@ function formatearFecha(fechaRegistro) {
 }
 
 function AdminUsuarios() {
+  const confirmar = useConfirmar()
   const [usuarios, setUsuarios] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
@@ -45,8 +47,13 @@ function AdminUsuarios() {
 
   async function alternarEstado(usuario) {
     const nuevoEstado = usuario.activo === false
-    const accion = nuevoEstado ? 'habilitar' : 'deshabilitar'
-    if (!window.confirm(`¿Seguro que quieres ${accion} a ${usuario.nombre || usuario.email}?`)) return
+    const confirmado = await confirmar({
+      titulo: `¿${nuevoEstado ? 'Habilitar' : 'Deshabilitar'} a ${usuario.nombre || usuario.email}?`,
+      mensaje: nuevoEstado ? 'Podrá volver a iniciar sesión y usar su cuenta.' : 'No podrá iniciar sesión hasta que vuelvas a habilitarlo.',
+      textoConfirmar: nuevoEstado ? 'Habilitar' : 'Deshabilitar',
+      tono: nuevoEstado ? 'normal' : 'peligro',
+    })
+    if (!confirmado) return
 
     setError('')
     try {

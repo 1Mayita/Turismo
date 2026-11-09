@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-const NOMBRE_SITIO = 'Rutas de Bolivia'
+const NOMBRE_SITIO = 'Kuntur'
 
 // Pone el título de la pestaña del navegador. Sin texto deja solo el nombre del sitio.
 export function useTituloPagina(titulo) {

@@ -20,7 +20,7 @@ export const GRUPOS_ADMIN = [
   {
     titulo: 'General',
     enlaces: [
-      { to: '/admin/estadisticas', etiqueta: 'Resumen y estadísticas', icono: BarChart3, detalle: 'Uso del sitio, visitas, reseñas y favoritos en el período elegido.' },
+      { to: '/admin/estadisticas', etiqueta: 'Reportes y estadísticas', icono: BarChart3, detalle: 'Lo más visitado, mejor calificado y más guardado, por departamento y período.' },
     ],
   },
   {
@@ -45,7 +45,7 @@ export const GRUPOS_ADMIN = [
     titulo: 'Comunidad',
     enlaces: [
       { to: '/admin/resenas', etiqueta: 'Reseñas', icono: MessageSquareText, detalle: 'Opiniones publicadas por los turistas.' },
-      { to: '/admin/reportes', etiqueta: 'Reportes', icono: Flag, detalle: 'Avisos de información incorrecta enviados por los usuarios.' },
+      { to: '/admin/reportes', etiqueta: 'Avisos de errores', icono: Flag, detalle: 'Información incorrecta que reportaron los usuarios.' },
       { to: '/admin/usuarios', etiqueta: 'Usuarios', icono: Users, detalle: 'Cuentas registradas y sus roles.' },
     ],
   },
